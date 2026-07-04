@@ -39,6 +39,7 @@ interface LibraryContextValue {
   addFolder(): Promise<void>;
   removeFolder(folderId: string): Promise<void>;
   rescanFolder(folderId: string): Promise<void>;
+  stopScan(): void;
   restoreAccess(): Promise<void>;
   getFile(track: TrackMeta): Promise<File>;
 }
@@ -60,6 +61,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
 
   const foldersRef = useRef(folders);
   foldersRef.current = folders;
+  const scanAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,13 +111,20 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
 
   const runScan = useCallback(
     async (folder: FolderRecord) => {
+      const controller = new AbortController();
+      scanAbortRef.current = controller;
       setScanning({ folderName: folder.name, done: 0, total: 0, omitted: 0 });
       let omitted = 0;
       try {
-        const scanned = await scanFolder(folder, (done, total, track) => {
-          if (shouldIgnoreTrack(track, settings.ignoreRules)) omitted++;
-          setScanning({ folderName: folder.name, done, total, omitted });
-        });
+        const scanned = await scanFolder(
+          folder,
+          (done, total, track) => {
+            if (shouldIgnoreTrack(track, settings.ignoreRules)) omitted++;
+            setScanning({ folderName: folder.name, done, total, omitted });
+          },
+          controller.signal
+        );
+        const aborted = controller.signal.aborted;
         const scannedIds = new Set(scanned.map((t) => t.id));
         const folderTracks = (await dbGetAll<TrackMeta>('tracks')).filter(
           (t) => t.folderId === folder.id
@@ -126,26 +135,39 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
         ).length;
 
         for (const track of scanned) await dbPut('tracks', track);
-        const stale = folderTracks.filter((t) => !scannedIds.has(t.id));
-        for (const track of stale) await dbDelete('tracks', track.id);
-        setTracks((prev) => [...prev.filter((t) => t.folderId !== folder.id), ...scanned]);
+        const kept = aborted ? folderTracks.filter((t) => !scannedIds.has(t.id)) : [];
+        if (!aborted) {
+          const stale = folderTracks.filter((t) => !scannedIds.has(t.id));
+          for (const track of stale) await dbDelete('tracks', track.id);
+        }
+        const folderResult = [...scanned, ...kept];
+        setTracks((prev) => [...prev.filter((t) => t.folderId !== folder.id), ...folderResult]);
         void fillCoverFlags(scanned);
 
-        const found = scanned.filter((t) => !shouldIgnoreTrack(t, settings.ignoreRules)).length;
-        let message = `Done scanning folder - found ${found} track${found === 1 ? '' : 's'}.`;
-        const delta = found - prevCount;
-        if (isRescan && delta !== 0) {
-          message += ` ${Math.abs(delta)} ${delta > 0 ? 'more' : 'less'} found than last scan.`;
+        const found = folderResult.filter((t) => !shouldIgnoreTrack(t, settings.ignoreRules)).length;
+        if (aborted) {
+          toast.info(`Bailed scanning with ${found} track${found === 1 ? '' : 's'}`);
+        } else {
+          let message = `Done scanning folder - found ${found} track${found === 1 ? '' : 's'}.`;
+          const delta = found - prevCount;
+          if (isRescan && delta !== 0) {
+            message += ` ${Math.abs(delta)} ${delta > 0 ? 'more' : 'less'} found than last scan.`;
+          }
+          toast.success(message);
         }
-        toast.success(message);
       } catch (err) {
         toast.error(`Scanning "${folder.name}" failed: ${err instanceof Error ? err.message : 'unknown error'}`);
       } finally {
+        scanAbortRef.current = null;
         setScanning(null);
       }
     },
     [settings.ignoreRules, fillCoverFlags]
   );
+
+  const stopScan = useCallback(() => {
+    scanAbortRef.current?.abort();
+  }, []);
 
   const addFolder = useCallback(async () => {
     let handle: FileSystemDirectoryHandle;
@@ -213,6 +235,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
         addFolder,
         removeFolder,
         rescanFolder,
+        stopScan,
         restoreAccess,
         getFile
       }}
