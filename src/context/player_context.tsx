@@ -16,9 +16,23 @@ import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds, pushRecent } from '../queue/history';
 import { readCoverArt } from '../management/metadata';
 import { useLibrary } from './library_context';
+import { useSettings } from './settings_context';
 import { clamp } from '../utils/format';
+import {
+  analyzeTrack,
+  classifyBpmDiff,
+  planCrossfade,
+  equalPowerFadeCurves,
+  type TrackAnalysis
+} from '../audio/bpm';
+import { toast } from '../utils/toast';
+import { EQ_BANDS, EQ_Q, normalizeBands } from '../audio/eq';
 
 export type RepeatMode = 'off' | 'all' | 'one';
+export type AutoMixPhase = 'idle' | 'analyzing-current' | 'analyzing-next' | 'mixing';
+export type AutoMixColor = 'green' | 'orange' | 'red' | null;
+
+const FADE_CURVES = equalPowerFadeCurves(64);
 
 interface PlayerContextValue {
   queue: QueueItem[];
@@ -47,13 +61,19 @@ interface PlayerContextValue {
   toggleShuffle(): void;
   cycleRepeat(): void;
   clearQueue(): void;
+  clearOthers(): void;
   getAnalyser(): AnalyserNode;
+  autoMixEnabled: boolean;
+  autoMixPhase: AutoMixPhase;
+  autoMixColor: AutoMixColor;
+  toggleAutoMix(): void;
 }
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 
 const VOLUME_KEY = 'xebrine.volume';
 const REPEAT_KEY = 'xebrine.repeat';
+const AUTOMIX_KEY = 'xebrine.automix';
 
 export const MAX_VOLUME = 1.5;
 
@@ -68,10 +88,18 @@ function loadRepeat(): RepeatMode {
   return raw === 'all' || raw === 'one' ? raw : 'off';
 }
 
+function loadAutoMix(): boolean {
+  return localStorage.getItem(AUTOMIX_KEY) === '1';
+}
+
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const { getFile } = useLibrary();
   const getFileRef = useRef(getFile);
   getFileRef.current = getFile;
+
+  const { settings } = useSettings();
+  const autoMixDurationRef = useRef(settings.autoMixDuration);
+  autoMixDurationRef.current = settings.autoMixDuration;
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   if (!audioRef.current) {
@@ -101,6 +129,27 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const fadeGainARef = useRef<GainNode | null>(null);
+  const eqFiltersRef = useRef<BiquadFilterNode[] | null>(null);
+
+  const [autoMixEnabled, setAutoMixEnabledState] = useState(loadAutoMix);
+  const autoMixEnabledRef = useRef(autoMixEnabled);
+  autoMixEnabledRef.current = autoMixEnabled;
+  const [autoMixPhase, setAutoMixPhase] = useState<AutoMixPhase>('idle');
+  const [autoMixColor, setAutoMixColor] = useState<AutoMixColor>(null);
+  const pendingMixRef = useRef<{
+    key: string;
+    outgoing: TrackAnalysis;
+    incoming: TrackAnalysis;
+    status: 'green' | 'orange' | 'red';
+  } | null>(null);
+  const crossfadeActiveRef = useRef(false);
+  const mixSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const mixFadeGainRef = useRef<GainNode | null>(null);
+  const mixStartCtxTimeRef = useRef(0);
+  const mixStartOffsetRef = useRef(0);
+  const mixRateRef = useRef(1);
+  const pendingHandoffTimeRef = useRef<number | null>(null);
 
   function ensureAudioGraph(): { gain: GainNode; analyser: AnalyserNode } {
     if (gainNodeRef.current && analyserRef.current) {
@@ -108,17 +157,122 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
     const ctx = new AudioContext();
     const source = ctx.createMediaElementSource(audio);
+    const fadeGainA = ctx.createGain();
+    fadeGainA.gain.value = 1;
     const gain = ctx.createGain();
     gain.gain.value = volume;
     const analyser = ctx.createAnalyser();
     analyser.fftSize = 512;
-    source.connect(gain);
-    gain.connect(analyser);
+
+    const eqFilters = EQ_BANDS.map((freq) => {
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'peaking';
+      filter.frequency.value = freq;
+      filter.Q.value = EQ_Q;
+      filter.gain.value = 0;
+      return filter;
+    });
+
+    source.connect(fadeGainA);
+    fadeGainA.connect(gain);
+    let tail: AudioNode = gain;
+    for (const filter of eqFilters) {
+      tail.connect(filter);
+      tail = filter;
+    }
+    tail.connect(analyser);
     analyser.connect(ctx.destination);
     audioCtxRef.current = ctx;
+    fadeGainARef.current = fadeGainA;
     gainNodeRef.current = gain;
     analyserRef.current = analyser;
+    eqFiltersRef.current = eqFilters;
     return { gain, analyser };
+  }
+
+  function ensureMixBus(): GainNode {
+    const { gain: masterGain } = ensureAudioGraph();
+    if (mixFadeGainRef.current) return mixFadeGainRef.current;
+    const ctx = audioCtxRef.current!;
+    const fadeGain = ctx.createGain();
+    fadeGain.gain.value = 0;
+    fadeGain.connect(masterGain);
+    mixFadeGainRef.current = fadeGain;
+    return fadeGain;
+  }
+
+  function cancelCrossfade() {
+    if (!crossfadeActiveRef.current) return;
+    crossfadeActiveRef.current = false;
+    setAutoMixPhase('idle');
+    const ctx = audioCtxRef.current;
+    if (ctx && fadeGainARef.current) {
+      fadeGainARef.current.gain.cancelScheduledValues(ctx.currentTime);
+      fadeGainARef.current.gain.setValueAtTime(1, ctx.currentTime);
+    }
+    if (mixSourceRef.current) {
+      try {
+        mixSourceRef.current.stop();
+      } catch {
+        null;
+      }
+      mixSourceRef.current.disconnect();
+      mixSourceRef.current = null;
+    }
+    if (ctx && mixFadeGainRef.current) {
+      mixFadeGainRef.current.gain.cancelScheduledValues(ctx.currentTime);
+      mixFadeGainRef.current.gain.setValueAtTime(0, ctx.currentTime);
+    }
+  }
+
+  async function startCrossfade(
+    nextItem: QueueItem,
+    requestedFade: number,
+    mix: { outgoing: TrackAnalysis; incoming: TrackAnalysis; status: 'green' | 'orange' | 'red' }
+  ) {
+    crossfadeActiveRef.current = true;
+    setAutoMixPhase('mixing');
+    try {
+      const mixFadeGain = ensureMixBus();
+      const ctx = audioCtxRef.current!;
+      await ctx.resume().catch(() => {});
+
+      const file = await getFileRef.current(nextItem.track);
+      if (!crossfadeActiveRef.current) return;
+      const audioBuffer = await ctx.decodeAudioData(await file.arrayBuffer());
+      if (!crossfadeActiveRef.current) return;
+
+      const lead = 0.06;
+      const startWhen = ctx.currentTime + lead;
+      const outgoingPosAtStart = audio.currentTime + lead;
+      const plan = planCrossfade(
+        mix.outgoing,
+        mix.incoming,
+        outgoingPosAtStart,
+        requestedFade,
+        mix.status !== 'red'
+      );
+
+      const source = ctx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.playbackRate.value = plan.playbackRate;
+      source.connect(mixFadeGain);
+      mixSourceRef.current = source;
+      mixStartCtxTimeRef.current = startWhen;
+      mixStartOffsetRef.current = plan.incomingOffset;
+      mixRateRef.current = plan.playbackRate;
+      source.start(startWhen, plan.incomingOffset);
+
+      const fadeGainA = fadeGainARef.current!;
+      fadeGainA.gain.cancelScheduledValues(startWhen);
+      fadeGainA.gain.setValueCurveAtTime(FADE_CURVES.fadeOut, startWhen, plan.fadeSeconds);
+      mixFadeGain.gain.cancelScheduledValues(startWhen);
+      mixFadeGain.gain.setValueCurveAtTime(FADE_CURVES.fadeIn, startWhen, plan.fadeSeconds);
+    } catch (err) {
+      console.error('Auto mix crossfade failed', err);
+      crossfadeActiveRef.current = false;
+      setAutoMixPhase('idle');
+    }
   }
 
   function applyVolume(v: number) {
@@ -138,19 +292,54 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const { analyser } = ensureAudioGraph();
     audioCtxRef.current?.resume().catch(() => {});
     return analyser;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [volume]);
 
   const current = state.items[state.position] ?? null;
   const currentKey = current?.key ?? null;
+  const nextKey = state.items[state.position + 1]?.key ?? null;
 
   useEffect(() => {
-    const onTime = () => setCurrentTime(audio.currentTime);
+    const onTime = () => {
+      const t = audio.currentTime;
+      setCurrentTime(t);
+      if (autoMixEnabledRef.current && !crossfadeActiveRef.current && repeatRef.current !== 'one') {
+        const s = stateRef.current;
+        const nextItem = s.items[s.position + 1];
+        const dur = audio.duration;
+        const fadeSeconds = autoMixDurationRef.current;
+        const mix = pendingMixRef.current;
+        if (
+          nextItem &&
+          mix &&
+          mix.key === nextItem.key &&
+          Number.isFinite(dur) &&
+          dur > fadeSeconds &&
+          dur - t <= fadeSeconds
+        ) {
+          void startCrossfade(nextItem, fadeSeconds, mix);
+        }
+      }
+    };
     const onDuration = () => setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
+    const onPlay = () => {
+      setIsPlaying(true);
+      audioCtxRef.current?.resume().catch(() => {});
+    };
+    const onPause = () => {
+      setIsPlaying(false);
+    };
     const onEnded = () => {
       const s = stateRef.current;
+      if (crossfadeActiveRef.current) {
+        const ctx = audioCtxRef.current;
+        if (ctx && mixSourceRef.current) {
+          const pos =
+            mixStartOffsetRef.current +
+            mixRateRef.current * (ctx.currentTime - mixStartCtxTimeRef.current);
+          pendingHandoffTimeRef.current = Math.max(0, pos);
+        }
+        cancelCrossfade();
+      }
       if (s.position + 1 < s.items.length) {
         autoplayRef.current = true;
         dispatch({ type: 'ADVANCE', delta: 1 });
@@ -209,6 +398,19 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [audio, repeatMode]);
 
   useEffect(() => {
+    const bands = normalizeBands(settings.eqBands);
+    const active = settings.eqEnabled && bands.some((v) => v !== 0);
+    if (!active && !eqFiltersRef.current) return;
+    ensureAudioGraph();
+    const ctx = audioCtxRef.current!;
+    const filters = eqFiltersRef.current!;
+    filters.forEach((filter, i) => {
+      const target = active ? bands[i] : 0;
+      filter.gain.setTargetAtTime(target, ctx.currentTime, 0.02);
+    });
+  }, [settings.eqEnabled, settings.eqBands]);
+
+  useEffect(() => {
     setLoadError(null);
     if (!current) {
       audio.pause();
@@ -232,9 +434,22 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         const url = URL.createObjectURL(file);
         if (srcUrlRef.current) URL.revokeObjectURL(srcUrlRef.current);
         srcUrlRef.current = url;
+        pendingMixRef.current = null;
+        const handoffTime = pendingHandoffTimeRef.current;
+        pendingHandoffTimeRef.current = null;
         audio.src = url;
-        setCurrentTime(0);
+        if (handoffTime !== null) {
+          const applyHandoffSeek = () => {
+            audio.currentTime = handoffTime;
+          };
+          if (audio.readyState >= 1) applyHandoffSeek();
+          else audio.addEventListener('loadedmetadata', applyHandoffSeek, { once: true });
+          setCurrentTime(handoffTime);
+        } else {
+          setCurrentTime(0);
+        }
         if (autoplayRef.current) {
+          audioCtxRef.current?.resume().catch(() => {});
           audio.play().catch(() => {});
         }
         pushRecent(track.id);
@@ -254,7 +469,62 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
   }, [currentKey]);
 
+  useEffect(() => {
+    if (!autoMixEnabled || !current) {
+      setAutoMixPhase('idle');
+      setAutoMixColor(null);
+      return;
+    }
+    const s = stateRef.current;
+    const nextItem = s.items[s.position + 1];
+    if (!nextItem) {
+      setAutoMixPhase('idle');
+      setAutoMixColor(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        setAutoMixPhase('analyzing-current');
+        const curFile = await getFileRef.current(current.track);
+        const curAnalysis = await analyzeTrack(current.track.id, curFile);
+        if (cancelled) return;
+
+        setAutoMixPhase('analyzing-next');
+        const nextFile = await getFileRef.current(nextItem.track);
+        const nextAnalysis = await analyzeTrack(nextItem.track.id, nextFile);
+        if (cancelled) return;
+
+        const status = classifyBpmDiff(curAnalysis.bpm, nextAnalysis.bpm);
+        pendingMixRef.current = {
+          key: nextItem.key,
+          outgoing: curAnalysis,
+          incoming: nextAnalysis,
+          status
+        };
+        setAutoMixColor(status);
+        setAutoMixPhase('idle');
+        toast.info(
+          `auto mix: ${curAnalysis.bpm} BPM (${Math.round(curAnalysis.confidence * 100)}%) -> ` +
+            `${nextAnalysis.bpm} BPM (${Math.round(nextAnalysis.confidence * 100)}%)`
+        );
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          setAutoMixPhase('idle');
+          setAutoMixColor(null);
+          const reason = err instanceof Error ? err.message : String(err);
+          toast.error(`bpm was not analyzed (${reason})`);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentKey, nextKey, autoMixEnabled, current]);
+
   const playNow = useCallback((tracks: TrackMeta[], startIndex = 0) => {
+    cancelCrossfade();
     autoplayRef.current = true;
     dispatch({ type: 'SET', items: makeItems(tracks), position: startIndex });
   }, []);
@@ -281,6 +551,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const jumpTo = useCallback(
     (index: number) => {
+      cancelCrossfade();
       if (index === stateRef.current.position) {
         audio.currentTime = 0;
         audioCtxRef.current?.resume().catch(() => {});
@@ -294,6 +565,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   );
 
   const next = useCallback(() => {
+    cancelCrossfade();
     const s = stateRef.current;
     autoplayRef.current = !audio.paused;
     if (s.position + 1 >= s.items.length) {
@@ -310,6 +582,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [audio]);
 
   const prev = useCallback(() => {
+    cancelCrossfade();
     if (audio.currentTime > 3 || stateRef.current.position <= 0) {
       audio.currentTime = 0;
       return;
@@ -325,11 +598,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.play().catch(() => {});
     } else {
       audio.pause();
+      if (crossfadeActiveRef.current) audioCtxRef.current?.suspend().catch(() => {});
     }
   }, [audio]);
 
   const seek = useCallback(
     (time: number) => {
+      cancelCrossfade();
       const target = clamp(time, 0, Number.isFinite(audio.duration) ? audio.duration : time);
       audio.currentTime = target;
       setCurrentTime(target);
@@ -364,8 +639,27 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const clearQueue = useCallback(() => {
+    cancelCrossfade();
     autoplayRef.current = false;
     dispatch({ type: 'CLEAR' });
+  }, []);
+
+  const clearOthers = useCallback(() => {
+    cancelCrossfade();
+    dispatch({ type: 'KEEP_CURRENT' });
+  }, []);
+
+  const toggleAutoMix = useCallback(() => {
+    setAutoMixEnabledState((on) => {
+      const next = !on;
+      if (!next) cancelCrossfade();
+      try {
+        localStorage.setItem(AUTOMIX_KEY, next ? '1' : '0');
+      } catch {
+        null;
+      }
+      return next;
+    });
   }, []);
 
   const value = useMemo<PlayerContextValue>(
@@ -396,7 +690,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       toggleShuffle,
       cycleRepeat,
       clearQueue,
-      getAnalyser
+      clearOthers,
+      getAnalyser,
+      autoMixEnabled,
+      autoMixPhase,
+      autoMixColor,
+      toggleAutoMix
     }),
     [
       state,
@@ -422,7 +721,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       toggleShuffle,
       cycleRepeat,
       clearQueue,
-      getAnalyser
+      clearOthers,
+      getAnalyser,
+      autoMixEnabled,
+      autoMixPhase,
+      autoMixColor,
+      toggleAutoMix
     ]
   );
 
