@@ -9,7 +9,7 @@ export interface ToastItem {
 
 type Listener = (toasts: ToastItem[]) => void;
 
-const DEFAULT_DURATION = 3500;
+const DEFAULT_DURATION = 7000;
 
 let toasts: ToastItem[] = [];
 let nextId = 1;
