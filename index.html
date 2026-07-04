@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f1115" />
+  <link rel="icon" type="image/png" href="/icon-192.png" />
+  <title>Xebrine</title>
+  <meta name="description" content="Yet another music player app" />
+</head>
+
+<body>
+  <div id="xebrine"></div>
+  <noscript> <!-- even more styling and detail for something nobody will see -->
+    <style>
+      .noscript-overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: #030003;
+        font-family: 'Chirp', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      }
+
+      .noscript-card {
+        background: #070007;
+        border: 1px solid rgba(33, 19, 41, 0.527);
+        border-radius: 10px;
+        padding: 32px;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+        text-align: center;
+        color: #ffffff;
+      }
+
+      .noscript-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #9b82f3;
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 18px;
+      }
+
+      .noscript-card h2 {
+        margin: 0 0 8px;
+        font-size: 1.2rem;
+      }
+
+      .noscript-card p {
+        color: #9aa2b5;
+        font-size: 0.9rem;
+        margin: 0 0 20px;
+      }
+
+      .noscript-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .noscript-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 9px 16px;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 120ms ease;
+      }
+
+      .noscript-btn--accent {
+        background: #4a29c2;
+        color: #fff;
+      }
+
+      .noscript-btn--accent:hover {
+        background: #5b39d9;
+      }
+
+      .noscript-btn--quiet {
+        background: #1c2130;
+        border: 1px solid rgba(33, 19, 41, 0.527);
+        color: #ffffff;
+        margin-top: 16px;
+      }
+
+      .noscript-btn--quiet:hover {
+        background: #232a3d;
+      }
+    </style>
+    <div class="noscript-overlay">
+      <div class="noscript-card">
+        <div class="noscript-logo">
+          <svg width="22" height="22" viewBox="70 260 563 545" fill="currentColor" aria-hidden="true">
+            <path
+              d="M86 413c26 -8 54 -12 84 -12s58 4 85 12v318h-169v-131h150v-56c-20 -4 -42 -6 -66 -6c-29 0 -57 4 -84 12v-137zM617 552c-27 -8 -56 -12 -85 -12c-30 0 -58 4 -84 12v-137c26 -8 54 -12 84 -12c29 0 58 4 85 12v137zM447 415c-27 -8 -55 -12 -84 -12c-23 0 -44 2 -66 6v384h-19v-515c27 -8 56 -12 85 -12c30 0 58 4 84 12v137z" />
+          </svg>
+          <span>xebrine</span>
+        </div>
+        <h2>JavaScript is not available / disabled</h2>
+        <p>This app requires JavaScript to function. Please enable
+          it or switch to a supported browser to continue.</p>
+        <div class="noscript-actions">
+          <a href="https://www.enablejavascript.io/" target="_blank" class="noscript-btn noscript-btn--accent">How
+            to enable JavaScript</a>
+        </div>
+        <div>
+          <a href="" class="noscript-btn noscript-btn--quiet">Enabled
+            JavaScript? Refresh!</a>
+        </div>
+      </div>
+    </div>
+  </noscript>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>
