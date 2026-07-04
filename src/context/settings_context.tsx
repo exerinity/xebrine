@@ -1,11 +1,15 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { LrclibMode } from '../api/lrclib';
 import { DEFAULT_IGNORE_RULES, type IgnoreRules } from '../utils/ignore_rules';
+import { EQ_FLAT, normalizeBands } from '../audio/eq';
 
 export interface Settings {
   lrclibMode: LrclibMode;
   notifications: boolean;
   ignoreRules: IgnoreRules;
+  autoMixDuration: number;
+  eqEnabled: boolean;
+  eqBands: number[];
 }
 
 interface SettingsContextValue {
@@ -18,13 +22,17 @@ const KEY = 'xebrine.settings';
 const DEFAULTS: Settings = {
   lrclibMode: 'strict',
   notifications: true,
-  ignoreRules: DEFAULT_IGNORE_RULES
+  ignoreRules: DEFAULT_IGNORE_RULES,
+  autoMixDuration: 15,
+  eqEnabled: false,
+  eqBands: [...EQ_FLAT]
 };
 
 function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
+    const merged = raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
+    return { ...merged, eqBands: normalizeBands(merged.eqBands) };
   } catch {
     return DEFAULTS;
   }
