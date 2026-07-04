@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { SettingsProvider } from './context/settings_context';
 import { LibraryProvider } from './context/library_context';
 import { PlayerProvider, usePlayer } from './context/player_context';
@@ -14,27 +14,11 @@ import { AlbumDetailPage } from './pages/album_detail';
 import { QueuePage } from './pages/queue';
 import { LyricsPage } from './pages/lyrics';
 import { SettingsPage } from './pages/settings';
+import { AboutPage } from './pages/about';
+import { Sidebar } from './components/sidebar';
 import { PlayerBar } from './components/player_bar';
 import { FullscreenPlayer } from './components/fs_player';
 import { ToastContainer } from './components/toast_container';
-import {
-  DiscIcon,
-  HomeIcon,
-  LogoIcon,
-  LyricsIcon,
-  PersonIcon,
-  QueueIcon,
-  SettingsIcon
-} from './components/icons';
-
-const NAV_LINKS = [
-  { path: '/home', label: 'Library', icon: HomeIcon },
-  { path: '/artists', label: 'Artists', icon: PersonIcon },
-  { path: '/albums', label: 'Albums', icon: DiscIcon },
-  { path: '/queue', label: 'Queue', icon: QueueIcon },
-  { path: '/lyrics', label: 'Lyrics', icon: LyricsIcon },
-  { path: '/settings', label: 'Settings', icon: SettingsIcon }
-];
 
 function MediaBridge() {
   useMediaSession();
@@ -67,7 +51,7 @@ function SpaceToPlayPause() {
 
 function Shell() {
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
-  const { queue, current, artworkUrl } = usePlayer();
+  const { current, artworkUrl } = usePlayer();
   const accent = useAccentColor(artworkUrl);
   const accentStyle = useMemo(
     () =>
@@ -88,27 +72,7 @@ function Shell() {
 
   return (
     <div className="xe_app" style={accentStyle}>
-      <nav className="xe_nav">
-        <div className="xe_nav__logo">
-          <LogoIcon size={22} />
-          <span>Xebrine</span>
-        </div>
-        {NAV_LINKS.map((link) => (
-          <NavLink
-            key={link.path}
-            to={link.path}
-            className={({ isActive }) => `xe_nav__link${isActive ? ' xe_nav__link--active' : ''}`}
-          >
-            <span className="xe_nav__link-content">
-              <link.icon size={16} />
-              {link.label}
-            </span>
-            {link.path === '/queue' && queue.length > 0 && (
-              <span className="xe_nav__badge">{queue.length}</span>
-            )}
-          </NavLink>
-        ))}
-      </nav>
+      <Sidebar />
       <main className="xe_main">
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
@@ -120,6 +84,7 @@ function Shell() {
           <Route path="/queue" element={<QueuePage />} />
           <Route path="/lyrics" element={<LyricsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </main>
