@@ -1,0 +1,224 @@
+.xe_search-input {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 7px 12px;
+  width: 240px;
+  outline: none;
+}
+
+.xe_search-input:focus {
+  border-color: var(--accent-bright);
+}
+
+.xe_search-field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.xe_search-field svg {
+  position: absolute;
+  left: 10px;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.xe_search-field .xe_search-input {
+  padding-left: 30px;
+}
+
+.xe_sort-select {
+  background-color: var(--panel);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa2b5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5 12 15.5 18 9.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 14px;
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 7px 30px 7px 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.xe_sort-select:hover {
+  background-color: var(--panel-2);
+}
+
+.xe_sort-select:focus {
+  border-color: var(--accent-bright);
+}
+
+.xe_btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 7px 14px;
+  color: var(--text);
+  transition: background 120ms ease;
+}
+
+.xe_btn:hover:not(:disabled) {
+  background: #232a3d;
+}
+
+.xe_btn--accent {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+}
+
+.xe_btn--accent:hover:not(:disabled) {
+  background: #5b39d9;
+}
+
+.xe_btn--quiet {
+  background: transparent;
+  color: var(--text-dim);
+}
+
+.xe_btn--small {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+.xe_btn--back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.xe_btn--back:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.xe_mini-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.xe_mini-btn:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.xe_icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--text-dim);
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.xe_icon-btn:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--panel-2);
+}
+
+.xe_icon-btn--primary {
+  width: 40px;
+  height: 40px;
+  background: var(--text);
+  color: var(--bg);
+}
+
+.xe_icon-btn--primary:hover:not(:disabled) {
+  background: #fff;
+  color: var(--bg);
+}
+
+.xe_icon-btn--active {
+  color: var(--accent-text);
+}
+
+.xe_slider {
+  padding: 8px 0;
+  cursor: pointer;
+  touch-action: none;
+  outline: none;
+}
+
+.xe_slider--disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.xe_slider__track {
+  position: relative;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--panel-2);
+}
+
+.xe_slider__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 99px;
+  background: var(--accent-bright);
+}
+
+.xe_slider__mark {
+  position: absolute;
+  top: 50%;
+  width: 2px;
+  height: 8px;
+  border-radius: 1px;
+  background: var(--text-dim);
+  opacity: 0.7;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.xe_slider__thumb {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.xe_slider:hover .xe_slider__thumb,
+.xe_slider:focus-visible .xe_slider__thumb {
+  opacity: 1;
+}
+
+.xe_scroll-text {
+  overflow: hidden;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.xe_scroll-text > span {
+  display: inline-block;
+  will-change: transform;
+}
+
+.xe_scroll-text--clickable {
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 120ms ease;
+}
+
+.xe_scroll-text--clickable:hover {
+  color: var(--accent-text);
+}
