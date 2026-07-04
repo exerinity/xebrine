@@ -5,13 +5,22 @@ import { IGNORABLE_FORMATS, type IgnoredFormat, type IgnoreRules } from '../util
 import { Spinner } from '../components/spinner';
 import { Slider } from '../components/slider';
 import { Equalizer } from '../components/equalizer';
-import { FolderIcon, KeyIcon, RefreshIcon, TrashIcon } from '../components/icons';
+import { CloseIcon, FolderIcon, KeyIcon, RefreshIcon, TrashIcon } from '../components/icons';
 import { useScanEta, formatEta } from '../hooks/scan_eta';
 
 export function SettingsPage() {
   const { settings, update } = useSettings();
-  const { folders, tracks, permissionNeeded, scanning, addFolder, removeFolder, rescanFolder, restoreAccess } =
-    useLibrary();
+  const {
+    folders,
+    tracks,
+    permissionNeeded,
+    scanning,
+    addFolder,
+    removeFolder,
+    rescanFolder,
+    stopScan,
+    restoreAccess
+  } = useLibrary();
   const eta = useScanEta(scanning);
   const [notifPermission, setNotifPermission] = useState<NotificationPermission>(
     'Notification' in window ? Notification.permission : 'denied'
@@ -200,6 +209,14 @@ export function SettingsPage() {
                 {scanning.omitted > 0 ? ` (${scanning.omitted} to be omitted by your filter)` : ''}
                 {eta !== null && <span className="xe_banner__eta">{formatEta(eta)}</span>}
               </span>
+              <button
+                type="button"
+                className="xe_btn xe_btn--small xe_btn--quiet xe_banner__stop"
+                onClick={stopScan}
+              >
+                <CloseIcon size={13} />
+                Stop scanning here
+              </button>
             </div>
           )}
           <ul className="xe_settings__folders">
