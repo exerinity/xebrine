@@ -63,3 +63,139 @@
   gap: 14px;
   color: var(--text-dim);
 }
+
+.xe_about {
+  max-width: 640px;
+  padding-bottom: 24px;
+}
+
+.xe_about__hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 0 24px;
+}
+
+.xe_about__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 20px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  flex-shrink: 0;
+}
+
+.xe_about__name {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--accent-text);
+}
+
+.xe_about__version {
+  margin: 4px 0 0;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.xe_about__lead {
+  font-size: 16px;
+  line-height: 1.55;
+  margin: 0 0 14px;
+}
+
+.xe_about a {
+  color: var(--accent-text);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 120ms ease, opacity 120ms ease;
+}
+
+.xe_about a:hover {
+  border-bottom-color: currentColor;
+}
+
+.xe_about a:focus-visible {
+  outline: none;
+  border-bottom-color: currentColor;
+  opacity: 0.85;
+}
+
+.xe_about__text {
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+
+.xe_about__stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.xe_about__stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.xe_about__stat strong {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+.xe_about__stat span {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.xe_about__heading {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.xe_about__list {
+  margin: 0 0 26px;
+  padding-left: 18px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.xe_about__packages {
+  list-style: none;
+  padding-left: 0;
+  max-width: 340px;
+}
+
+.xe_about__packages li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.xe_about__packages li:last-child {
+  border-bottom: none;
+}
+
+.xe_about__packages code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.xe_about__packages span {
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
