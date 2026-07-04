@@ -1,6 +1,6 @@
 .xe_app {
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: auto 1fr;
   grid-template-rows: 1fr auto;
   grid-template-areas:
     'xe_nav xe_main'
@@ -10,12 +10,58 @@
 
 .xe_nav {
   grid-area: xe_nav;
+  position: relative;
   background: var(--panel);
   border-right: 1px solid var(--border);
   padding: 16px 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.xe_nav--collapsed {
+  align-items: center;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.xe_nav--collapsed .xe_nav__logo {
+  justify-content: center;
+  padding: 6px 0 18px;
+}
+
+.xe_nav--collapsed .xe_nav__link {
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+.xe_nav__resize {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 7px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 5;
+  touch-action: none;
+}
+
+.xe_nav__resize::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 3px;
+  width: 2px;
+  height: 100%;
+  background: transparent;
+  transition: background 120ms ease;
+}
+
+.xe_nav__resize:hover::after,
+.xe_nav__resize:active::after {
+  background: var(--accent);
 }
 
 .xe_nav__logo {
@@ -26,9 +72,17 @@
   font-size: 16px;
   color: var(--accent-text);
   padding: 6px 10px 18px;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: opacity 120ms ease;
+}
+
+.xe_nav__logo:hover {
+  opacity: 0.75;
 }
 
 .xe_nav__link {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -44,6 +98,19 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.xe_nav__dot {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 .xe_nav__link:hover {
