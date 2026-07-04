@@ -3,6 +3,8 @@ import { useSettings } from '../context/settings_context';
 import { useLibrary } from '../context/library_context';
 import { IGNORABLE_FORMATS, type IgnoredFormat, type IgnoreRules } from '../utils/ignore_rules';
 import { Spinner } from '../components/spinner';
+import { Slider } from '../components/slider';
+import { Equalizer } from '../components/equalizer';
 import { FolderIcon, KeyIcon, RefreshIcon, TrashIcon } from '../components/icons';
 
 export function SettingsPage() {
@@ -147,6 +149,33 @@ export function SettingsPage() {
             })}
           </div>
         </section>
+
+        <section className="xe_settings__section">
+          <h2>Auto mix</h2>
+          <p className="xe_settings__hint">
+            Auto mix is an experimental... automatic mixing subsystem. It works by analyzing the BPM of the currently playing track and the next enqueued track then calculates the BPM difference and ease of crossfading while beat-matching
+          </p>
+          <div className="xe_settings__slider-row">
+            <Slider
+              value={settings.autoMixDuration}
+              min={5}
+              max={90}
+              wheelStep={1}
+              onChange={(v) => update({ autoMixDuration: Math.round(v) })}
+              ariaLabel="Auto mix duration"
+            />
+            <span className="xe_settings__slider-value">{settings.autoMixDuration}s</span>
+          </div>
+          <p className="xe_settings__hint">
+            A <span style={{ color: '#3ddc84' }}>Green</span> pill means the current and next track BPMs are compatible for a smooth mix
+            <br></br>
+            An <span style={{ color: '#f5a623' }}>Orange</span> pill means the BPMs are less-than-optimal but Xebrine will try mixing them anyway
+            <br></br>
+            A <span style={{ color: '#f5524a'}}>Red</span> pill means the BPMs are way too incompatible for mixing and they will just simply crossfade
+          </p>
+        </section>
+
+        <Equalizer />
 
         <section className="xe_settings__section">
           <h2>Library</h2>
