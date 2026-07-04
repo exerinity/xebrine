@@ -49,6 +49,17 @@
   color: var(--text-dim);
 }
 
+.xe_banner__eta {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 99px;
+  background: var(--panel-2);
+  color: var(--accent-text);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .xe_empty-note {
   color: var(--text-dim);
   padding: 24px 0;
