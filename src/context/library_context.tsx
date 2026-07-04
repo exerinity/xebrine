@@ -117,13 +117,27 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
           setScanning({ folderName: folder.name, done, total, omitted });
         });
         const scannedIds = new Set(scanned.map((t) => t.id));
-        for (const track of scanned) await dbPut('tracks', track);
-        const stale = (await dbGetAll<TrackMeta>('tracks')).filter(
-          (t) => t.folderId === folder.id && !scannedIds.has(t.id)
+        const folderTracks = (await dbGetAll<TrackMeta>('tracks')).filter(
+          (t) => t.folderId === folder.id
         );
+        const isRescan = folderTracks.length > 0;
+        const prevCount = folderTracks.filter(
+          (t) => !shouldIgnoreTrack(t, settings.ignoreRules)
+        ).length;
+
+        for (const track of scanned) await dbPut('tracks', track);
+        const stale = folderTracks.filter((t) => !scannedIds.has(t.id));
         for (const track of stale) await dbDelete('tracks', track.id);
         setTracks((prev) => [...prev.filter((t) => t.folderId !== folder.id), ...scanned]);
         void fillCoverFlags(scanned);
+
+        const found = scanned.filter((t) => !shouldIgnoreTrack(t, settings.ignoreRules)).length;
+        let message = `Done scanning folder - found ${found} track${found === 1 ? '' : 's'}.`;
+        const delta = found - prevCount;
+        if (isRescan && delta !== 0) {
+          message += ` ${Math.abs(delta)} ${delta > 0 ? 'more' : 'less'} found than last scan.`;
+        }
+        toast.success(message);
       } catch (err) {
         toast.error(`Scanning "${folder.name}" failed: ${err instanceof Error ? err.message : 'unknown error'}`);
       } finally {
