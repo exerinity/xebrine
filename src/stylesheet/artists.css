@@ -1,0 +1,48 @@
+.xe_artist-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 10px;
+  text-align: left;
+}
+
+.xe_artist-row:hover {
+  background: var(--panel);
+}
+
+.xe_artist-row__name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.xe_artist-row__meta {
+  color: var(--text-dim);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.xe_album-section {
+  padding-bottom: 22px;
+}
+
+.xe_album-section__title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  padding: 0 10px;
+}
+
+.xe_album-section__link:hover {
+  color: var(--accent-text);
+  text-decoration: underline;
+}
+
+.xe_album-section__year {
+  color: var(--text-dim);
+  font-weight: 400;
+}
