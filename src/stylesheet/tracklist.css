@@ -1,0 +1,80 @@
+.xe_track-table__row {
+  display: grid;
+  grid-template-columns: 36px minmax(140px, 2fr) minmax(100px, 1.4fr) minmax(100px, 1.4fr) 52px 92px;
+  gap: 10px;
+  align-items: center;
+  padding: 0 10px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.xe_track-table__row--head {
+  color: var(--text-dim);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 1;
+}
+
+.xe_track-table__row:not(.xe_track-table__row--head):hover {
+  background: var(--panel);
+}
+
+.xe_track-table__row--active {
+  color: var(--accent-text);
+}
+
+.xe_track-table__row--skeleton:hover {
+  background: none;
+}
+
+.xe_track-table__cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.xe_track-table__cell--link {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.xe_track-table__cell--link:hover {
+  color: var(--accent-text);
+  text-decoration: underline;
+}
+
+.xe_track-table__cell--num {
+  color: var(--text-dim);
+  text-align: right;
+}
+
+.xe_track-table__cell--num svg {
+  display: block;
+  margin-left: auto;
+}
+
+.xe_track-table__row--active .xe_track-table__cell--num {
+  color: var(--accent-text);
+}
+
+.xe_track-table__cell--dur {
+  color: var(--text-dim);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.xe_track-table__cell--actions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+  visibility: hidden;
+}
+
+.xe_track-table__row:hover .xe_track-table__cell--actions {
+  visibility: visible;
+}
