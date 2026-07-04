@@ -28,6 +28,7 @@ export type QueueAction =
   | { type: 'ADVANCE'; delta: number }
   | { type: 'APPLY_SHUFFLE'; upcoming: QueueItem[] }
   | { type: 'UNSHUFFLE' }
+  | { type: 'KEEP_CURRENT' }
   | { type: 'CLEAR' };
 
 export function queueReducer(state: QueueState, action: QueueAction): QueueState {
@@ -105,6 +106,12 @@ export function queueReducer(state: QueueState, action: QueueAction): QueueState
         shuffled: false,
         original: null
       };
+    }
+
+    case 'KEEP_CURRENT': {
+      const current = state.items[state.position];
+      if (!current) return initialQueue;
+      return { items: [current], position: 0, shuffled: false, original: null };
     }
 
     case 'CLEAR':
