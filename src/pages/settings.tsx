@@ -6,11 +6,13 @@ import { Spinner } from '../components/spinner';
 import { Slider } from '../components/slider';
 import { Equalizer } from '../components/equalizer';
 import { FolderIcon, KeyIcon, RefreshIcon, TrashIcon } from '../components/icons';
+import { useScanEta, formatEta } from '../hooks/scan_eta';
 
 export function SettingsPage() {
   const { settings, update } = useSettings();
   const { folders, tracks, permissionNeeded, scanning, addFolder, removeFolder, rescanFolder, restoreAccess } =
     useLibrary();
+  const eta = useScanEta(scanning);
   const [notifPermission, setNotifPermission] = useState<NotificationPermission>(
     'Notification' in window ? Notification.permission : 'denied'
   );
@@ -196,6 +198,7 @@ export function SettingsPage() {
                 Scanning <strong>{scanning.folderName}</strong>: read {scanning.done}
                 {scanning.total > 0 ? ` / ${scanning.total}` : ''} files so far...
                 {scanning.omitted > 0 ? ` (${scanning.omitted} to be omitted by your filter)` : ''}
+                {eta !== null && <span className="xe_banner__eta">{formatEta(eta)}</span>}
               </span>
             </div>
           )}
