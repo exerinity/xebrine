@@ -1,0 +1,15 @@
+@import './fonts.css';
+@import './base.css';
+@import './shell.css';
+@import './page.css';
+@import './controls.css';
+@import './loading.css';
+@import './tracklist.css';
+@import './queue.css';
+@import './artists.css';
+@import './albums.css';
+@import './lyrics.css';
+@import './player.css';
+@import './settings.css';
+@import './modal.css';
+@import './toast.css';
