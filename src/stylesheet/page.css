@@ -60,6 +60,11 @@
   white-space: nowrap;
 }
 
+.xe_banner__stop {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 .xe_empty-note {
   color: var(--text-dim);
   padding: 24px 0;
