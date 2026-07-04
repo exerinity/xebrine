@@ -4,7 +4,7 @@ import { formatTime } from '../utils/format';
 import { ShuffleIcon, TrashIcon } from '../components/icons';
 
 export function QueuePage() {
-  const { queue, shuffled, toggleShuffle, clearQueue } = usePlayer();
+  const { queue, current, shuffled, toggleShuffle, clearQueue, clearOthers } = usePlayer();
   const totalSeconds = queue.reduce((sum, item) => sum + item.track.duration, 0);
 
   return (
@@ -22,6 +22,15 @@ export function QueuePage() {
         >
           <ShuffleIcon size={14} />
           Shuffle {shuffled ? 'ON' : 'OFF'}
+        </button>
+        <button
+          type="button"
+          className="xe_btn xe_btn--quiet"
+          onClick={clearOthers}
+          disabled={!current || queue.length <= 1}
+        >
+          <TrashIcon size={14} />
+          Clear others
         </button>
         <button type="button" className="xe_btn xe_btn--quiet" onClick={clearQueue} disabled={queue.length === 0}>
           <TrashIcon size={14} />
