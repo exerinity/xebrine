@@ -6,6 +6,7 @@ import { Slider } from './slider';
 import { Visualizer } from './visualizer';
 import { toast } from '../utils/toast';
 import {
+  AutoMixIcon,
   NextIcon,
   PauseIcon,
   PlayIcon,
@@ -39,7 +40,11 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
     setVolume,
     toggleShuffle,
     cycleRepeat,
-    getAnalyser
+    getAnalyser,
+    autoMixEnabled,
+    autoMixPhase,
+    autoMixColor,
+    toggleAutoMix
   } = usePlayer();
   const lastAudibleVolumeRef = useRef(volume > 0 ? volume : 0.8);
   const [copiedField, setCopiedField] = useState<'title' | 'artist' | 'album' | null>(null);
@@ -87,6 +92,17 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
       return !on;
     });
   };
+
+  const autoMixLabel = !autoMixEnabled
+    ? 'Disabled'
+    : autoMixPhase === 'analyzing-current'
+      ? 'Analyzing current...'
+      : autoMixPhase === 'analyzing-next'
+        ? 'Analyzing next...'
+        : autoMixPhase === 'mixing'
+          ? 'In progress...'
+          : 'Enabled';
+  const autoMixBusy = autoMixEnabled && (autoMixPhase === 'analyzing-current' || autoMixPhase === 'analyzing-next');
 
   return (
     <footer className="xe_player-bar">
@@ -185,6 +201,20 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
       </div>
 
       <div className="xe_player-bar__volume">
+        <button
+          type="button"
+          className={`xe_automix-pill${autoMixEnabled ? ' xe_automix-pill--on' : ''}${
+            autoMixEnabled && autoMixColor ? ` xe_automix-pill--${autoMixColor}` : ''
+          }${autoMixBusy ? ' xe_automix-pill--busy' : ''}${
+            autoMixPhase === 'mixing' ? ' xe_automix-pill--mixing' : ''
+          }`}
+          onClick={toggleAutoMix}
+          title={`Auto mix is ${autoMixLabel.toLowerCase()}`}
+          aria-pressed={autoMixEnabled}
+        >
+          <AutoMixIcon size={14} />
+          <span className="xe_automix-pill__label">{autoMixLabel}</span>
+        </button>
         <button
           type="button"
           className={`xe_icon-btn${visualizerOn ? ' xe_icon-btn--active' : ''}`}
