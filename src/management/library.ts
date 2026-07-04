@@ -94,11 +94,13 @@ async function readFileTags(handle: FileSystemFileHandle): Promise<TrackTags> {
 
 export async function scanFolder(
   folder: FolderRecord,
-  onProgress?: (done: number, total: number, track: TrackMeta) => void
+  onProgress?: (done: number, total: number, track: TrackMeta) => void,
+  signal?: AbortSignal
 ): Promise<TrackMeta[]> {
   const files = await collectAudioFiles(folder.handle);
   const tracks: TrackMeta[] = [];
   for (let i = 0; i < files.length; i++) {
+    if (signal?.aborted) break;
     if (i > 0) await delay(SCAN_DELAY_MS);
     const { handle, relPath } = files[i];
     let tags: TrackTags;
