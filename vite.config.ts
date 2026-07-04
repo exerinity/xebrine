@@ -38,5 +38,22 @@ export default defineConfig({
         ]
       }
     })
-  ]
+  ],
+  build: {
+    rollupOptions: {
+      output: {
+        chunkFileNames: 'xe_[name]-[hash].js',
+        manualChunks(id) {
+          if (id.includes('node_modules')) return 'node_modules';
+          if (id.match(/pages\/library/)) return 'library';
+          if (id.match(/pages\/(artists|artist_detail)/)) return 'artists';
+          if (id.match(/pages\/(albums|album_detail)/)) return 'albums';
+          if (id.match(/pages\/queue/)) return 'queue';
+          if (id.match(/pages\/lyrics/)) return 'lyrics';
+          if (id.match(/pages\/settings/)) return 'settings';
+          if (id.match(/context\//)) return 'context';
+        }
+      }
+    }
+  }
 });

@@ -77,9 +77,9 @@ export function AlbumDetailPage() {
         <div className="xe_album-hero__info">
           <h1 className="xe_album-hero__title">{album.album}</h1>
           <p className="xe_album-hero__meta">
-            {album.artist}
-            {album.year ? ` · ${album.year}` : ''} · {album.tracks.length} track
-            {album.tracks.length === 1 ? '' : 's'} · {formatTime(total)}
+            by <strong>{album.artist}</strong>
+            {album.year ? ` / released ${album.year}` : ''} / {album.tracks.length} track
+            {album.tracks.length === 1 ? '' : 's'} / {formatTime(total)} total
           </p>
           <div className="xe_album-hero__actions">
             <button type="button" className="xe_btn xe_btn--accent" onClick={() => playNow(album.tracks, 0)}>

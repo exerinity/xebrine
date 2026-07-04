@@ -53,7 +53,7 @@ export function ArtistDetailPage() {
         </button>
         <h1 className="xe_page__title">{artist.name}</h1>
         <span className="xe_page__meta">
-          {artist.albumCount} album{artist.albumCount === 1 ? '' : 's'} · {artist.tracks.length}{' '}
+          {artist.albumCount} album{artist.albumCount === 1 ? '' : 's'} / {artist.tracks.length}{' '}
           track{artist.tracks.length === 1 ? '' : 's'}
         </span>
         <button type="button" className="xe_btn" onClick={() => playNow(artist.tracks, 0)}>
@@ -80,7 +80,7 @@ export function ArtistDetailPage() {
               >
                 {album.album}
               </button>
-              {album.year ? <span className="xe_album-section__year"> · {album.year}</span> : null}
+              {album.year ? <span className="xe_album-section__year"> / {album.year}</span> : null}
             </h2>
             <TrackList tracks={album.tracks} />
           </section>

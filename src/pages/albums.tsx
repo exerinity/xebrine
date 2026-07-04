@@ -76,8 +76,7 @@ function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
       </div>
       <span className="xe_album-card__title">{album.album}</span>
       <span className="xe_album-card__artist">
-        {album.artist}
-        {album.year ? ` · ${album.year}` : ''}
+        by {album.artist}
       </span>
     </div>
   );

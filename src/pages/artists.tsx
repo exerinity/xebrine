@@ -88,7 +88,7 @@ export function ArtistsPage() {
             >
               <span className="xe_artist-row__name">{a.name}</span>
               <span className="xe_artist-row__meta">
-                {a.albumCount} album{a.albumCount === 1 ? '' : 's'} · {a.tracks.length} track
+                {a.albumCount} album{a.albumCount === 1 ? '' : 's'} / {a.tracks.length} track
                 {a.tracks.length === 1 ? '' : 's'}
               </span>
             </button>
