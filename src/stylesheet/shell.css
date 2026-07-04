@@ -1,0 +1,73 @@
+.xe_app {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    'xe_nav xe_main'
+    'player player';
+  height: 100vh;
+}
+
+.xe_nav {
+  grid-area: xe_nav;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.xe_nav__logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--accent-text);
+  padding: 6px 10px 18px;
+}
+
+.xe_nav__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: var(--text-dim);
+  text-align: left;
+  text-decoration: none;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.xe_nav__link-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.xe_nav__link:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.xe_nav__link--active {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.xe_nav__badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 99px;
+  padding: 1px 7px;
+}
+
+.xe_main {
+  grid-area: xe_main;
+  overflow: hidden;
+  display: flex;
+}
