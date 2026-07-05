@@ -11,6 +11,7 @@ import { BackIcon, NoteIcon, PlayIcon, ShuffleIcon } from '../components/icons';
 import { formatTime } from '../utils/format';
 import { CoverModal } from '../components/cover_modal';
 import { slugify, toSlugParam } from '../utils/slug';
+import { usePageTitle } from '../hooks/page_title';
 
 export function AlbumDetailPage() {
   const { artistName = '', albumName = '' } = useParams();
@@ -29,6 +30,8 @@ export function AlbumDetailPage() {
       ),
     [albums, artistName, albumName]
   );
+
+  usePageTitle(album ? [album.album, 'Albums'] : 'Albums');
 
   const art = useAlbumArt(album?.key ?? '', album?.tracks[0]);
   const cameFrom = (location.state as { from?: string } | null)?.from;
