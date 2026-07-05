@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { MAX_VOLUME, usePlayer } from '../context/player_context';
+import { useSettings } from '../context/settings_context';
 import { ScrollingText } from './scrolling_text';
 import { Scrubber } from './scrubber';
 import { Slider } from './slider';
 import { Visualizer } from './visualizer';
 import { toast } from '../utils/toast';
+import { formatTime } from '../utils/format';
 import {
   AutoMixIcon,
   NextIcon,
@@ -46,6 +48,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
     autoMixColor,
     toggleAutoMix
   } = usePlayer();
+  const { settings } = useSettings();
   const lastAudibleVolumeRef = useRef(volume > 0 ? volume : 0.8);
   const [copiedField, setCopiedField] = useState<'title' | 'artist' | 'album' | null>(null);
   const copiedTimeoutRef = useRef<number | null>(null);
@@ -93,6 +96,14 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
     });
   };
 
+  const secondsUntilMix = duration - settings.autoMixDuration - currentTime;
+  const showCountdown =
+    autoMixEnabled &&
+    autoMixPhase === 'idle' &&
+    autoMixColor !== null &&
+    duration > settings.autoMixDuration &&
+    secondsUntilMix > 0;
+
   const autoMixLabel = !autoMixEnabled
     ? 'Disabled'
     : autoMixPhase === 'analyzing-current'
@@ -101,7 +112,9 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
         ? 'Analyzing next...'
         : autoMixPhase === 'mixing'
           ? 'In progress...'
-          : 'Enabled';
+          : showCountdown
+            ? `${formatTime(Math.ceil(secondsUntilMix))}`
+            : 'Enabled';
   const autoMixBusy = autoMixEnabled && (autoMixPhase === 'analyzing-current' || autoMixPhase === 'analyzing-next');
 
   return (
