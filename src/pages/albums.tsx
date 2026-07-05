@@ -10,6 +10,8 @@ import { NoteIcon, PlayIcon, PlusIcon, ShuffleIcon } from '../components/icons';
 import { SortSelect, type SortOption } from '../components/sort_select';
 import { toSlugParam } from '../utils/slug';
 import { useScrollRestoration } from '../hooks/scroll_restoration';
+import { useInfiniteScroll } from '../hooks/infinite_scroll';
+import { usePageTitle } from '../hooks/page_title';
 
 type AlbumSort = 'artist' | 'title' | 'title-desc' | 'tracks';
 
@@ -88,6 +90,7 @@ export function AlbumsPage() {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<AlbumSort>(loadSort);
   const scrollRef = useScrollRestoration<HTMLDivElement>();
+  usePageTitle('Albums');
 
   const changeSort = (value: AlbumSort) => {
     setSort(value);
@@ -128,6 +131,8 @@ export function AlbumsPage() {
     return copy;
   }, [albums, query, sort]);
 
+  const { visible: paged, hasMore, sentinelRef } = useInfiniteScroll(visible);
+
   return (
     <div className="xe_page">
       <div className="xe_page__toolbar">
@@ -149,7 +154,7 @@ export function AlbumsPage() {
       ) : (
         <div className="xe_page__scroll" ref={scrollRef}>
           <div className="xe_album-grid">
-            {visible.map((a) => (
+            {paged.map((a) => (
               <AlbumCard
                 key={a.key}
                 album={a}
@@ -161,6 +166,7 @@ export function AlbumsPage() {
               />
             ))}
           </div>
+          {hasMore && <div ref={sentinelRef} className="xe_infinite-sentinel" aria-hidden="true" />}
         </div>
       )}
     </div>
