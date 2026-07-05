@@ -7,6 +7,8 @@ import { TrackList } from '../components/track_list';
 import { TrackListSkeleton } from '../components/skeletons';
 import { Spinner } from '../components/spinner';
 import { SortSelect, type SortOption } from '../components/sort_select';
+import { useInfiniteScroll } from '../hooks/infinite_scroll';
+import { usePageTitle } from '../hooks/page_title';
 import { FolderIcon, KeyIcon, PlayIcon, SearchIcon, ShuffleIcon } from '../components/icons';
 
 type LibrarySort = 'artist' | 'album' | 'title' | 'title-desc' | 'duration';
@@ -24,6 +26,7 @@ export function LibraryPage() {
   const { playNow } = usePlayer();
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<LibrarySort>('artist');
+  usePageTitle('Library');
 
   const sorted = useMemo(() => {
     const copy = [...tracks];
@@ -68,6 +71,8 @@ export function LibraryPage() {
         t.album.toLowerCase().includes(q)
     );
   }, [sorted, query]);
+
+  const { visible: paged, hasMore, sentinelRef } = useInfiniteScroll(visible);
 
   const shuffleAll = () => {
     const order = intelligentShuffle(visible, (t) => ({ id: t.id, artist: t.artist }), getRecentIds());
@@ -145,7 +150,14 @@ export function LibraryPage() {
         </div>
       ) : (
         <div className="xe_page__scroll">
-          {scanning ? <TrackListSkeleton rows={15} /> : <TrackList tracks={visible} />}
+          {scanning ? (
+            <TrackListSkeleton rows={15} />
+          ) : (
+            <>
+              <TrackList tracks={paged} />
+              {hasMore && <div ref={sentinelRef} className="xe_infinite-sentinel" aria-hidden="true" />}
+            </>
+          )}
         </div>
       )}
     </div>
