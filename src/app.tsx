@@ -6,6 +6,7 @@ import { PlayerProvider, usePlayer } from './context/player_context';
 import { useMediaSession } from './hooks/media_session';
 import { useTrackNotifications } from './hooks/track_notifications';
 import { useAccentColor } from './hooks/accent_color';
+import { useKeyboardShortcuts } from './hooks/keyboard_shortcuts';
 import { LibraryPage } from './pages/library';
 import { ArtistsPage } from './pages/artists';
 import { ArtistDetailPage } from './pages/artist_detail';
@@ -26,26 +27,8 @@ function MediaBridge() {
   return null;
 }
 
-function SpaceToPlayPause() {
-  const { togglePlay } = usePlayer();
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.code !== 'Space' || e.repeat) return;
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.tagName === 'BUTTON' ||
-        target.isContentEditable
-      ) {
-        return;
-      }
-      e.preventDefault();
-      togglePlay();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [togglePlay]);
+function KeyboardShortcuts({ toggleFullscreen }: { toggleFullscreen: () => void }) {
+  useKeyboardShortcuts({ toggleFullscreen });
   return null;
 }
 
@@ -69,6 +52,15 @@ function Shell() {
   useEffect(() => {
     if (!current) setFullscreenOpen(false);
   }, [current]);
+  useEffect(() => {
+    if (!fullscreenOpen || !current) return;
+    const previous = document.title;
+    const { title, artist } = current.track;
+    document.title = `${title} by ${artist} / Xebrine`;
+    return () => {
+      document.title = previous;
+    };
+  }, [fullscreenOpen, current]);
 
   return (
     <div className="xe_app" style={accentStyle}>
@@ -94,7 +86,11 @@ function Shell() {
         onToggleFullscreen={() => setFullscreenOpen((open) => !open)}
       />
       <MediaBridge />
-      <SpaceToPlayPause />
+      <KeyboardShortcuts
+        toggleFullscreen={() => {
+          if (current) setFullscreenOpen((open) => !open);
+        }}
+      />
       <ToastContainer />
     </div>
   );
