@@ -117,6 +117,40 @@ function beatPeriod(a: TrackAnalysis): number {
   return a.bpm > 0 ? 60 / a.bpm : 0.5;
 }
 
+interface BeatGrid {
+  period: number;
+  phase: number;
+}
+
+function beatGrid(a: TrackAnalysis): BeatGrid | null {
+  const beats = a.beats;
+  if (beats.length < 4) return null;
+  const diffs: number[] = [];
+  for (let i = 1; i < beats.length; i++) diffs.push(beats[i] - beats[i - 1]);
+  diffs.sort((x, y) => x - y);
+  const rough = diffs[Math.floor(diffs.length / 2)];
+  if (!(rough > 0.2 && rough < 2)) return null;
+
+  let sx = 0;
+  let sy = 0;
+  let sxx = 0;
+  let sxy = 0;
+  const n = beats.length;
+  for (const b of beats) {
+    const k = Math.round((b - beats[0]) / rough);
+    sx += k;
+    sy += b;
+    sxx += k * k;
+    sxy += k * b;
+  }
+  const den = n * sxx - sx * sx;
+  if (den === 0) return null;
+  const period = (n * sxy - sx * sy) / den;
+  const phase = (sy - period * sx) / n;
+  if (!(period > 0.2 && period < 2)) return null;
+  return { period, phase };
+}
+
 export function planCrossfade(
   outgoing: TrackAnalysis | null,
   incoming: TrackAnalysis | null,
@@ -128,24 +162,24 @@ export function planCrossfade(
     return { incomingOffset: 0, fadeSeconds: requestedFade, playbackRate: 1 };
   }
 
-  const PA = beatPeriod(outgoing);
-  const PB = beatPeriod(incoming);
-  const rate = PB / PA; 
+  const outGrid = beatGrid(outgoing);
+  const inGrid = beatGrid(incoming);
+  const PA = outGrid?.period ?? beatPeriod(outgoing);
+  const PB = inGrid?.period ?? beatPeriod(incoming);
+  const rate = PB / PA;
 
   const beatsInFade = Math.max(1, Math.floor(requestedFade / PA));
   const fadeSeconds = Math.min(requestedFade, beatsInFade * PA);
 
-  if (!outgoing.beats.length || !incoming.beats.length) {
+  if (!outGrid || (!inGrid && !incoming.beats.length)) {
     return { incomingOffset: 0, fadeSeconds, playbackRate: rate };
   }
 
-  const aRef = outgoing.beats[outgoing.beats.length - 1];
-  const kNear = Math.round((outgoingTime - aRef) / PA);
-  const aNear = aRef + kNear * PA;
-  const aNext = aNear >= outgoingTime ? aNear : aNear + PA;
+  const kNext = Math.ceil((outgoingTime - outGrid.phase) / PA - 1e-6);
+  const aNext = outGrid.phase + kNext * PA;
   const dA = aNext - outgoingTime;
-  
-  const b0 = incoming.beats[0];
+
+  const b0 = inGrid ? inGrid.phase : incoming.beats[0];
   const target = rate * dA;
   const m = Math.max(0, Math.ceil((target - b0) / PB));
   const bEntry = b0 + m * PB;
