@@ -1,18 +1,58 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../context/player_context';
 import { formatTime } from '../utils/format';
 import { toSlugParam } from '../utils/slug';
+import { displayArtist } from '../utils/groups';
+import { toast } from '../utils/toast';
 import type { TrackMeta } from '../types';
+import { ContextMenu, type ContextMenuItem } from './context_menu';
 import { PauseIcon, PlayIcon, PlayNextIcon, PlusIcon } from './icons';
 
 interface TrackListProps {
   tracks: TrackMeta[];
 }
 
+interface MenuState {
+  x: number;
+  y: number;
+  track: TrackMeta;
+  index: number;
+}
+
 export function TrackList({ tracks }: TrackListProps) {
   const { current, isPlaying, playNow, enqueueNext, enqueueEnd } = usePlayer();
   const navigate = useNavigate();
   const currentTrackId = current?.track.id;
+  const [menu, setMenu] = useState<MenuState | null>(null);
+
+  const goToArtist = (track: TrackMeta) => navigate(`/artists/${toSlugParam(displayArtist(track))}`);
+  const goToAlbum = (track: TrackMeta) => {
+    const albumArtist = displayArtist(track);
+    navigate(`/artists/${toSlugParam(albumArtist)}/${toSlugParam(track.album)}`, {
+      state: { from: `/artists/${toSlugParam(albumArtist)}` }
+    });
+  };
+
+  const copy = (text: string, label: string) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => toast.success(`Copied the ${label}`))
+      .catch(() => toast.error(`Couldn't copy the ${label}`));
+  };
+
+  const menuItems = (m: MenuState): ContextMenuItem[] => [
+    { label: 'Play now', onSelect: () => playNow(tracks, m.index) },
+    { label: 'Play next', onSelect: () => enqueueNext([m.track]) },
+    { label: 'Add to queue', onSelect: () => enqueueEnd([m.track]) },
+    { label: 'Copy title', separatorBefore: true, onSelect: () => copy(m.track.title, 'title') },
+    {
+      label: 'Copy info',
+      onSelect: () => copy(`${m.track.title} by ${m.track.artist}`, 'info')
+    },
+    { label: 'Go to album', separatorBefore: true, onSelect: () => goToAlbum(m.track) },
+    { label: 'Go to artist', onSelect: () => goToArtist(m.track) }
+  ];
 
   return (
     <div className="xe_track-table">
@@ -31,6 +71,10 @@ export function TrackList({ tracks }: TrackListProps) {
             key={track.id}
             className={`xe_track-table__row${active ? ' xe_track-table__row--active' : ''}`}
             onDoubleClick={() => playNow(tracks, i)}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setMenu({ x: e.clientX, y: e.clientY, track, index: i });
+            }}
           >
             <span className="xe_track-table__cell xe_track-table__cell--num">
               {active ? (isPlaying ? <PlayIcon size={13} /> : <PauseIcon size={13} />) : i + 1}
@@ -41,7 +85,7 @@ export function TrackList({ tracks }: TrackListProps) {
               className="xe_track-table__cell xe_track-table__cell--link"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/artists/${toSlugParam(track.artist)}`);
+                goToArtist(track);
               }}
             >
               {track.artist}
@@ -51,9 +95,7 @@ export function TrackList({ tracks }: TrackListProps) {
               className="xe_track-table__cell xe_track-table__cell--link"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/artists/${toSlugParam(track.artist)}/${toSlugParam(track.album)}`, {
-                  state: { from: `/artists/${toSlugParam(track.artist)}` }
-                });
+                goToAlbum(track);
               }}
             >
               {track.album}
@@ -90,6 +132,9 @@ export function TrackList({ tracks }: TrackListProps) {
           </div>
         );
       })}
+      {menu && (
+        <ContextMenu x={menu.x} y={menu.y} items={menuItems(menu)} onClose={() => setMenu(null)} />
+      )}
     </div>
   );
 }
