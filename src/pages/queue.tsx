@@ -1,11 +1,13 @@
 import { usePlayer } from '../context/player_context';
 import { QueueList } from '../components/queue_list';
 import { formatTime } from '../utils/format';
+import { usePageTitle } from '../hooks/page_title';
 import { ShuffleIcon, TrashIcon } from '../components/icons';
 
 export function QueuePage() {
   const { queue, current, shuffled, toggleShuffle, clearQueue, clearOthers } = usePlayer();
   const totalSeconds = queue.reduce((sum, item) => sum + item.track.duration, 0);
+  usePageTitle('Queue');
 
   return (
     <div className="xe_page">
