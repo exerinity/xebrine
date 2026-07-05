@@ -147,6 +147,19 @@ export const BackIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const ChevronRightIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path
+      d="M9 5l7 7-7 7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
 export const NoteIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M9 3v10.55A4 4 0 1 0 11 17V7h8V3H9Z" />
@@ -314,25 +327,26 @@ export const QueueIcon = (p: IconProps) => (
 
 export const LyricsIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M4 5h13a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H10l-4 3v-3H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />
-    <path d="M7 9h9M7 12h6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <g transform="rotate(45 12 12)">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M10.5 0.5 H13.5 A3.5 3.5 0 0 1 17 4 V8 A3.5 3.5 0 0 1 13.5 11.5 H10.5 A3.5 3.5 0 0 1 7 8 V4 A3.5 3.5 0 0 1 10.5 0.5 Z M8.5 2.2 H15.5 V3.4 H8.5 Z M8.5 4.6 H15.5 V5.8 H8.5 Z M8.5 7 H15.5 V8.2 H8.5 Z"
+      />
+      <rect x="10.6" y="11" width="2.8" height="10.5" rx="1.4" />
+    </g>
   </Svg>
 );
 
 export const SettingsIcon = (p: IconProps) => (
   <Svg {...p}>
-    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
     <path
-      d="M12 4.5v2M12 17.5v2M4.5 12h2M17.5 12h2M6.8 6.8l1.4 1.4M15.8 15.8l1.4 1.4M6.8 17.2l1.4-1.4M15.8 8.2l1.4-1.4"
+      d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"
+      fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
       strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </Svg>
 );
