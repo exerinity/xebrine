@@ -1,11 +1,13 @@
 import { usePlayer } from '../context/player_context';
 import { LyricsPanel } from '../components/lyrics';
 import { ScrollingText } from '../components/scrolling_text';
+import { usePageTitle } from '../hooks/page_title';
 import { NoteIcon } from '../components/icons';
 
 export function LyricsPage() {
   const { current, artworkUrl } = usePlayer();
   const track = current?.track ?? null;
+  usePageTitle('Lyrics');
 
   return (
     <div className="xe_page">
