@@ -33,6 +33,7 @@ export type AutoMixPhase = 'idle' | 'analyzing-current' | 'analyzing-next' | 'mi
 export type AutoMixColor = 'green' | 'orange' | 'red' | null;
 
 const FADE_CURVES = equalPowerFadeCurves(64);
+const MEDIA_LATENCY = 0.0;
 
 interface PlayerContextValue {
   queue: QueueItem[];
@@ -149,7 +150,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const mixStartCtxTimeRef = useRef(0);
   const mixStartOffsetRef = useRef(0);
   const mixRateRef = useRef(1);
-  const pendingHandoffTimeRef = useRef<number | null>(null);
+  const handoffPendingRef = useRef(false);
+  const preloadedBufferRef = useRef<{ key: string; buffer: AudioBuffer } | null>(null);
+  const preloadingKeyRef = useRef<string | null>(null);
 
   function ensureAudioGraph(): { gain: GainNode; analyser: AnalyserNode } {
     if (gainNodeRef.current && analyserRef.current) {
@@ -204,6 +207,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   function cancelCrossfade() {
     if (!crossfadeActiveRef.current) return;
     crossfadeActiveRef.current = false;
+    handoffPendingRef.current = false;
     setAutoMixPhase('idle');
     const ctx = audioCtxRef.current;
     if (ctx && fadeGainARef.current) {
@@ -225,6 +229,70 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  function finishHandoff() {
+    const ctx = audioCtxRef.current;
+    const src = mixSourceRef.current;
+    const fadeGainA = fadeGainARef.current;
+    const mixFadeGain = mixFadeGainRef.current;
+    if (!ctx || !src) {
+      crossfadeActiveRef.current = false;
+      handoffPendingRef.current = false;
+      setAutoMixPhase('idle');
+      return;
+    }
+    const now = ctx.currentTime;
+    const SWAP = 0.12;
+    if (fadeGainA) {
+      fadeGainA.gain.cancelScheduledValues(now);
+      fadeGainA.gain.setValueAtTime(fadeGainA.gain.value, now);
+      fadeGainA.gain.linearRampToValueAtTime(1, now + SWAP);
+    }
+    if (mixFadeGain) {
+      mixFadeGain.gain.cancelScheduledValues(now);
+      mixFadeGain.gain.setValueAtTime(mixFadeGain.gain.value, now);
+      mixFadeGain.gain.linearRampToValueAtTime(0, now + SWAP);
+    }
+    try {
+      src.stop(now + SWAP + 0.03);
+    } catch {
+      null;
+    }
+    window.setTimeout(
+      () => {
+        if (mixSourceRef.current === src) {
+          try {
+            src.disconnect();
+          } catch {
+            null;
+          }
+          mixSourceRef.current = null;
+          if (mixFadeGain) mixFadeGain.gain.value = 0;
+          crossfadeActiveRef.current = false;
+          handoffPendingRef.current = false;
+          setAutoMixPhase('idle');
+        }
+      },
+      (SWAP + 0.06) * 1000
+    );
+  }
+
+  async function preloadMixBuffer(nextItem: QueueItem) {
+    if (preloadingKeyRef.current === nextItem.key) return;
+    if (preloadedBufferRef.current?.key === nextItem.key) return;
+    preloadingKeyRef.current = nextItem.key;
+    try {
+      ensureAudioGraph();
+      const ctx = audioCtxRef.current!;
+      const file = await getFileRef.current(nextItem.track);
+      const buffer = await ctx.decodeAudioData(await file.arrayBuffer());
+      preloadedBufferRef.current = { key: nextItem.key, buffer };
+    } catch {
+      null;
+    } finally {
+      preloadingKeyRef.current = null;
+    }
+  }
+
   async function startCrossfade(
     nextItem: QueueItem,
     requestedFade: number,
@@ -237,14 +305,21 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       const ctx = audioCtxRef.current!;
       await ctx.resume().catch(() => {});
 
-      const file = await getFileRef.current(nextItem.track);
-      if (!crossfadeActiveRef.current) return;
-      const audioBuffer = await ctx.decodeAudioData(await file.arrayBuffer());
-      if (!crossfadeActiveRef.current) return;
+      let audioBuffer: AudioBuffer;
+      const preloaded = preloadedBufferRef.current;
+      if (preloaded && preloaded.key === nextItem.key) {
+        audioBuffer = preloaded.buffer;
+        preloadedBufferRef.current = null;
+      } else {
+        const file = await getFileRef.current(nextItem.track);
+        if (!crossfadeActiveRef.current) return;
+        audioBuffer = await ctx.decodeAudioData(await file.arrayBuffer());
+        if (!crossfadeActiveRef.current) return;
+      }
 
       const lead = 0.06;
       const startWhen = ctx.currentTime + lead;
-      const outgoingPosAtStart = audio.currentTime + lead;
+      const outgoingPosAtStart = audio.currentTime + lead - MEDIA_LATENCY;
       const plan = planCrossfade(
         mix.outgoing,
         mix.incoming,
@@ -308,15 +383,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         const dur = audio.duration;
         const fadeSeconds = autoMixDurationRef.current;
         const mix = pendingMixRef.current;
-        if (
-          nextItem &&
-          mix &&
-          mix.key === nextItem.key &&
-          Number.isFinite(dur) &&
-          dur > fadeSeconds &&
-          dur - t <= fadeSeconds
-        ) {
-          void startCrossfade(nextItem, fadeSeconds, mix);
+        if (nextItem && mix && mix.key === nextItem.key && Number.isFinite(dur) && dur > fadeSeconds) {
+          if (dur - t <= fadeSeconds + 6) void preloadMixBuffer(nextItem);
+          if (dur - t <= fadeSeconds) void startCrossfade(nextItem, fadeSeconds, mix);
         }
       }
     };
@@ -330,16 +399,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
     const onEnded = () => {
       const s = stateRef.current;
-      if (crossfadeActiveRef.current) {
-        const ctx = audioCtxRef.current;
-        if (ctx && mixSourceRef.current) {
-          const pos =
-            mixStartOffsetRef.current +
-            mixRateRef.current * (ctx.currentTime - mixStartCtxTimeRef.current);
-          pendingHandoffTimeRef.current = Math.max(0, pos);
-        }
-        cancelCrossfade();
+      if (crossfadeActiveRef.current && mixSourceRef.current && s.position + 1 < s.items.length) {
+        handoffPendingRef.current = true;
+        autoplayRef.current = true;
+        dispatch({ type: 'ADVANCE', delta: 1 });
+        return;
       }
+      if (crossfadeActiveRef.current) cancelCrossfade();
       if (s.position + 1 < s.items.length) {
         autoplayRef.current = true;
         dispatch({ type: 'ADVANCE', delta: 1 });
@@ -435,22 +501,44 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         if (srcUrlRef.current) URL.revokeObjectURL(srcUrlRef.current);
         srcUrlRef.current = url;
         pendingMixRef.current = null;
-        const handoffTime = pendingHandoffTimeRef.current;
-        pendingHandoffTimeRef.current = null;
+        const isHandoff = handoffPendingRef.current;
+        handoffPendingRef.current = false;
         audio.src = url;
-        if (handoffTime !== null) {
-          const applyHandoffSeek = () => {
-            audio.currentTime = handoffTime;
+
+        if (isHandoff && mixSourceRef.current && audioCtxRef.current) {
+          const ctx = audioCtxRef.current;
+          const bufferPos = () =>
+            Math.max(
+              0,
+              mixStartOffsetRef.current +
+                mixRateRef.current * (ctx.currentTime - mixStartCtxTimeRef.current)
+            );
+          const startMedia = () => {
+            if (cancelled) return;
+            audio.currentTime = bufferPos() + 0.1;
+            audioCtxRef.current?.resume().catch(() => {});
+            audio.play().then(
+              () => {
+                if (!cancelled) finishHandoff();
+              },
+              () => {
+                if (!cancelled) finishHandoff();
+              }
+            );
           };
-          if (audio.readyState >= 1) applyHandoffSeek();
-          else audio.addEventListener('loadedmetadata', applyHandoffSeek, { once: true });
-          setCurrentTime(handoffTime);
+          setCurrentTime(bufferPos());
+          if (audio.readyState >= 1) startMedia();
+          else audio.addEventListener('loadedmetadata', startMedia, { once: true });
         } else {
           setCurrentTime(0);
-        }
-        if (autoplayRef.current) {
-          audioCtxRef.current?.resume().catch(() => {});
-          audio.play().catch(() => {});
+          if (fadeGainARef.current && audioCtxRef.current) {
+            fadeGainARef.current.gain.cancelScheduledValues(audioCtxRef.current.currentTime);
+            fadeGainARef.current.gain.setValueAtTime(1, audioCtxRef.current.currentTime);
+          }
+          if (autoplayRef.current) {
+            audioCtxRef.current?.resume().catch(() => {});
+            audio.play().catch(() => {});
+          }
         }
         pushRecent(track.id);
         const art = await readCoverArt(file);
@@ -470,6 +558,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [currentKey]);
 
   useEffect(() => {
+    preloadedBufferRef.current = null;
     if (!autoMixEnabled || !current) {
       setAutoMixPhase('idle');
       setAutoMixColor(null);
