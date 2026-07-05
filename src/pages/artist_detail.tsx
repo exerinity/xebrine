@@ -2,13 +2,43 @@ import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
 import { usePlayer } from '../context/player_context';
-import { groupArtists, groupAlbums } from '../utils/groups';
+import { groupArtists, groupAlbums, type AlbumGroup } from '../utils/groups';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { TrackList } from '../components/track_list';
-import { BackIcon, PlayIcon, ShuffleIcon } from '../components/icons';
+import { BackIcon, NoteIcon, PlayIcon, ShuffleIcon } from '../components/icons';
 import { slugify, toSlugParam } from '../utils/slug';
+import { useAlbumArt } from '../hooks/album_art';
 import { useScrollRestoration } from '../hooks/scroll_restoration';
+import { usePageTitle } from '../hooks/page_title';
+
+function AlbumSection({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
+  const art = useAlbumArt(album.key, album.tracks[0]);
+  return (
+    <section className="xe_album-section">
+      <div className="xe_album-section__head">
+        <button
+          type="button"
+          className="xe_album-section__cover"
+          onClick={onOpen}
+          title={`Open ${album.album}`}
+        >
+          {art ? <img src={art} alt="" loading="lazy" /> : <NoteIcon size={30} />}
+        </button>
+        <div className="xe_album-section__heading">
+          <button type="button" className="xe_album-section__link" onClick={onOpen}>
+            {album.album}
+          </button>
+          <span className="xe_album-section__meta">
+            {album.year ? `${album.year} / ` : ''}
+            {album.tracks.length} song{album.tracks.length === 1 ? '' : 's'}
+          </span>
+        </div>
+      </div>
+      <TrackList tracks={album.tracks} />
+    </section>
+  );
+}
 
 export function ArtistDetailPage() {
   const { artistName = '' } = useParams();
@@ -22,6 +52,7 @@ export function ArtistDetailPage() {
     () => artists.find((a) => slugify(a.name) === artistName.toLowerCase()),
     [artists, artistName]
   );
+  usePageTitle(artist ? [artist.name, 'Artists'] : 'Artists');
 
   if (!artist) {
     return (
@@ -67,23 +98,15 @@ export function ArtistDetailPage() {
       </div>
       <div className="xe_page__scroll" ref={scrollRef}>
         {albums.map((album) => (
-          <section key={album.key} className="xe_album-section">
-            <h2 className="xe_album-section__title">
-              <button
-                type="button"
-                className="xe_album-section__link"
-                onClick={() =>
-                  navigate(`/artists/${toSlugParam(artist.name)}/${toSlugParam(album.album)}`, {
-                    state: { from: `/artists/${toSlugParam(artist.name)}` }
-                  })
-                }
-              >
-                {album.album}
-              </button>
-              {album.year ? <span className="xe_album-section__year"> / {album.year}</span> : null}
-            </h2>
-            <TrackList tracks={album.tracks} />
-          </section>
+          <AlbumSection
+            key={album.key}
+            album={album}
+            onOpen={() =>
+              navigate(`/artists/${toSlugParam(artist.name)}/${toSlugParam(album.album)}`, {
+                state: { from: `/artists/${toSlugParam(artist.name)}` }
+              })
+            }
+          />
         ))}
       </div>
     </div>
