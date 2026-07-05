@@ -4,6 +4,8 @@ import { useLibrary } from '../context/library_context';
 import { groupArtists } from '../utils/groups';
 import { toSlugParam } from '../utils/slug';
 import { SortSelect, type SortOption } from '../components/sort_select';
+import { useInfiniteScroll } from '../hooks/infinite_scroll';
+import { usePageTitle } from '../hooks/page_title';
 
 type ArtistSort = 'name' | 'name-desc' | 'albums' | 'tracks';
 
@@ -26,6 +28,7 @@ export function ArtistsPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<ArtistSort>(loadSort);
+  usePageTitle('Artists');
 
   const changeSort = (value: ArtistSort) => {
     setSort(value);
@@ -59,6 +62,8 @@ export function ArtistsPage() {
     return copy;
   }, [artists, query, sort]);
 
+  const { visible: paged, hasMore, sentinelRef } = useInfiniteScroll(visible);
+
   return (
     <div className="xe_page">
       <div className="xe_page__toolbar">
@@ -79,7 +84,7 @@ export function ArtistsPage() {
         </p>
       ) : (
         <div className="xe_page__scroll">
-          {visible.map((a) => (
+          {paged.map((a) => (
             <button
               key={a.name}
               type="button"
@@ -93,6 +98,7 @@ export function ArtistsPage() {
               </span>
             </button>
           ))}
+          {hasMore && <div ref={sentinelRef} className="xe_infinite-sentinel" aria-hidden="true" />}
         </div>
       )}
     </div>
