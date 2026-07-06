@@ -15,7 +15,7 @@ if (!fontFile) {
 }
 console.log(`rendering ${GLYPH} with ${fontFile}`);
 
-mkdirSync(join(root, 'public'), { recursive: true });
+mkdirSync(join(root, 'public', 'app', 'media'), { recursive: true });
 for (const size of [192, 512]) {
   const glyphBox = Math.round(size * 0.64);
   execFileSync('magick', [
@@ -32,7 +32,7 @@ for (const size of [192, 512]) {
     ')',
     '-gravity', 'center',
     '-composite',
-    join(root, 'public', `icon-${size}.png`)
+    join(root, 'public', 'app', 'media', `icon-${size}.png`)
   ]);
-  console.log(`wrote public/icon-${size}.png`);
+  console.log(`wrote public/app/media/icon-${size}.png`);
 }

@@ -180,7 +180,12 @@ export function AboutPage() {
                   </a>
                   : audio tag and artwork parsing
                 </li>
-                <li>Twitter: Chirp font</li>
+                <li>
+                  <a href="https://fonts.google.com/specimen/Google+Sans+Flex" target="_blank" rel="noopener noreferrer">
+                    Google
+                  </a>
+                  : Google Sans Flex font
+                </li>
                 <li>
                   <a href="https://voxity.dev" target="_blank" rel="noopener noreferrer">
                     Voxity

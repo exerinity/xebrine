@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon-192.png', 'icon-512.png'],
+      includeAssets: ['app/media/icon-192.png', 'app/media/icon-512.png'],
       manifest: {
         name: 'Xebrine',
         id: 'com.exerinity.xebrine',
@@ -18,9 +18,9 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/',
         icons: [
-          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          { src: 'app/media/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'app/media/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'app/media/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: {
@@ -43,7 +43,13 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        chunkFileNames: 'xe_[name]-[hash].js',
+        entryFileNames: 'app/scripts/[name]-[hash].js',
+        chunkFileNames: 'app/scripts/xe_[name]-[hash].js',
+        assetFileNames(assetInfo) {
+          const name = assetInfo.names?.[0] ?? '';
+          if (name.endsWith('.css')) return 'app/stylesheets/[name]-[hash][extname]';
+          return 'assets/[name]-[hash][extname]';
+        },
         manualChunks(id) {
           if (id.includes('node_modules')) return 'node_modules';
           if (id.match(/pages\/library/)) return 'library';
@@ -54,6 +60,14 @@ export default defineConfig({
           if (id.match(/pages\/settings/)) return 'settings';
           if (id.match(/context\//)) return 'context';
         }
+      }
+    }
+  },
+  worker: {
+    rollupOptions: {
+      output: {
+        entryFileNames: 'app/scripts/[name]-[hash].js',
+        chunkFileNames: 'app/scripts/[name]-[hash].js'
       }
     }
   }

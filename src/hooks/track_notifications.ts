@@ -22,7 +22,7 @@ export function useTrackNotifications(): void {
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
       const notification = new Notification(track.title, {
         body: `${track.artist} from ${track.album}`,
-        icon: artworkRef.current ?? '/icon-192.png',
+        icon: artworkRef.current ?? '/app/media/icon-192.png',
         tag: 'xebrine-now-playing',
         silent: true
       });
