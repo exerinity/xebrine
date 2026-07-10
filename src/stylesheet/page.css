@@ -212,6 +212,20 @@
   background: var(--accent-soft);
   color: var(--accent-text);
   flex-shrink: 0;
+  cursor: pointer;
+}
+
+.xe_about__logo--spin {
+  animation: xe_about_logo_spin 0.6s ease-in-out;
+}
+
+@keyframes xe_about_logo_spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .xe_about__name {
@@ -294,6 +308,20 @@
   padding-left: 18px;
   color: var(--text-dim);
   line-height: 1.7;
+}
+
+.xe_about__release .xe_about__heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent-text);
+}
+
+.xe_about__release .xe_about__version {
+  margin: 0;
+  font-size: 13px;
 }
 
 .xe_about__packages {
