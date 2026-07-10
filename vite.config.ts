@@ -24,7 +24,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,woff2}'],
+        globPatterns: ['**/*.{js,css,html,png,woff2,json}'],
         navigateFallback: '/index.html',
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         runtimeCaching: [
@@ -51,6 +51,7 @@ export default defineConfig({
           return 'assets/[name]-[hash][extname]';
         },
         manualChunks(id) {
+          if (id.includes('node_modules/mespeak')) return 'mespeak';
           if (id.includes('node_modules')) return 'node_modules';
           if (id.match(/pages\/library/)) return 'library';
           if (id.match(/pages\/(artists|artist_detail)/)) return 'artists';
