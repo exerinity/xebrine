@@ -48,6 +48,7 @@ interface PlayerContextValue {
   artworkUrl: string | null;
   loadError: string | null;
   audioRef: RefObject<HTMLAudioElement | null>;
+  justPlayed: QueueItem | null;
   playNow(tracks: TrackMeta[], startIndex?: number): void;
   enqueueNext(tracks: TrackMeta[]): void;
   enqueueEnd(tracks: TrackMeta[]): void;
@@ -59,6 +60,7 @@ interface PlayerContextValue {
   togglePlay(): void;
   seek(time: number): void;
   setVolume(volume: number): void;
+  duckVolume(ducking: boolean): void;
   toggleShuffle(): void;
   cycleRepeat(): void;
   clearQueue(): void;
@@ -77,6 +79,7 @@ const REPEAT_KEY = 'xebrine.repeat';
 const AUTOMIX_KEY = 'xebrine.automix';
 
 export const MAX_VOLUME = 1.5;
+const DUCK_FACTOR = 0.25;
 
 function loadVolume(): number {
   const raw = localStorage.getItem(VOLUME_KEY);
@@ -117,6 +120,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(loadVolume);
+  const [ducking, setDucking] = useState(false);
+  const duckingRef = useRef(ducking);
+  duckingRef.current = ducking;
   const [repeatMode, setRepeatMode] = useState<RepeatMode>(loadRepeat);
   const repeatRef = useRef(repeatMode);
   repeatRef.current = repeatMode;
@@ -373,6 +379,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const currentKey = current?.key ?? null;
   const nextKey = state.items[state.position + 1]?.key ?? null;
 
+  const [justPlayed, setJustPlayed] = useState<QueueItem | null>(null);
+  const lastCurrentRef = useRef<QueueItem | null>(null);
+  useEffect(() => {
+    setJustPlayed(lastCurrentRef.current);
+    lastCurrentRef.current = current;
+  }, [currentKey]);
+
   useEffect(() => {
     const onTime = () => {
       const t = audio.currentTime;
@@ -446,13 +459,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [isPlaying]);
 
   useEffect(() => {
-    applyVolume(volume);
+    applyVolume(volume * (ducking ? DUCK_FACTOR : 1));
     try {
       localStorage.setItem(VOLUME_KEY, String(volume));
     } catch {
       null;
     }
-  }, [audio, volume]);
+  }, [audio, volume, ducking]);
 
   useEffect(() => {
     audio.loop = repeatMode === 'one';
@@ -718,9 +731,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const setVolume = useCallback((v: number) => {
     const clamped = clamp(v, 0, MAX_VOLUME);
-    applyVolume(clamped);
+    applyVolume(clamped * (duckingRef.current ? DUCK_FACTOR : 1));
     audioCtxRef.current?.resume().catch(() => {});
     setVolumeState(clamped);
+  }, []);
+
+  const duckVolume = useCallback((duck: boolean) => {
+    setDucking(duck);
   }, []);
 
   const cycleRepeat = useCallback(() => {
@@ -765,6 +782,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       artworkUrl,
       loadError,
       audioRef,
+      justPlayed,
       playNow,
       enqueueNext,
       enqueueEnd,
@@ -776,6 +794,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       togglePlay,
       seek,
       setVolume,
+      duckVolume,
       toggleShuffle,
       cycleRepeat,
       clearQueue,
@@ -796,6 +815,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       repeatMode,
       artworkUrl,
       loadError,
+      justPlayed,
       playNow,
       enqueueNext,
       enqueueEnd,
@@ -807,6 +827,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       togglePlay,
       seek,
       setVolume,
+      duckVolume,
       toggleShuffle,
       cycleRepeat,
       clearQueue,
