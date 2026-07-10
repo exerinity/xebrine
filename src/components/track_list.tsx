@@ -8,6 +8,7 @@ import { toast } from '../utils/toast';
 import type { TrackMeta } from '../types';
 import { ContextMenu, type ContextMenuItem } from './context_menu';
 import { PauseIcon, PlayIcon, PlayNextIcon, PlusIcon } from './icons';
+import { ExplicitBadge } from './explicit_badge';
 
 interface TrackListProps {
   tracks: TrackMeta[];
@@ -79,7 +80,10 @@ export function TrackList({ tracks }: TrackListProps) {
             <span className="xe_track-table__cell xe_track-table__cell--num">
               {active ? (isPlaying ? <PlayIcon size={13} /> : <PauseIcon size={13} />) : i + 1}
             </span>
-            <span className="xe_track-table__cell xe_track-table__cell--title">{track.title}</span>
+            <span className="xe_track-table__cell xe_track-table__cell--title">
+              {track.title}
+              <ExplicitBadge trackId={track.id} />
+            </span>
             <button
               type="button"
               className="xe_track-table__cell xe_track-table__cell--link"
