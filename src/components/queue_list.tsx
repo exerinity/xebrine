@@ -2,6 +2,7 @@ import { usePlayer } from '../context/player_context';
 import { useDragReorder } from '../hooks/drag_reorder';
 import { formatTime } from '../utils/format';
 import { CloseIcon, DragIcon, PauseIcon, PlayIcon } from './icons';
+import { ExplicitBadge } from './explicit_badge';
 
 export function QueueList() {
   const { queue, position, isPlaying, jumpTo, removeAt, move } = usePlayer();
@@ -32,7 +33,10 @@ export function QueueList() {
               {isCurrent ? (isPlaying ? <PlayIcon size={13} /> : <PauseIcon size={13} />) : i + 1}
             </span>
             <span className="xe_queue-row__titles">
-              <span className="xe_queue-row__title">{item.track.title}</span>
+              <span className="xe_queue-row__title">
+                {item.track.title}
+                <ExplicitBadge trackId={item.track.id} />
+              </span>
               <span className="xe_queue-row__artist">{item.track.artist}</span>
             </span>
             <span className="xe_queue-row__dur">{formatTime(item.track.duration)}</span>
