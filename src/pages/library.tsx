@@ -119,6 +119,7 @@ export function LibraryPage() {
           <FolderIcon size={14} />
           Add folder
         </button>
+        <span className="xe_page__meta">{visible.length} tracks</span>
       </div>
 
       {permissionNeeded && (
