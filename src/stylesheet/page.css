@@ -310,6 +310,19 @@
   line-height: 1.7;
 }
 
+.xe_about__subheading {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.xe_about__list--group {
+  margin-bottom: 18px;
+}
+
 .xe_about__release .xe_about__heading {
   display: flex;
   align-items: baseline;

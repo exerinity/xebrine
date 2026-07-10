@@ -141,16 +141,51 @@ export function AboutPage() {
                 </ul>
 
                 <h3 className="xe_about__heading">Features</h3>
-                <ul className="xe_about__list">
-                  <li>Folder-based library, organized by artist and album</li>
-                  <li>Queue with intelligent shuffle and repeat modes</li>
+
+                <h4 className="xe_about__subheading">Library</h4>
+                <ul className="xe_about__list xe_about__list--group">
+                  <li>Folder-based library read straight from disk via the File System Access API, organized by artist and album</li>
+                  <li>Fully local: tracks, cover art, and lyrics are cached in IndexedDB</li>
+                  <li><Link to="/settings/library">Scan filters</Link> to omit tracks missing tags or cover art, or in unwanted formats, with live scan progress and an ETA</li>
+                  <li>Search, sorting, and infinite scrolling on the library, artists, and albums pages</li>
+                </ul>
+
+                <h4 className="xe_about__subheading">Queue & playback</h4>
+                <ul className="xe_about__list xe_about__list--group">
+                  <li><Link to="/queue">Queue</Link> with intelligent shuffle (recently-played weighting and artist spreading), repeat modes, drag-to-reorder, play next / add to queue, and clear others</li>
+                  <li>Rudimentary beat-matched <Link to="/settings/playback">auto mix</Link>: BPM analysis in a worker, tempo matching, and equal-power crossfades</li>
+                  <li>Fullscreen player with lyrics, up next, and a just-played card</li>
+                  <li><Link to="/settings/preferences">Configurable player bar fields</Link>: click to copy or to open the artist / album, right-click for the opposite</li>
+                </ul>
+
+                <h4 className="xe_about__subheading">Sound</h4>
+                <ul className="xe_about__list xe_about__list--group">
+                  <li><Link to="/settings/playback">18-band equalizer</Link> with a stack of presets</li>
                   <li>Volume boost to 150%</li>
                   <li>Live spectrum visualizer</li>
-                  <li>18-band equalizer with a stack of presets</li>
-                  <li>Beat-matched auto mix</li>
-                  <li>Synced and interactive (click to jump) lyrics</li>
-                  <li>System notifications</li>
-                  <li>Artwork-driven accent theming that recolors the app for every track</li>
+                </ul>
+
+                <h4 className="xe_about__subheading">Lyrics</h4>
+                <ul className="xe_about__list xe_about__list--group">
+                  <li>Synced and interactive (click to jump) lyrics from LRCLIB (<Link to="/settings/preferences">strict or lax matching</Link>)</li>
+                  <li><Link to="/lyrics">LRC/SRT/VTT import and LRC export</Link></li>
+                  <li>Optional <Link to="/settings/toys">explicit tagging</Link> that scans lyrics for profanity and badges offending tracks</li>
+                </ul>
+
+                <h4 className="xe_about__subheading">Interface</h4>
+                <ul className="xe_about__list xe_about__list--group">
+                  <li>Artwork-derived accent theming that recolors the app for every track</li>
+                  <li>Context menus, toasts, scrolling marquee titles, and a resizable collapsing sidebar</li>
+                  <li>Keyboard shortcuts for nearly everything (<Link to="/i/hotkeys">see Hotkeys</Link>)</li>
+                  <li><Link to="/settings/a11y">Reduced motion</Link> mode</li>
+                </ul>
+
+                <h4 className="xe_about__subheading">System</h4>
+                <ul className="xe_about__list">
+                  <li>Media Session integration: hardware media keys, OS now-playing info, and seeking</li>
+                  <li><Link to="/settings/preferences">System notifications</Link> on track change</li>
+                  <li><Link to="/settings/a11y">Spoken track announcements</Link> with volume ducking</li>
+                  <li>Installable PWA that works offline</li>
                 </ul>
               </>
             )}
