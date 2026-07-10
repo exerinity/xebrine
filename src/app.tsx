@@ -3,8 +3,11 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { SettingsProvider } from './context/settings_context';
 import { LibraryProvider } from './context/library_context';
 import { PlayerProvider, usePlayer } from './context/player_context';
+import { useSettings } from './context/settings_context';
 import { useMediaSession } from './hooks/media_session';
 import { useTrackNotifications } from './hooks/track_notifications';
+import { useSpeechAnnouncements } from './hooks/speech_announcements';
+import { useQueueFinishedSound } from './hooks/queue_finished_sound';
 import { useAccentColor } from './hooks/accent_color';
 import { useKeyboardShortcuts } from './hooks/keyboard_shortcuts';
 import { LibraryPage } from './pages/library';
@@ -16,6 +19,7 @@ import { QueuePage } from './pages/queue';
 import { LyricsPage } from './pages/lyrics';
 import { SettingsPage } from './pages/settings';
 import { AboutPage } from './pages/about';
+import { ReleaseNotesPage } from './pages/release_notes';
 import { Sidebar } from './components/sidebar';
 import { PlayerBar } from './components/player_bar';
 import { FullscreenPlayer } from './components/fs_player';
@@ -24,6 +28,8 @@ import { ToastContainer } from './components/toast_container';
 function MediaBridge() {
   useMediaSession();
   useTrackNotifications();
+  useSpeechAnnouncements();
+  useQueueFinishedSound();
   return null;
 }
 
@@ -35,6 +41,7 @@ function KeyboardShortcuts({ toggleFullscreen }: { toggleFullscreen: () => void 
 function Shell() {
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
   const { current, artworkUrl } = usePlayer();
+  const { settings } = useSettings();
   const accent = useAccentColor(artworkUrl);
   const accentStyle = useMemo(
     () =>
@@ -48,6 +55,10 @@ function Shell() {
       }) as CSSProperties,
     [accent]
   );
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('xe_reduced-motion', settings.reducedMotion);
+  }, [settings.reducedMotion]);
 
   useEffect(() => {
     if (!current) setFullscreenOpen(false);
@@ -75,8 +86,11 @@ function Shell() {
           <Route path="/albums" element={<AlbumsPage />} />
           <Route path="/queue" element={<QueuePage />} />
           <Route path="/lyrics" element={<LyricsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/about" element={<AboutPage />} />
+          <Route path="/settings" element={<Navigate to="/settings/preferences" replace />} />
+          <Route path="/settings/:section" element={<SettingsPage />} />
+          <Route path="/i" element={<Navigate to="/i/info" replace />} />
+          <Route path="/i/:section" element={<AboutPage />} />
+          <Route path="/i/release_notes" element={<ReleaseNotesPage />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </main>
