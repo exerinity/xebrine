@@ -19,6 +19,16 @@
   box-sizing: border-box;
 }
 
+.xe_reduced-motion,
+.xe_reduced-motion * {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
 html,
 body,
 #root {
@@ -61,4 +71,20 @@ button:disabled {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #2a3145;
+}
+
+.xe_explicit-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  margin-left: 6px;
+  border-radius: 3px;
+  background: var(--text-dim);
+  color: var(--bg);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
 }
