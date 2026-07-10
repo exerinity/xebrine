@@ -3,6 +3,8 @@ import type { LrclibMode } from '../api/lrclib';
 import { DEFAULT_IGNORE_RULES, type IgnoreRules } from '../utils/ignore_rules';
 import { EQ_FLAT, normalizeBands } from '../audio/eq';
 
+export type PlayerBarClickAction = 'copy' | 'open';
+
 export interface Settings {
   lrclibMode: LrclibMode;
   notifications: boolean;
@@ -10,6 +12,10 @@ export interface Settings {
   autoMixDuration: number;
   eqEnabled: boolean;
   eqBands: number[];
+  playerBarClickAction: PlayerBarClickAction;
+  reducedMotion: boolean;
+  announceTrackChanges: boolean;
+  tagExplicitSongs: boolean;
 }
 
 interface SettingsContextValue {
@@ -25,7 +31,11 @@ const DEFAULTS: Settings = {
   ignoreRules: DEFAULT_IGNORE_RULES,
   autoMixDuration: 15,
   eqEnabled: false,
-  eqBands: [...EQ_FLAT]
+  eqBands: [...EQ_FLAT],
+  playerBarClickAction: 'copy',
+  reducedMotion: false,
+  announceTrackChanges: false,
+  tagExplicitSongs: false
 };
 
 function loadSettings(): Settings {
