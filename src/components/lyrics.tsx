@@ -4,6 +4,8 @@ import { useSettings } from '../context/settings_context';
 import { fetchLyrics } from '../api/lrclib';
 import { parseLyricsFile, toLrc } from '../utils/lyrics';
 import { dbDelete, dbGet, dbPut } from '../management/db';
+import { containsProfanity } from '../utils/profanity';
+import { isExplicitId, markExplicit } from '../utils/explicit_tracks';
 import type { Lyrics, StoredLyrics, TrackMeta } from '../types';
 import { LyricsSkeleton } from './skeletons';
 import { Spinner } from './spinner';
@@ -107,6 +109,12 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
       controller.abort();
     };
   }, [track?.id, runSearch]);
+
+  useEffect(() => {
+    if (!track || !lyrics || !settings.tagExplicitSongs || isExplicitId(track.id)) return;
+    const text = lyrics.lines.map((line) => line.text).join(' ');
+    if (containsProfanity(text)) markExplicit(track.id);
+  }, [track, lyrics, settings.tagExplicitSongs]);
 
   useEffect(() => {
     if (!lyrics?.synced) {
