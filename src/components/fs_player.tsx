@@ -1,16 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePlayer } from '../context/player_context';
 import { useAlbumArt } from '../hooks/album_art';
 import { formatTime } from '../utils/format';
 import type { QueueItem } from '../types';
 import { LyricsPanel } from './lyrics';
 import { ScrollingText } from './scrolling_text';
-import { CloseIcon, NoteIcon, PauseIcon, PlayIcon } from './icons';
+import { CloseIcon, LogoIcon, NoteIcon, PauseIcon, PlayIcon } from './icons';
 
 interface FullscreenPlayerProps {
   open: boolean;
   onClose(): void;
 }
+
+const EXIT_DURATION_MS = 200;
 
 function UpNextPreview({ item, onPlay }: { item: QueueItem; onPlay(): void }) {
   const artUrl = useAlbumArt(item.track.id, item.track);
@@ -29,6 +31,23 @@ function UpNextPreview({ item, onPlay }: { item: QueueItem; onPlay(): void }) {
   );
 }
 
+function JustPlayedCard({ item, onPlay }: { item: QueueItem; onPlay(): void }) {
+  const artUrl = useAlbumArt(item.track.id, item.track);
+
+  return (
+    <button type="button" className="xe_fullscreen-player__prev-card" onClick={onPlay} title="Back to this track">
+      <span className="xe_fullscreen-player__prev-art">
+        {artUrl ? <img src={artUrl} alt="" /> : <NoteIcon size={20} />}
+      </span>
+      <span className="xe_fullscreen-player__prev-copy">
+        <span className="xe_fullscreen-player__prev-label">Just played</span>
+        <span className="xe_fullscreen-player__prev-title">{item.track.title}</span>
+        <span className="xe_fullscreen-player__prev-artist">{item.track.artist}</span>
+      </span>
+    </button>
+  );
+}
+
 export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
   const {
     current,
@@ -38,10 +57,42 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
     artworkUrl,
     currentTime,
     duration,
-    jumpTo
+    justPlayed,
+    jumpTo,
+    playNow
   } = usePlayer();
   const track = current?.track ?? null;
-  const nextItem = queue[position + 1] ?? null;
+  const visible = open && Boolean(track);
+  const [rendered, setRendered] = useState(visible);
+  const [leaving, setLeaving] = useState(false);
+  const snapshotRef = useRef<{
+    track: NonNullable<typeof track>;
+    queue: typeof queue;
+    position: number;
+    isPlaying: boolean;
+    artworkUrl: typeof artworkUrl;
+    currentTime: number;
+    duration: number;
+    justPlayed: typeof justPlayed;
+  } | null>(null);
+  if (track) {
+    snapshotRef.current = { track, queue, position, isPlaying, artworkUrl, currentTime, duration, justPlayed };
+  }
+
+  useEffect(() => {
+    if (visible) {
+      setRendered(true);
+      setLeaving(false);
+      return;
+    }
+    if (!rendered) return;
+    setLeaving(true);
+    const timeout = window.setTimeout(() => {
+      setRendered(false);
+      setLeaving(false);
+    }, EXIT_DURATION_MS);
+    return () => window.clearTimeout(timeout);
+  }, [visible, rendered]);
 
   useEffect(() => {
     if (!open) return;
@@ -52,21 +103,43 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose, open]);
 
-  if (!open || !track) return null;
+  if (!rendered || !snapshotRef.current) return null;
 
-  const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+  const {
+    track: displayTrack,
+    queue: displayQueue,
+    position: displayPosition,
+    isPlaying: displayPlaying,
+    artworkUrl: displayArtworkUrl,
+    currentTime: displayCurrentTime,
+    duration: displayDuration,
+    justPlayed: displayJustPlayed
+  } = snapshotRef.current;
+  const nextItem = displayQueue[displayPosition + 1] ?? null;
+  const progress = displayDuration > 0 ? Math.min(100, (displayCurrentTime / displayDuration) * 100) : 0;
+
+  const backToJustPlayed = () => {
+    if (!displayJustPlayed) return;
+    const index = displayQueue.findIndex((item) => item.key === displayJustPlayed.key);
+    if (index >= 0) jumpTo(index);
+    else playNow([displayJustPlayed.track], 0);
+  };
 
   return (
-    <section className="xe_fullscreen-player" role="dialog" aria-label="Now playing">
-      {artworkUrl && (
+    <section
+      className={`xe_fullscreen-player${leaving ? ' xe_fullscreen-player--leaving' : ''}`}
+      role="dialog"
+      aria-label="Now playing"
+    >
+      {displayArtworkUrl && (
         <div
           className="xe_fullscreen-player__wash"
-          style={{ backgroundImage: `url(${artworkUrl})` }}
+          style={{ backgroundImage: `url(${displayArtworkUrl})` }}
           aria-hidden="true"
         />
       )}
       <div className="xe_fullscreen-player__top">
-        <span className="xe_fullscreen-player__eyebrow">{isPlaying ? 'Now playing' : 'Now paused'}</span>
+        {displayJustPlayed && <JustPlayedCard item={displayJustPlayed} onPlay={backToJustPlayed} />}
         <button type="button" className="xe_icon-btn" onClick={onClose} title="Close the player">
           <CloseIcon size={20} />
         </button>
@@ -74,6 +147,10 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
 
       <div className="xe_fullscreen-player__layout">
         <section className="xe_fullscreen-player__hero" aria-label="Current track">
+          <span className="xe_fullscreen-player__eyebrow">
+            <LogoIcon size={14} />
+            {displayPlaying ? 'Now playing' : 'Now paused'}
+          </span>
           <div className="xe_fullscreen-player__cover-wrap">
             <div className="xe_fullscreen-player__cover-glow" aria-hidden="true" />
             <button
@@ -83,16 +160,16 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
               title="Close fullscreen player"
               aria-label="Close fullscreen player"
             >
-              {artworkUrl ? <img src={artworkUrl} alt="" /> : <NoteIcon size={88} />}
+              {displayArtworkUrl ? <img src={displayArtworkUrl} alt="" /> : <NoteIcon size={88} />}
             </button>
           </div>
           <div className="xe_fullscreen-player__identity">
             <div className="xe_fullscreen-player__state">
-              {isPlaying ? <PlayIcon size={14} /> : <PauseIcon size={14} />}
-              <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
+              {displayPlaying ? <PlayIcon size={14} /> : <PauseIcon size={14} />}
+              <span>{formatTime(displayCurrentTime)} / {formatTime(displayDuration)}</span>
             </div>
-            <ScrollingText text={track.title} className="xe_fullscreen-player__title" />
-            <ScrollingText text={track.artist} className="xe_fullscreen-player__artist" />
+            <ScrollingText text={displayTrack.title} className="xe_fullscreen-player__title" />
+            <ScrollingText text={displayTrack.artist} className="xe_fullscreen-player__artist" />
             <div className="xe_fullscreen-player__progress" aria-hidden="true">
               <span style={{ width: `${progress}%` }} />
             </div>
@@ -107,7 +184,7 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
         <section className="xe_fullscreen-player__panel xe_fullscreen-player__queue" aria-label="Up next">
           <h2>Up next</h2>
           {nextItem ? (
-            <UpNextPreview item={nextItem} onPlay={() => jumpTo(position + 1)} />
+            <UpNextPreview item={nextItem} onPlay={() => jumpTo(displayPosition + 1)} />
           ) : (
             <p className="xe_empty-note">Nothing up next</p>
           )}
