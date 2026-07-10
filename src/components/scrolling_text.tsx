@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type MouseEvent, type ReactNode } from 'react';
 
 const SPEED_PX_PER_S = 40;
 const PAUSE_MS = 1800;
@@ -7,10 +7,12 @@ interface ScrollingTextProps {
   text: string;
   className?: string;
   title?: string;
+  suffix?: ReactNode;
   onClick?: () => void;
+  onContextMenu?: (e: MouseEvent) => void;
 }
 
-export function ScrollingText({ text, className, title, onClick }: ScrollingTextProps) {
+export function ScrollingText({ text, className, title, suffix, onClick, onContextMenu }: ScrollingTextProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const textRef = useRef<HTMLSpanElement | null>(null);
   const animationRef = useRef<Animation | null>(null);
@@ -60,6 +62,7 @@ export function ScrollingText({ text, className, title, onClick }: ScrollingText
       onMouseEnter={() => animationRef.current?.pause()}
       onMouseLeave={() => animationRef.current?.play()}
       onClick={onClick}
+      onContextMenu={onContextMenu}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={
@@ -73,7 +76,10 @@ export function ScrollingText({ text, className, title, onClick }: ScrollingText
           : undefined
       }
     >
-      <span ref={textRef}>{text}</span>
+      <span ref={textRef}>
+        {text}
+        {suffix}
+      </span>
     </div>
   );
 }
