@@ -1,6 +1,8 @@
+import { useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { useSettings } from '../context/settings_context';
 import { useLibrary } from '../context/library_context';
+import { usePlayer } from '../context/player_context';
 import { IGNORABLE_FORMATS, type IgnoredFormat, type IgnoreRules } from '../utils/ignore_rules';
 import { Spinner } from '../components/spinner';
 import { Slider } from '../components/slider';
@@ -8,14 +10,23 @@ import { Equalizer } from '../components/equalizer';
 import { ChevronRightIcon, CloseIcon, FolderIcon, KeyIcon, RefreshIcon, TrashIcon } from '../components/icons';
 import { useScanEta, formatEta } from '../hooks/scan_eta';
 import { usePageTitle } from '../hooks/page_title';
+import { toast, type ToastVariant } from '../utils/toast';
+import { speakText } from '../utils/speech';
+import { ExplicitIcon } from '../components/explicit_badge';
+import { Modal } from '../components/modal';
+import { PROFANITY_WORDS } from '../utils/profanity';
 
-type SectionId = 'management' | 'library' | 'audio';
+type SectionId = 'preferences' | 'library' | 'playback' | 'a11y' | 'toys';
 
 const SECTIONS: { id: SectionId; label: string }[] = [
-  { id: 'management', label: 'Management' },
-  { id: 'library', label: 'Library' },
-  { id: 'audio', label: 'Audio' }
+  { id: 'preferences', label: 'Main preferences' },
+  { id: 'library', label: 'Library settings' },
+  { id: 'playback', label: 'Playback settings' },
+  { id: 'a11y', label: 'Accessibility' },
+  { id: 'toys', label: 'Toys' }
 ];
+
+const TOAST_VARIANTS: ToastVariant[] = ['success', 'error', 'info', 'warning'];
 
 export function SettingsPage() {
   const { settings, update } = useSettings();
@@ -31,10 +42,16 @@ export function SettingsPage() {
     restoreAccess
   } = useLibrary();
   const eta = useScanEta(scanning);
+  const { current } = usePlayer();
   const [notifPermission, setNotifPermission] = useState<NotificationPermission>(
     'Notification' in window ? Notification.permission : 'denied'
   );
-  const [active, setActive] = useState<SectionId>('management');
+  const [toastVariant, setToastVariant] = useState<ToastVariant>('info');
+  const [toastMessage, setToastMessage] = useState('');
+  const [showFilteredWords, setShowFilteredWords] = useState(false);
+  const navigate = useNavigate();
+  const { section: sectionParam } = useParams<{ section: string }>();
+  const active = (SECTIONS.find((s) => s.id === sectionParam)?.id ?? SECTIONS[0].id) as SectionId;
   const section = SECTIONS.find((s) => s.id === active) ?? SECTIONS[0];
   usePageTitle('Settings');
 
@@ -62,6 +79,15 @@ export function SettingsPage() {
     }
   };
 
+  const createToast = () => {
+    toast[toastVariant](toastMessage.trim() || `This is a ${toastVariant} toast`);
+  };
+
+  const announceCurrentSong = () => {
+    if (current) speakText(`Now playing: ${current.track.title} by ${current.track.artist}`);
+    else speakText('no');
+  };
+
   return (
     <div className="xe_page">
       <div className="xe_page__toolbar">
@@ -76,7 +102,7 @@ export function SettingsPage() {
               type="button"
               className={`xe_split__item${s.id === active ? ' xe_split__item--active' : ''}`}
               aria-current={s.id === active}
-              onClick={() => setActive(s.id)}
+              onClick={() => navigate(`/settings/${s.id}`)}
             >
               <span>{s.label}</span>
               <ChevronRightIcon size={16} />
@@ -89,7 +115,7 @@ export function SettingsPage() {
             <h2 className="xe_split__title">{section.label}</h2>
           </header>
 
-          {active === 'management' && (
+          {active === 'preferences' && (
             <>
               <section className="xe_settings__section">
                 <h2>LRCLIB configuration</h2>
@@ -115,6 +141,33 @@ export function SettingsPage() {
                     <strong>Lax</strong> just searches for the title and artist and going for the first result, if any
                   </span>
                 </label>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>What should clicking fields in the player bar do?</h2>
+                <label className="xe_settings__radio">
+                  <input
+                    type="radio"
+                    name="player-bar-click-action"
+                    checked={settings.playerBarClickAction === 'copy'}
+                    onChange={() => update({ playerBarClickAction: 'copy' })}
+                  />
+                  <span>
+                    <strong>Copy field</strong> copies the title, artist, or album text to your clipboard
+                  </span>
+                </label>
+                <label className="xe_settings__radio">
+                  <input
+                    type="radio"
+                    name="player-bar-click-action"
+                    checked={settings.playerBarClickAction === 'open'}
+                    onChange={() => update({ playerBarClickAction: 'open' })}
+                  />
+                  <span>
+                    <strong>Open field</strong> navigates to the artist or album page
+                  </span>
+                </label>
+                <p className="xe_settings__hint">Secondary clicking will always do the opposite action set here</p>
               </section>
 
               <section className="xe_settings__section">
@@ -198,7 +251,7 @@ export function SettingsPage() {
                   })}
                 </div>
                 <p className="xe_settings__hint">
-                  Xebrine automatically omits formats that the browser cannot play, e.g., .aiff, .alac, etc. Thus, use these settings sparingly, and only if your library is full of botchy pirated music with improper tagging.
+                  Xebrine automatically omits formats that the browser cannot play, e.g., .aiff, .alac, etc. Thus, use these settings sparingly, and only if your library is full of botchy ripped music with improper tagging. A well-tagged folder with clean streams shouldn't need any of these applied.
                 </p>
               </section>
 
@@ -276,7 +329,7 @@ export function SettingsPage() {
             </>
           )}
 
-          {active === 'audio' && (
+          {active === 'playback' && (
             <>
               <section className="xe_settings__section">
                 <h2>Auto mix</h2>
@@ -319,6 +372,113 @@ export function SettingsPage() {
               </section>
 
               <Equalizer />
+            </>
+          )}
+
+          {active === 'a11y' && (
+            <>
+              <section className="xe_settings__section">
+                <h2>Motion</h2>
+                <label className="xe_settings__radio">
+                  <input
+                    type="checkbox"
+                    checked={settings.reducedMotion}
+                    onChange={(e) => update({ reducedMotion: e.target.checked })}
+                  />
+                  <span>Reduced motion</span>
+                </label>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>Speech</h2>
+                <label className="xe_settings__radio">
+                  <input
+                    type="checkbox"
+                    checked={settings.announceTrackChanges}
+                    onChange={(e) => update({ announceTrackChanges: e.target.checked })}
+                  />
+                  <span>Announce when a song is finished or changes over TTS</span>
+                </label>
+              </section>
+            </>
+          )}
+
+          {active === 'toys' && (
+            <>
+              <section className="xe_settings__section">
+                <h2>Create a toast notification</h2>
+                <input
+                  type="text"
+                  className="xe_search-input"
+                  placeholder={`This is a ${toastVariant} toast`}
+                  value={toastMessage}
+                  onChange={(e) => setToastMessage(e.target.value)}
+                />
+                <div className="xe_settings__chip-row">
+                  {TOAST_VARIANTS.map((variant) => (
+                    <button
+                      key={variant}
+                      type="button"
+                      className={`xe_settings__chip xe_settings__chip--${variant}${variant === toastVariant ? ' xe_settings__chip--active' : ''}`}
+                      aria-pressed={variant === toastVariant}
+                      onClick={() => setToastVariant(variant)}
+                    >
+                      {variant}
+                    </button>
+                  ))}
+                </div>
+                <div className="xe_settings__actions">
+                  <button
+                    type="button"
+                    className={`xe_btn xe_btn--accent xe_btn--toast-${toastVariant}`}
+                    onClick={createToast}
+                  >
+                    Create toast
+                  </button>
+                </div>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>Announce currently playing song</h2>
+                <div className="xe_settings__actions">
+                  <button type="button" className="xe_btn" onClick={announceCurrentSong}>
+                    Announce
+                  </button>
+                </div>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>Tag explicit songs?</h2>
+                <label className="xe_settings__radio">
+                  <input
+                    type="checkbox"
+                    checked={settings.tagExplicitSongs}
+                    onChange={(e) => update({ tagExplicitSongs: e.target.checked })}
+                  />
+                  <span>
+                    Scan lyrics for profanity and mark profane songs with an <ExplicitIcon />
+                  </span>
+                </label>
+                <p className="xe_settings__hint">
+                  Runs whenever lyrics are found for a track (freshly fetched, imported, or already cached). Once a
+                  song is tagged, it stays tagged in this browser, even if the setting is later turned off.<br></br>
+                  <i>Note:</i> this is not automatic (you must initiate a lyrics search) and is pretty rudimentary{' '}
+                  <button type="button" className="xe_link-btn" onClick={() => setShowFilteredWords(true)}>
+                    (show words to filter)
+                  </button>
+                </p>
+                {showFilteredWords && (
+                  <Modal title="Filtered words" onClose={() => setShowFilteredWords(false)}>
+                    <div className="xe_settings__chip-row">
+                      {PROFANITY_WORDS.map((word) => (
+                        <span key={word} className="xe_settings__chip">
+                          {word}
+                        </span>
+                      ))}
+                    </div>
+                  </Modal>
+                )}
+              </section>
             </>
           )}
         </div>
