@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
-import { BackIcon, ChevronRightIcon, LogoIcon } from '../components/icons';
+import { BackIcon, ChevronRightIcon, LogoIcon, NoteIcon } from '../components/icons';
 import { usePageTitle } from '../hooks/page_title';
 
 const HOTKEYS: { chords: string[][]; action: string }[] = [
@@ -20,11 +20,11 @@ const HOTKEYS: { chords: string[][]; action: string }[] = [
   { chords: [['0 - 9']], action: 'Jump to 0 - 90% of the track (Shift nudges 5%)' }
 ];
 
-type SectionId = 'about' | 'stats' | 'acknowledgements' | 'hotkeys';
+type SectionId = 'info' | 'stats' | 'acknowledgements' | 'hotkeys';
 
 const SECTIONS: { id: SectionId; label: string }[] = [
-  { id: 'about', label: 'About' },
-  { id: 'stats', label: 'Stats' },
+  { id: 'info', label: 'About Xebrine' },
+  { id: 'stats', label: 'Library stats' },
   { id: 'acknowledgements', label: 'Acknowledgements' },
   { id: 'hotkeys', label: 'Hotkeys' }
 ];
@@ -32,7 +32,9 @@ const SECTIONS: { id: SectionId; label: string }[] = [
 export function AboutPage() {
   const navigate = useNavigate();
   const { tracks, folders } = useLibrary();
-  const [active, setActive] = useState<SectionId>('about');
+  const { section: sectionParam } = useParams<{ section: string }>();
+  const active = (SECTIONS.find((s) => s.id === sectionParam)?.id ?? SECTIONS[0].id) as SectionId;
+  const [spinning, setSpinning] = useState(false);
   const section = SECTIONS.find((s) => s.id === active) ?? SECTIONS[0];
   usePageTitle('About');
 
@@ -44,6 +46,10 @@ export function AboutPage() {
           Back
         </button>
         <h1 className="xe_page__title">Help & about</h1>
+        <button type="button" className="xe_btn xe_btn--quiet" onClick={() => navigate('/i/release_notes')}>
+          <NoteIcon size={16} />
+          Release notes
+        </button>
       </div>
 
       <div className="xe_split">
@@ -54,7 +60,7 @@ export function AboutPage() {
               type="button"
               className={`xe_split__item${s.id === active ? ' xe_split__item--active' : ''}`}
               aria-current={s.id === active}
-              onClick={() => setActive(s.id)}
+              onClick={() => navigate(`/i/${s.id}`)}
             >
               <span>{s.label}</span>
               <ChevronRightIcon size={16} />
@@ -68,10 +74,14 @@ export function AboutPage() {
           </header>
 
           <div className="xe_about">
-            {active === 'about' && (
+            {active === 'info' && (
               <>
                 <div className="xe_about__hero">
-                  <span className="xe_about__logo">
+                  <span
+                    className={`xe_about__logo${spinning ? ' xe_about__logo--spin' : ''}`}
+                    onClick={() => setSpinning(true)}
+                    onAnimationEnd={() => setSpinning(false)}
+                  >
                     <LogoIcon size={60} />
                   </span>
                   <div>
@@ -80,19 +90,25 @@ export function AboutPage() {
                 </div>
 
                 <p className="xe_about__lead">
-                  Xebrine is the spiritual successor to the venerable{' '}
+                  Xebrine <i>(zeh-brine)</i> is the React-made heavy-duty spiritual-successor to the venerable{' '}
                   <a href="https://voxity.dev" target="_blank" rel="noopener noreferrer">
                     Voxity
                   </a>{' '}
-                  PWA music player.
+                  PWA music player by <a href="https://exerinity.com" target="_blank">exerinity</a>.
                 </p>
                 <p className="xe_about__text">
                   It is a clear-cut and modern reimplementation of the same core ideas: fast, bizarre, and very opinionated.
                   Point Xebrine at a folder and it crawls your collection, reads the tags and cover art, and keeps everything
                   organized.
+                  <br></br><small>
+                    (No - Xebrine is not <i>replacing</i> Voxity nor am I canning it, this is just something more)
+                  </small>
                 </p>
 
                 <h3 className="xe_about__heading">Stack</h3>
+                <p className="xe_about__text">
+                  <Link to="/i/acknowledgements">(see all in acknowledgements)</Link>
+                </p>
                 <ul className="xe_about__list xe_about__packages">
                   <li>
                     <code>react</code>
@@ -105,14 +121,6 @@ export function AboutPage() {
                   <li>
                     <code>react-router-dom</code>
                     <span>7.18.1</span>
-                  </li>
-                  <li>
-                    <code>essentia.js</code>
-                    <span>0.1.3</span>
-                  </li>
-                  <li>
-                    <code>music-metadata</code>
-                    <span>11.0.0</span>
                   </li>
                   <li>
                     <code>vite</code>
@@ -161,38 +169,51 @@ export function AboutPage() {
             )}
 
             {active === 'acknowledgements' && (
-              <ul className="xe_about__list">
-                <li>
-                  <a href="https://mtg.github.io/essentia.js/" target="_blank" rel="noopener noreferrer">
-                    essentia.js
-                  </a>
-                  : BPM and beat detection for auto mix
-                </li>
-                <li>
-                  <a href="https://lrclib.net" target="_blank" rel="noopener noreferrer">
-                    LRCLIB
-                  </a>
-                  : lyrics
-                </li>
-                <li>
-                  <a href="https://github.com/borewit/music-metadata" target="_blank" rel="noopener noreferrer">
-                    music-metadata
-                  </a>
-                  : audio tag and artwork parsing
-                </li>
-                <li>
-                  <a href="https://fonts.google.com/specimen/Google+Sans+Flex" target="_blank" rel="noopener noreferrer">
-                    Google
-                  </a>
-                  : Google Sans Flex font
-                </li>
-                <li>
-                  <a href="https://voxity.dev" target="_blank" rel="noopener noreferrer">
-                    Voxity
-                  </a>
-                  : the original
-                </li>
-              </ul>
+              <>
+                <h3 className="xe_about__heading">Dependencies</h3>
+                <ul className="xe_about__list">
+                  <li>
+                    <a href="https://mtg.github.io/essentia.js/" target="_blank" rel="noopener noreferrer">
+                      essentia.js
+                    </a>
+                    : BPM and beat detection for auto mix
+                  </li>
+                  <li>
+                    <a href="https://github.com/borewit/music-metadata" target="_blank" rel="noopener noreferrer">
+                      music-metadata
+                    </a>
+                    : audio tag and artwork parsing
+                  </li>
+                  <li>
+                    <a href="https://github.com/mikolalysenko/mespeak" target="_blank" rel="noopener noreferrer">
+                      meSpeak
+                    </a>
+                    : offline text-to-speech fallback for track announcements
+                  </li>
+                </ul>
+
+                <h3 className="xe_about__heading">External links</h3>
+                <ul className="xe_about__list">
+                  <li>
+                    <a href="https://lrclib.net" target="_blank" rel="noopener noreferrer">
+                      LRCLIB
+                    </a>
+                    : lyrics
+                  </li>
+                  <li>
+                    <a href="https://fonts.google.com/specimen/Google+Sans+Flex" target="_blank" rel="noopener noreferrer">
+                      Google
+                    </a>
+                    : Google Sans Flex font
+                  </li>
+                  <li>
+                    <a href="https://voxity.dev" target="_blank" rel="noopener noreferrer">
+                      Voxity
+                    </a>
+                    : the original
+                  </li>
+                </ul>
+              </>
             )}
 
             {active === 'hotkeys' && (
