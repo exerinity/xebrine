@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MAX_VOLUME, usePlayer } from '../context/player_context';
 import { useSettings } from '../context/settings_context';
 import { ScrollingText } from './scrolling_text';
@@ -7,6 +8,8 @@ import { Slider } from './slider';
 import { Visualizer } from './visualizer';
 import { toast } from '../utils/toast';
 import { formatTime } from '../utils/format';
+import { toSlugParam } from '../utils/slug';
+import { displayArtist } from '../utils/groups';
 import {
   AutoMixIcon,
   NextIcon,
@@ -19,6 +22,7 @@ import {
   VisualizerIcon,
   VolumeIcon
 } from './icons';
+import { ExplicitBadge } from './explicit_badge';
 
 interface PlayerBarProps {
   fullscreenOpen?: boolean;
@@ -26,6 +30,7 @@ interface PlayerBarProps {
 }
 
 export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: PlayerBarProps) {
+  const navigate = useNavigate();
   const {
     current,
     isPlaying,
@@ -78,6 +83,43 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
     setCopiedField(field);
     if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
     copiedTimeoutRef.current = window.setTimeout(() => setCopiedField(null), 1000);
+  };
+
+  const openField = (field: 'title' | 'artist' | 'album') => {
+    if (!track) return;
+    if (fullscreenOpen) onToggleFullscreen?.();
+    const artistSlug = toSlugParam(displayArtist(track));
+    if (field === 'artist') {
+      navigate(`/artists/${artistSlug}`);
+    } else {
+      navigate(`/artists/${artistSlug}/${toSlugParam(track.album)}`, { state: { from: `/artists/${artistSlug}` } });
+    }
+  };
+
+  const handleFieldClick = (field: 'title' | 'artist' | 'album', value: string) => {
+    if (settings.playerBarClickAction === 'open') {
+      openField(field);
+    } else {
+      copyField(field, value);
+    }
+  };
+
+  const handleFieldContextMenu = (e: MouseEvent, field: 'title' | 'artist' | 'album', value: string) => {
+    if (!track) return;
+    e.preventDefault();
+    if (settings.playerBarClickAction === 'open') {
+      copyField(field, value);
+    } else {
+      openField(field);
+    }
+  };
+
+  const fieldTooltip = (field: 'title' | 'artist' | 'album', value: string) => {
+    const target = field === 'artist' ? track!.artist : track!.album;
+    if (settings.playerBarClickAction === 'open') {
+      return copiedField === field ? 'Copied!' : `Go to "${target}" (right-click to copy)`;
+    }
+    return copiedField === field ? 'Copied!' : `Copy "${value}" (right-click to open)`;
   };
 
   const toggleMute = () => {
@@ -141,20 +183,24 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
               <ScrollingText
                 text={track.title}
                 className="xe_player-bar__title"
-                title={copiedField === 'title' ? 'Copied!' : `Copy "${track.title}"`}
-                onClick={() => copyField('title', track.title)}
+                title={fieldTooltip('title', track.title)}
+                suffix={<ExplicitBadge trackId={track.id} />}
+                onClick={() => handleFieldClick('title', track.title)}
+                onContextMenu={(e) => handleFieldContextMenu(e, 'title', track.title)}
               />
               <ScrollingText
                 text={track.artist}
                 className="xe_player-bar__subtitle"
-                title={copiedField === 'artist' ? 'Copied!' : `Copy "${track.artist}"`}
-                onClick={() => copyField('artist', track.artist)}
+                title={fieldTooltip('artist', track.artist)}
+                onClick={() => handleFieldClick('artist', track.artist)}
+                onContextMenu={(e) => handleFieldContextMenu(e, 'artist', track.artist)}
               />
               <ScrollingText
                 text={track.album}
                 className="xe_player-bar__subtitle"
-                title={copiedField === 'album' ? 'Copied!' : `Copy "${track.album}"`}
-                onClick={() => copyField('album', track.album)}
+                title={fieldTooltip('album', track.album)}
+                onClick={() => handleFieldClick('album', track.album)}
+                onContextMenu={(e) => handleFieldContextMenu(e, 'album', track.album)}
               />
               {loadError && <span className="xe_player-bar__error">{loadError}</span>}
             </>
@@ -164,7 +210,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
 
       <div className="xe_player-bar__center">
         <div className="xe_player-bar__controls">
-          <span className="xe_player-bar__percent" aria-hidden="true">
+          <span className="xe_player-bar__percent" aria-hidden="true" title="Percent elapsed">
             {elapsedLabel}
           </span>
           <button
@@ -206,7 +252,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
           >
             {repeatMode === 'one' ? <RepeatOneIcon size={18} /> : <RepeatIcon size={18} />}
           </button>
-          <span className="xe_player-bar__percent" aria-hidden="true">
+          <span className="xe_player-bar__percent" aria-hidden="true" title="Percent remaining">
             {remainingLabel}
           </span>
         </div>
@@ -226,7 +272,9 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
           aria-pressed={autoMixEnabled}
         >
           <AutoMixIcon size={14} />
-          <span className="xe_automix-pill__label">{autoMixLabel}</span>
+          <span className="xe_automix-pill__label" title={`Auto mix is ${autoMixLabel.toLowerCase()}`}>
+            {autoMixLabel}
+          </span>
         </button>
         <button
           type="button"
