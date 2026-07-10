@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { usePlayer } from '../context/player_context';
 import { clamp } from '../utils/format';
@@ -79,9 +79,19 @@ export function Sidebar() {
     window.addEventListener('pointerup', onUp);
   };
 
+  const resetWidth = (e: MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setNavWidth(DEFAULT_WIDTH);
+    try {
+      localStorage.setItem(WIDTH_KEY, String(DEFAULT_WIDTH));
+    } catch {
+      null;
+    }
+  };
+
   return (
     <nav className={`xe_nav${collapsed ? ' xe_nav--collapsed' : ''}`} style={{ width }}>
-      <Link to="/about" className="xe_nav__logo" title="About Xebrine">
+      <Link to="/i" className="xe_nav__logo" title="About Xebrine">
         <LogoIcon size={22} />
         {!collapsed && <span>Xebrine</span>}
       </Link>
@@ -109,10 +119,11 @@ export function Sidebar() {
         <div
           className="xe_nav__resize"
           onPointerDown={startResize}
+          onContextMenu={resetWidth}
           role="separator"
           aria-orientation="vertical"
           aria-label="Resize sidebar"
-          title="Drag to resize"
+          title="Drag to resize, right-click to reset"
         />
       )}
     </nav>
