@@ -71,12 +71,12 @@ export function ArtistsPage() {
         <input
           className="xe_search-input"
           type="search"
-          placeholder="Search artists…"
+          placeholder="Search artists..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
         <SortSelect value={sort} onChange={changeSort} options={SORT_OPTIONS} />
-        <span className="xe_page__meta">{artists.length}</span>
+        <span className="xe_page__meta">{artists.length} artists</span>
       </div>
       {visible.length === 0 ? (
         <p className="xe_empty-note">
