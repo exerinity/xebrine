@@ -31,6 +31,15 @@
   margin: 6px 0 12px;
 }
 
+.xe_link-btn {
+  color: var(--accent-text);
+  text-decoration: underline;
+}
+
+.xe_link-btn:hover {
+  color: var(--text);
+}
+
 .xe_settings__slider-row {
   display: flex;
   align-items: center;
@@ -159,6 +168,7 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 4px;
+  margin-bottom: 16px;
 }
 
 .xe_settings__chip {
@@ -180,4 +190,62 @@
   border-color: transparent;
   color: #fff;
   font-weight: 600;
+}
+
+.xe_settings__chip--success.xe_settings__chip--active {
+  background: #35d08a;
+}
+
+.xe_settings__chip--error.xe_settings__chip--active {
+  background: var(--danger);
+}
+
+.xe_settings__chip--warning.xe_settings__chip--active {
+  background: #e0b32e;
+  color: #1a1400;
+}
+
+.xe_settings__chip--info.xe_settings__chip--active {
+  background: var(--accent-text);
+  color: #001018;
+}
+
+.xe_btn--toast-success {
+  background: #35d08a;
+  border-color: transparent;
+  color: #04120b;
+}
+
+.xe_btn--toast-success:hover:not(:disabled) {
+  background: #2ab979;
+}
+
+.xe_btn--toast-error {
+  background: var(--danger);
+  border-color: transparent;
+  color: #fff;
+}
+
+.xe_btn--toast-error:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.xe_btn--toast-warning {
+  background: #e0b32e;
+  border-color: transparent;
+  color: #1a1400;
+}
+
+.xe_btn--toast-warning:hover:not(:disabled) {
+  background: #cfa326;
+}
+
+.xe_btn--toast-info {
+  background: var(--accent-text);
+  border-color: transparent;
+  color: #001018;
+}
+
+.xe_btn--toast-info:hover:not(:disabled) {
+  filter: brightness(1.1);
 }
