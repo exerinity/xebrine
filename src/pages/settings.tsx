@@ -278,7 +278,7 @@ export function SettingsPage() {
                     </span>
                     <button
                       type="button"
-                      className="xe_btn xe_btn--small xe_btn--quiet xe_banner__stop"
+                      className="xe_btn xe_banner__stop"
                       onClick={stopScan}
                     >
                       <CloseIcon size={13} />
@@ -290,23 +290,27 @@ export function SettingsPage() {
                   {folders.map((folder) => (
                     <li key={folder.id}>
                       <span className="xe_settings__folder-name">{folder.name}</span>
-                      <button
-                        type="button"
-                        className="xe_btn xe_btn--small"
-                        onClick={() => void rescanFolder(folder.id)}
-                        disabled={scanning !== null}
-                      >
-                        <RefreshIcon size={13} />
-                        Rescan
-                      </button>
-                      <button
-                        type="button"
-                        className="xe_btn xe_btn--small xe_btn--quiet"
-                        onClick={() => void removeFolder(folder.id)}
-                      >
-                        <TrashIcon size={13} />
-                        Remove
-                      </button>
+                      <div className="xe_settings__folder-actions">
+                        <button
+                          type="button"
+                          className="xe_btn xe_btn--accent"
+                          onClick={() => void rescanFolder(folder.id)}
+                          disabled={scanning !== null}
+                          aria-label={`Rescan ${folder.name}`}
+                        >
+                          <RefreshIcon size={14} />
+                          Rescan
+                        </button>
+                        <button
+                          type="button"
+                          className="xe_btn xe_settings__folder-remove"
+                          onClick={() => void removeFolder(folder.id)}
+                          aria-label={`Remove ${folder.name}`}
+                        >
+                          <TrashIcon size={14} />
+                          Remove
+                        </button>
+                      </div>
                     </li>
                   ))}
                 </ul>
