@@ -148,6 +148,20 @@
   margin: 0 0 6px;
 }
 
+.xe_album-hero__title-btn {
+  font: inherit;
+  color: inherit;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: copy;
+}
+
+.xe_album-hero__title-btn:hover {
+  color: var(--accent-text);
+}
+
 .xe_album-hero__meta {
   color: var(--text-dim);
   margin: 0 0 14px;
