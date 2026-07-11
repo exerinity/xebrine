@@ -12,6 +12,7 @@ import { formatTime } from '../utils/format';
 import { CoverModal } from '../components/cover_modal';
 import { slugify, toSlugParam } from '../utils/slug';
 import { usePageTitle } from '../hooks/page_title';
+import { toast } from '../utils/toast';
 
 export function AlbumDetailPage() {
   const { artistName = '', albumName = '' } = useParams();
@@ -52,6 +53,13 @@ export function AlbumDetailPage() {
     );
   }
 
+  const copyTitle = () => {
+    navigator.clipboard
+      .writeText(album.album)
+      .then(() => toast.success('Copied the album title'))
+      .catch(() => toast.error("Couldn't copy the album title"));
+  };
+
   const total = album.tracks.reduce((sum, t) => sum + t.duration, 0);
   const shuffle = () =>
     playNow(
@@ -78,7 +86,11 @@ export function AlbumDetailPage() {
           {art ? <img src={art} alt="" /> : <NoteIcon size={48} />}
         </button>
         <div className="xe_album-hero__info">
-          <h1 className="xe_album-hero__title">{album.album}</h1>
+          <h1 className="xe_album-hero__title">
+            <button type="button" className="xe_album-hero__title-btn" title="Copy album title" onClick={copyTitle}>
+              {album.album}
+            </button>
+          </h1>
           <p className="xe_album-hero__meta">
             by <strong>{album.artist}</strong>
             {album.year ? ` / released ${album.year}` : ''} / {album.tracks.length} track
