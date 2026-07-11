@@ -5,6 +5,7 @@ export interface ContextMenuItem {
   label: string;
   onSelect: () => void;
   separatorBefore?: boolean;
+  heading?: string;
 }
 
 interface ContextMenuProps {
@@ -61,6 +62,11 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
       {items.map((item, i) => (
         <div key={i}>
           {item.separatorBefore && <div className="xe_context-menu__sep" role="separator" />}
+          {item.heading && (
+            <div className="xe_context-menu__heading" role="presentation">
+              {item.heading}
+            </div>
+          )}
           <button
             type="button"
             role="menuitem"
