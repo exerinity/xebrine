@@ -86,7 +86,7 @@ export function LibraryPage() {
         <p className="xe_empty-note">
           The browser you're using doesn't seem to support (or you have denied access to)
           the File System Access API, which is required for Xebrine to read your music files. Please
-          try again using a different browser that supports it, like a Chromium browser or Firefox. In the meantime, <a href="https://voxity.dev" target="_blank">try Voxity</a>?
+          try again using a different browser that supports it. In the meantime, <a href="https://voxity.dev" target="_blank">try Voxity</a>?
         </p>
       </div>
     );
