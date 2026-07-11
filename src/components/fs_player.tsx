@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePlayer } from '../context/player_context';
+import { useSettings } from '../context/settings_context';
 import { useAlbumArt } from '../hooks/album_art';
 import { formatTime } from '../utils/format';
 import type { QueueItem } from '../types';
@@ -61,6 +62,7 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
     jumpTo,
     playNow
   } = usePlayer();
+  const { settings } = useSettings();
   const track = current?.track ?? null;
   const visible = open && Boolean(track);
   const [rendered, setRendered] = useState(visible);
@@ -134,7 +136,10 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
       {displayArtworkUrl && (
         <div
           className="xe_fullscreen-player__wash"
-          style={{ backgroundImage: `url(${displayArtworkUrl})` }}
+          style={{
+            backgroundImage: `url(${displayArtworkUrl})`,
+            filter: `blur(${settings.fsBlur}px) saturate(${settings.fsSaturate})`
+          }}
           aria-hidden="true"
         />
       )}
