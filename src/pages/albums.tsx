@@ -6,7 +6,7 @@ import { groupAlbums, type AlbumGroup } from '../utils/groups';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { useAlbumArt } from '../hooks/album_art';
-import { NoteIcon, PlayIcon, PlusIcon, ShuffleIcon } from '../components/icons';
+import { NoteIcon, PlayIcon, PlusIcon, SearchIcon, ShuffleIcon } from '../components/icons';
 import { SortSelect, type SortOption } from '../components/sort_select';
 import { toSlugParam } from '../utils/slug';
 import { useScrollRestoration } from '../hooks/scroll_restoration';
@@ -55,7 +55,7 @@ function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
           <button
             type="button"
             className="xe_album-card__action"
-            title="Add to queue"
+            title="Enqueue"
             onClick={(e) => {
               e.stopPropagation();
               enqueueEnd(album.tracks);
@@ -137,13 +137,16 @@ export function AlbumsPage() {
     <div className="xe_page">
       <div className="xe_page__toolbar">
         <h1 className="xe_page__title">Albums</h1>
-        <input
-          className="xe_search-input"
-          type="search"
-          placeholder="Search albums..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <div className="xe_search-field">
+          <SearchIcon size={14} />
+          <input
+            className="xe_search-input"
+            type="search"
+            placeholder="Search albums..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
         <SortSelect value={sort} onChange={changeSort} options={SORT_OPTIONS} />
         <span className="xe_page__meta">{albums.length} albums</span>
       </div>
