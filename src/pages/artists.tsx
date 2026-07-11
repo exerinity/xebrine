@@ -6,6 +6,7 @@ import { toSlugParam } from '../utils/slug';
 import { SortSelect, type SortOption } from '../components/sort_select';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { usePageTitle } from '../hooks/page_title';
+import { SearchIcon } from '../components/icons';
 
 type ArtistSort = 'name' | 'name-desc' | 'albums' | 'tracks';
 
@@ -68,13 +69,16 @@ export function ArtistsPage() {
     <div className="xe_page">
       <div className="xe_page__toolbar">
         <h1 className="xe_page__title">Artists</h1>
-        <input
-          className="xe_search-input"
-          type="search"
-          placeholder="Search artists..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <div className="xe_search-field">
+          <SearchIcon size={14} />
+          <input
+            className="xe_search-input"
+            type="search"
+            placeholder="Search artists..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
         <SortSelect value={sort} onChange={changeSort} options={SORT_OPTIONS} />
         <span className="xe_page__meta">{artists.length} artists</span>
       </div>
