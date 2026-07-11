@@ -43,15 +43,15 @@ export function TrackList({ tracks }: TrackListProps) {
   };
 
   const menuItems = (m: MenuState): ContextMenuItem[] => [
-    { label: 'Play now', onSelect: () => playNow(tracks, m.index) },
+    { label: 'Play now', heading: 'Enqueue track...', onSelect: () => playNow(tracks, m.index) },
     { label: 'Play next', onSelect: () => enqueueNext([m.track]) },
-    { label: 'Add to queue', onSelect: () => enqueueEnd([m.track]) },
-    { label: 'Copy title', separatorBefore: true, onSelect: () => copy(m.track.title, 'title') },
+    { label: 'Enqueue', onSelect: () => enqueueEnd([m.track]) },
+    { label: 'Copy title', heading: 'Copy metadata...', onSelect: () => copy(m.track.title, 'title') },
     {
       label: 'Copy info',
       onSelect: () => copy(`${m.track.title} by ${m.track.artist}`, 'info')
     },
-    { label: 'Go to album', separatorBefore: true, onSelect: () => goToAlbum(m.track) },
+    { label: 'Go to album', heading: 'Navigation...', onSelect: () => goToAlbum(m.track) },
     { label: 'Go to artist', onSelect: () => goToArtist(m.track) }
   ];
 
