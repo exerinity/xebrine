@@ -17,7 +17,8 @@ const RELEASES: Release[] = [
       <>Made the <Link to="/settings/library">library settings</Link> look better</>,
       'The artists and albums search bar now has a little magnifying glass like library',
       'Added a search bar to the queue page to filter through enqueued tracks',
-      'The context menu actions are now split up into categories: "enqueue track", "copy metadata" and "navigation"'
+      'The context menu actions are now split up into categories: "enqueue track", "copy metadata" and "navigation"',
+      'You can now right-click the scrubber to open a precise input modal'
     ]
   },
   {
