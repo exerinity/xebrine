@@ -4,7 +4,7 @@ import { formatTime } from '../utils/format';
 import { CloseIcon, DragIcon, PauseIcon, PlayIcon } from './icons';
 import { ExplicitBadge } from './explicit_badge';
 
-export function QueueList() {
+export function QueueList({ query = '' }: { query?: string }) {
   const { queue, position, isPlaying, jumpTo, removeAt, move } = usePlayer();
   const { listRef, dragging, handleProps, itemStyle } = useDragReorder(move);
 
@@ -12,9 +12,21 @@ export function QueueList() {
     return <p className="xe_empty-note">The queue is empty!</p>;
   }
 
+  const needle = query.trim().toLowerCase();
+  const filtering = needle.length > 0;
+  const matches = (item: (typeof queue)[number]) =>
+    !filtering ||
+    item.track.title.toLowerCase().includes(needle) ||
+    item.track.artist.toLowerCase().includes(needle);
+
+  if (filtering && !queue.some(matches)) {
+    return <p className="xe_empty-note">No queued tracks match “{query.trim()}”</p>;
+  }
+
   return (
     <div className="xe_queue-list" ref={listRef}>
       {queue.map((item, i) => {
+        if (!matches(item)) return null;
         const isCurrent = i === position;
         const isDragged = dragging?.from === i;
         return (
@@ -23,12 +35,18 @@ export function QueueList() {
             className={`xe_queue-row${isCurrent ? ' xe_queue-row--current' : ''}${
               isDragged ? ' xe_queue-row--dragging' : ''
             }`}
-            style={itemStyle(i)}
+            style={filtering ? undefined : itemStyle(i)}
             onDoubleClick={() => jumpTo(i)}
           >
-            <span className="xe_queue-row__handle" title="Drag to reorder" {...handleProps(i)}>
-              <DragIcon size={16} />
-            </span>
+            {filtering ? (
+              <span className="xe_queue-row__handle xe_queue-row__handle--disabled" title="Clear search to reorder">
+                <DragIcon size={16} />
+              </span>
+            ) : (
+              <span className="xe_queue-row__handle" title="Drag to reorder" {...handleProps(i)}>
+                <DragIcon size={16} />
+              </span>
+            )}
             <span className="xe_queue-row__num">
               {isCurrent ? (isPlaying ? <PlayIcon size={13} /> : <PauseIcon size={13} />) : i + 1}
             </span>
