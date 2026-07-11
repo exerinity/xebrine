@@ -1,14 +1,25 @@
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { BackIcon } from '../components/icons';
 import { usePageTitle } from '../hooks/page_title';
 
 interface Release {
   version: string;
   date: string;
-  notes: string[];
+  notes: React.ReactNode[];
 }
 
 const RELEASES: Release[] = [
+  {
+    version: '3a',
+    date: '2026-07-12',
+    notes: [
+      <>Made the <Link to="/settings/library">library settings</Link> look better</>,
+      'The artists and albums search bar now has a little magnifying glass like library',
+      'Added a search bar to the queue page to filter through enqueued tracks',
+      'The context menu actions are now split up into categories: "enqueue track", "copy metadata" and "navigation"'
+    ]
+  },
   {
     version: '3',
     date: '2026-07-10',
@@ -24,7 +35,7 @@ const RELEASES: Release[] = [
       'Added a modal component',
       'Adjusted the responsiveness of the app, it should be more mobile-friendly',
       'Added a new setting to change what clicking on the fields in the player bar does: copy or open, and the opposite can be performed by right-clicking',
-      
+
     ]
   },
   {
@@ -68,14 +79,17 @@ export function ReleaseNotesPage() {
       </div>
 
       <div className="xe_page__scroll xe_about">
+        <p>Welcome to the Release notes for Xebrine! Please note, that these are not exhaustive, and only
+          covering major/some minor updates. In other words, I may make an update without listing it in this
+          document.</p>
         {RELEASES.map((release) => (
           <section key={release.version} className="xe_about__release">
             <h2 className="xe_about__heading">
               Version {release.version} <span className="xe_about__version">{release.date}</span>
             </h2>
             <ul className="xe_about__list">
-              {release.notes.map((note) => (
-                <li key={note}>{note}</li>
+              {release.notes.map((note, idx) => (
+                <li key={idx}>{note}</li>
               ))}
             </ul>
           </section>
