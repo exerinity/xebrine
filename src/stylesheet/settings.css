@@ -140,15 +140,28 @@
 
 .xe_settings__folders {
   list-style: none;
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .xe_settings__folders li {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 0;
+  gap: 16px;
+  padding: 12px 16px;
+  min-height: 56px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.xe_settings__folders li:hover {
+  background: var(--accent-wash);
+  border-color: var(--accent-soft);
 }
 
 .xe_settings__folder-name {
@@ -156,6 +169,25 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 600;
+}
+
+.xe_settings__folder-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.xe_settings__folder-remove {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--danger);
+}
+
+.xe_settings__folder-remove:hover:not(:disabled) {
+  background: rgba(255, 124, 138, 0.14);
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 .xe_settings__actions {
