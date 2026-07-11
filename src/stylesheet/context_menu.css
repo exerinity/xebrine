@@ -40,3 +40,19 @@
   margin: 5px 8px;
   background: var(--border);
 }
+
+.xe_context-menu__heading {
+  padding: 8px 12px 4px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.xe_context-menu > div:first-child .xe_context-menu__heading {
+  margin-top: 0;
+  border-top: none;
+}
