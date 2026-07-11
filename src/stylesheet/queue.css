@@ -40,6 +40,11 @@
   cursor: grabbing;
 }
 
+.xe_queue-row__handle--disabled {
+  cursor: default;
+  opacity: 0.3;
+}
+
 .xe_queue-row__num {
   color: var(--text-dim);
   font-size: 12px;
