@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { usePlayer } from '../context/player_context';
-import { formatTime } from '../utils/format';
+import { formatTime, parseSeekInput } from '../utils/format';
 import { Slider } from './slider';
+import { Modal } from './modal';
 
 const TIME_MODE_KEY = 'xebrine.timeMode';
 
@@ -15,8 +16,16 @@ export function Scrubber() {
   const { currentTime, duration, seek, current } = usePlayer();
   const [dragValue, setDragValue] = useState<number | null>(null);
   const [timeMode, setTimeMode] = useState<TimeMode>(loadTimeMode);
+  const [seekModalOpen, setSeekModalOpen] = useState(false);
+  const [seekInput, setSeekInput] = useState('');
 
   const shown = dragValue ?? currentTime;
+  const parsedSeek = parseSeekInput(seekInput, duration);
+  const submitSeek = () => {
+    if (parsedSeek === null) return;
+    seek(parsedSeek);
+    setSeekModalOpen(false);
+  };
   const toggleTimeMode = () => {
     const mode: TimeMode = timeMode === 'elapsed' ? 'remaining' : 'elapsed';
     setTimeMode(mode);
@@ -48,6 +57,15 @@ export function Scrubber() {
         disabled={!current}
         ariaLabel="Seek"
         className="xe_scrubber__slider"
+        onContextMenu={
+          current
+            ? (e) => {
+                e.preventDefault();
+                setSeekInput('');
+                setSeekModalOpen(true);
+              }
+            : undefined
+        }
       />
       <button
         type="button"
@@ -57,6 +75,40 @@ export function Scrubber() {
       >
         {durationLabel}
       </button>
+      {seekModalOpen && (
+        <Modal title="Set playback time" onClose={() => setSeekModalOpen(false)}>
+          <form
+            className="xe_seek-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              submitSeek();
+            }}
+          >
+            <input
+              className="xe_search-input"
+              type="text"
+              autoFocus
+              value={seekInput}
+              onChange={(e) => setSeekInput(e.target.value)}
+            />
+            <p className="xe_seek-form__hint">
+              {seekInput.trim() === ''
+                ? `Enter a timestamp (1:23), seconds (93), or percentage (40%) to jump to`
+                : parsedSeek === null
+                  ? "Invalid or unparsable time..."
+                  : `Go to ${formatTime(parsedSeek)}`}
+            </p>
+            <div className="xe_seek-form__actions">
+              <button type="button" className="xe_btn xe_btn--quiet" onClick={() => setSeekModalOpen(false)}>
+                Cancel
+              </button>
+              <button type="submit" className="xe_btn xe_btn--accent" disabled={parsedSeek === null}>
+                Go
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }
