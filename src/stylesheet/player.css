@@ -140,6 +140,25 @@ button.xe_scrubber__time:hover {
   flex: 1;
 }
 
+.xe_seek-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 280px;
+}
+
+.xe_seek-form__hint {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.xe_seek-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .xe_player-bar__volume {
   display: flex;
   align-items: center;
