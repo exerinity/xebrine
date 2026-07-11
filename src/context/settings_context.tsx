@@ -13,6 +13,8 @@ export interface Settings {
   eqEnabled: boolean;
   eqBands: number[];
   playerBarClickAction: PlayerBarClickAction;
+  fsBlur: number;
+  fsSaturate: number;
   reducedMotion: boolean;
   announceTrackChanges: boolean;
   tagExplicitSongs: boolean;
@@ -33,6 +35,8 @@ const DEFAULTS: Settings = {
   eqEnabled: false,
   eqBands: [...EQ_FLAT],
   playerBarClickAction: 'copy',
+  fsBlur: 56,
+  fsSaturate: 1.35,
   reducedMotion: false,
   announceTrackChanges: false,
   tagExplicitSongs: false
