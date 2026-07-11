@@ -45,7 +45,7 @@ export function AboutPage() {
           <BackIcon size={16} />
           Back
         </button>
-        <h1 className="xe_page__title">Help & about</h1>
+        <h1 className="xe_page__title">About</h1>
         <button type="button" className="xe_btn xe_btn--quiet" onClick={() => navigate('/i/release_notes')}>
           <NoteIcon size={16} />
           Release notes
@@ -94,7 +94,7 @@ export function AboutPage() {
                   <a href="https://voxity.dev" target="_blank" rel="noopener noreferrer">
                     Voxity
                   </a>{' '}
-                  PWA music player by <a href="https://exerinity.com" target="_blank">exerinity</a>.
+                  PWA music player by <a href="https://exerinity.com" target="_blank">exerinity</a>. Xebrine was released exactly 1 year after Voxity was created.
                 </p>
                 <p className="xe_about__text">
                   It is a clear-cut and modern reimplementation of the same core ideas: fast, bizarre, and very opinionated.
