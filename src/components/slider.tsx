@@ -1,4 +1,4 @@
-import { useRef, type PointerEvent } from 'react';
+import { useRef, type MouseEvent, type PointerEvent } from 'react';
 import { clamp } from '../utils/format';
 import { useWheel } from '../hooks/wheel';
 
@@ -10,6 +10,8 @@ interface SliderProps {
   onCommit?(value: number): void;
   wheelStep?: number;
   markAt?: number;
+  resetTo?: number;
+  onContextMenu?: (e: MouseEvent<HTMLDivElement>) => void;
   disabled?: boolean;
   ariaLabel?: string;
   className?: string;
@@ -23,6 +25,8 @@ export function Slider({
   onCommit,
   wheelStep,
   markAt,
+  resetTo,
+  onContextMenu,
   disabled,
   ariaLabel,
   className
@@ -80,6 +84,16 @@ export function Slider({
       aria-valuenow={value}
       tabIndex={disabled ? -1 : 0}
       onPointerDown={handlePointerDown}
+      onContextMenu={
+        onContextMenu ??
+        (resetTo === undefined
+          ? undefined
+          : (e) => {
+              if (disabled) return;
+              e.preventDefault();
+              commit(clamp(resetTo, min, max));
+            })
+      }
     >
       <div className="xe_slider__track">
         <div className="xe_slider__fill" style={{ width: `${fraction * 100}%` }} />
