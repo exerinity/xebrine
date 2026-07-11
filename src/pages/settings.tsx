@@ -28,6 +28,14 @@ const SECTIONS: { id: SectionId; label: string }[] = [
 
 const TOAST_VARIANTS: ToastVariant[] = ['success', 'error', 'info', 'warning'];
 
+const FS_BG_PRESETS: { label: string; blur: number; saturate: number }[] = [
+  { label: 'None', blur: 0, saturate: 1 },
+  { label: 'Cinematic', blur: 56, saturate: 1.35 },
+  { label: 'Vague', blur: 32, saturate: 1.1 },
+  { label: 'Dramatic', blur: 80, saturate: 1.9 },
+  { label: 'Maximum', blur: 120, saturate: 3 }
+];
+
 export function SettingsPage() {
   const { settings, update } = useSettings();
   const {
@@ -185,6 +193,56 @@ export function SettingsPage() {
                     Notifications are blocked by the browser. Allow them?
                   </p>
                 )}
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>Fullscreen player background</h2>
+                <p className="xe_settings__hint">
+                  Right-click a slider to reset it to default
+                </p>
+                <div className="xe_settings__chip-row">
+                  {FS_BG_PRESETS.map((preset) => {
+                    const activePreset =
+                      settings.fsBlur === preset.blur && settings.fsSaturate === preset.saturate;
+                    return (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        className={`xe_settings__chip${activePreset ? ' xe_settings__chip--active' : ''}`}
+                        aria-pressed={activePreset}
+                        onClick={() => update({ fsBlur: preset.blur, fsSaturate: preset.saturate })}
+                      >
+                        {preset.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <h2>Blur</h2>
+                <div className="xe_settings__slider-row">
+                  <Slider
+                    value={settings.fsBlur}
+                    min={0}
+                    max={120}
+                    wheelStep={1}
+                    resetTo={56}
+                    onChange={(v) => update({ fsBlur: Math.round(v) })}
+                    ariaLabel="Fullscreen player background blur"
+                  />
+                  <span className="xe_settings__slider-value">{settings.fsBlur}px</span>
+                </div>
+                <h2>Saturation</h2>
+                <div className="xe_settings__slider-row">
+                  <Slider
+                    value={settings.fsSaturate}
+                    min={0}
+                    max={3}
+                    wheelStep={0.05}
+                    resetTo={1.35}
+                    onChange={(v) => update({ fsSaturate: Math.round(v * 100) / 100 })}
+                    ariaLabel="Fullscreen player background saturation"
+                  />
+                  <span className="xe_settings__slider-value">{settings.fsSaturate.toFixed(2)}×</span>
+                </div>
               </section>
             </>
           )}
@@ -360,6 +418,7 @@ export function SettingsPage() {
                     min={5}
                     max={90}
                     wheelStep={1}
+                    resetTo={15}
                     onChange={(v) => update({ autoMixDuration: Math.round(v) })}
                     ariaLabel="Auto mix duration"
                   />
