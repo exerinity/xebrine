@@ -67,6 +67,14 @@
 .xe_banner__stop {
   margin-left: auto;
   flex-shrink: 0;
+  background: var(--danger);
+  border-color: transparent;
+  color: #1a0206;
+  font-weight: 600;
+}
+
+.xe_banner__stop:hover:not(:disabled) {
+  background: #ff9aa5;
 }
 
 .xe_empty-note {
