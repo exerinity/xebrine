@@ -11,3 +11,22 @@ export function formatTime(seconds: number): string {
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
+
+export function parseSeekInput(raw: string, duration: number): number | null {
+  const s = raw.trim();
+  if (!s) return null;
+  if (s.endsWith('%')) {
+    const pct = Number(s.slice(0, -1).trim());
+    if (!Number.isFinite(pct)) return null;
+    return clamp((pct / 100) * duration, 0, duration);
+  }
+  if (s.includes(':')) {
+    const parts = s.split(':');
+    if (parts.some((p) => !/^\d+(\.\d+)?$/.test(p.trim()))) return null;
+    const secs = parts.reduce((acc, p) => acc * 60 + Number(p.trim()), 0);
+    return clamp(secs, 0, duration);
+  }
+  const n = Number(s);
+  if (!Number.isFinite(n)) return null;
+  return clamp(n, 0, duration);
+}
