@@ -241,7 +241,7 @@ export function SettingsPage() {
                     onChange={(v) => update({ fsSaturate: Math.round(v * 100) / 100 })}
                     ariaLabel="Fullscreen player background saturation"
                   />
-                  <span className="xe_settings__slider-value">{settings.fsSaturate.toFixed(2)}×</span>
+                  <span className="xe_settings__slider-value">{settings.fsSaturate.toFixed(2)}x</span>
                 </div>
               </section>
             </>
