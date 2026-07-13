@@ -148,7 +148,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
         if (aborted) {
           toast.info(`Bailed scanning with ${found} track${found === 1 ? '' : 's'}`);
         } else {
-          let message = `Done scanning folder - found ${found} track${found === 1 ? '' : 's'}.`;
+          let message = `Done scanning "${folder.name}" - found ${found} track${found === 1 ? '' : 's'}.`;
           const delta = found - prevCount;
           if (isRescan && delta !== 0) {
             message += ` ${Math.abs(delta)} ${delta > 0 ? 'more' : 'less'} found than last scan.`;
