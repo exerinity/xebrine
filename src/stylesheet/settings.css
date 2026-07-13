@@ -147,6 +147,40 @@
   gap: 12px;
 }
 
+.xe_settings__import-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.xe_settings__import-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.xe_settings__import-key {
+  flex-shrink: 0;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.xe_settings__import-value {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text-dim);
+  font-family: monospace;
+  text-align: right;
+}
+
 .xe_settings__folders li {
   display: flex;
   align-items: center;
@@ -164,12 +198,24 @@
   border-color: var(--accent-soft);
 }
 
-.xe_settings__folder-name {
+.xe_settings__folder-info {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.xe_settings__folder-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 600;
+}
+
+.xe_settings__folder-count {
+  font-size: 0.8125rem;
+  color: var(--text-dim);
 }
 
 .xe_settings__folder-actions {
@@ -193,6 +239,23 @@
 .xe_settings__actions {
   display: flex;
   gap: 8px;
+}
+
+.xe_settings__share-url {
+  margin-bottom: 14px;
+}
+
+.xe_settings__pron-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.xe_settings__pron-row .xe_search-input {
+  flex: 1;
+  min-width: 160px;
 }
 
 .xe_settings__chip-row {
