@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../context/player_context';
 import { useSettings } from '../context/settings_context';
 import { fetchLyrics } from '../api/lrclib';
@@ -9,7 +10,7 @@ import { isExplicitId, markExplicit } from '../utils/explicit_tracks';
 import type { Lyrics, StoredLyrics, TrackMeta } from '../types';
 import { LyricsSkeleton } from './skeletons';
 import { Spinner } from './spinner';
-import { DownloadIcon, SearchIcon, TrashIcon, UploadIcon } from './icons';
+import { DownloadIcon, SearchIcon, ShareIcon, TrashIcon, UploadIcon } from './icons';
 
 type Status = 'idle' | 'waiting' | 'loading' | 'notfound' | 'error' | 'badfile';
 const AUTO_SEARCH_DELAY_MS = 2000;
@@ -34,6 +35,7 @@ interface LyricsPanelProps {
 export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPanelProps) {
   const { current, seek, audioRef } = usePlayer();
   const { settings } = useSettings();
+  const navigate = useNavigate();
   const track = current?.track ?? null;
 
   const [lyrics, setLyrics] = useState<Lyrics | null>(null);
@@ -202,6 +204,12 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
             <button type="button" className="xe_btn" onClick={exportLrc}>
               <DownloadIcon size={14} />
               Download as LRC
+            </button>
+          )}
+          {lyrics && (
+            <button type="button" className="xe_btn" onClick={() => navigate('/lyrics/share')}>
+              <ShareIcon size={14} />
+              Share
             </button>
           )}
           {lyrics && (
