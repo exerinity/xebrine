@@ -17,6 +17,7 @@ import { AlbumsPage } from './pages/albums';
 import { AlbumDetailPage } from './pages/album_detail';
 import { QueuePage } from './pages/queue';
 import { LyricsPage } from './pages/lyrics';
+import { ShareLyricsPage } from './pages/share_lyrics';
 import { SettingsPage } from './pages/settings';
 import { AboutPage } from './pages/about';
 import { ReleaseNotesPage } from './pages/release_notes';
@@ -24,6 +25,8 @@ import { Sidebar } from './components/sidebar';
 import { PlayerBar } from './components/player_bar';
 import { FullscreenPlayer } from './components/fs_player';
 import { ToastContainer } from './components/toast_container';
+import { UpdateModal } from './components/update_modal';
+import { WelcomeModal } from './components/welcome_modal';
 
 function MediaBridge() {
   useMediaSession();
@@ -86,6 +89,7 @@ function Shell() {
           <Route path="/albums" element={<AlbumsPage />} />
           <Route path="/queue" element={<QueuePage />} />
           <Route path="/lyrics" element={<LyricsPage />} />
+          <Route path="/lyrics/share" element={<ShareLyricsPage />} />
           <Route path="/settings" element={<Navigate to="/settings/preferences" replace />} />
           <Route path="/settings/:section" element={<SettingsPage />} />
           <Route path="/i" element={<Navigate to="/i/info" replace />} />
@@ -106,6 +110,8 @@ function Shell() {
         }}
       />
       <ToastContainer />
+      <UpdateModal />
+      <WelcomeModal />
     </div>
   );
 }
