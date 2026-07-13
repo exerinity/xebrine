@@ -59,6 +59,24 @@ button:disabled {
   opacity: 0.4;
 }
 
+a:not([class]) {
+  color: var(--accent-text);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 120ms ease, opacity 120ms ease;
+}
+
+a:not([class]):hover {
+  border-bottom-color: currentColor;
+}
+
+a:not([class]):focus-visible {
+  outline: none;
+  border-bottom-color: currentColor;
+  opacity: 0.85;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
 }
