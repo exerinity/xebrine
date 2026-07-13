@@ -169,6 +169,7 @@ export function AboutPage() {
                 <ul className="xe_about__list xe_about__list--group">
                   <li>Synced and interactive (click to jump) lyrics from LRCLIB (<Link to="/settings/preferences">strict or lax matching</Link>)</li>
                   <li><Link to="/lyrics">LRC/SRT/VTT import and LRC export</Link></li>
+                  <li><Link to="/lyrics/share">Share lyrics</Link> as a stylable card image: pick up to 7 lines, tweak colors, style, and background, and download as a PNG</li>
                   <li>Optional <Link to="/settings/toys">explicit tagging</Link> that scans lyrics for profanity and badges offending tracks</li>
                 </ul>
 
