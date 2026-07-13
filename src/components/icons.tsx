@@ -434,6 +434,21 @@ export const DownloadIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const ShareIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="6" cy="12" r="2.6" />
+    <circle cx="17.5" cy="5.5" r="2.6" />
+    <circle cx="17.5" cy="18.5" r="2.6" />
+    <path
+      d="m8.4 10.8 6.6-4M8.4 13.2l6.6 4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </Svg>
+);
+
 export const KeyIcon = (p: IconProps) => (
   <Svg {...p}>
     <circle cx="8" cy="14" r="3.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
