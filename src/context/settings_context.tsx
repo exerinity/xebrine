@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { LrclibMode } from '../api/lrclib';
 import { DEFAULT_IGNORE_RULES, type IgnoreRules } from '../utils/ignore_rules';
 import { EQ_FLAT, normalizeBands } from '../audio/eq';
+import type { ArtistPronunciation } from '../utils/pronunciation';
 
 export type PlayerBarClickAction = 'copy' | 'open';
 
@@ -17,6 +18,7 @@ export interface Settings {
   fsSaturate: number;
   reducedMotion: boolean;
   announceTrackChanges: boolean;
+  artistPronunciations: ArtistPronunciation[];
   tagExplicitSongs: boolean;
 }
 
@@ -27,7 +29,7 @@ interface SettingsContextValue {
 
 const KEY = 'xebrine.settings';
 
-const DEFAULTS: Settings = {
+export const DEFAULT_SETTINGS: Settings = {
   lrclibMode: 'strict',
   notifications: true,
   ignoreRules: DEFAULT_IGNORE_RULES,
@@ -39,16 +41,17 @@ const DEFAULTS: Settings = {
   fsSaturate: 1.35,
   reducedMotion: false,
   announceTrackChanges: false,
+  artistPronunciations: [],
   tagExplicitSongs: false
 };
 
 function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(KEY);
-    const merged = raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
+    const merged = raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS;
     return { ...merged, eqBands: normalizeBands(merged.eqBands) };
   } catch {
-    return DEFAULTS;
+    return DEFAULT_SETTINGS;
   }
 }
 
