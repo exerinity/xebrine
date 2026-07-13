@@ -134,3 +134,15 @@
   padding: 16px;
   overflow: auto;
 }
+
+.xe_modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 14px;
+}
+
+.xe_update-modal__text,
+.xe_welcome-modal__text {
+  margin: 0;
+}
