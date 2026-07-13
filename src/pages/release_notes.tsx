@@ -11,6 +11,14 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '3b',
+    date: '2026-07-12',
+    notes: [
+      <><Link to="/settings/a11y">The TTS engine can now be instructed how to pronounce artists</Link></>,
+      <><Link to="/settings/share">Settings can be exported and imported and shared</Link></>
+    ]
+  },
+  {
     version: '3a',
     date: '2026-07-12',
     notes: [
