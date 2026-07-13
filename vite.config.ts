@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['app/media/icon-192.png', 'app/media/icon-512.png'],
       manifest: {
         name: 'Xebrine',
@@ -41,6 +41,7 @@ export default defineConfig({
     })
   ],
   build: {
+    minify: false,
     rollupOptions: {
       output: {
         entryFileNames: 'app/scripts/[name]-[hash].js',
