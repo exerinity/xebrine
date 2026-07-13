@@ -1,29 +1,32 @@
-import { useNavigate, useParams } from 'react-router-dom';
-import { useState } from 'react';
-import { useSettings } from '../context/settings_context';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useMemo, useRef, useState } from 'react';
+import { useSettings, type Settings } from '../context/settings_context';
 import { useLibrary } from '../context/library_context';
 import { usePlayer } from '../context/player_context';
 import { IGNORABLE_FORMATS, type IgnoredFormat, type IgnoreRules } from '../utils/ignore_rules';
 import { Spinner } from '../components/spinner';
 import { Slider } from '../components/slider';
 import { Equalizer } from '../components/equalizer';
-import { ChevronRightIcon, CloseIcon, FolderIcon, KeyIcon, RefreshIcon, TrashIcon } from '../components/icons';
+import { ChevronRightIcon, CloseIcon, FolderIcon, KeyIcon, PlayIcon, RefreshIcon, TrashIcon } from '../components/icons';
 import { useScanEta, formatEta } from '../hooks/scan_eta';
 import { usePageTitle } from '../hooks/page_title';
 import { toast, type ToastVariant } from '../utils/toast';
 import { speakText } from '../utils/speech';
+import { applyPronunciations } from '../utils/pronunciation';
+import { parseSettingsJson, paramsToSettings, settingsToParams } from '../utils/settings_transfer';
 import { ExplicitIcon } from '../components/explicit_badge';
 import { Modal } from '../components/modal';
 import { PROFANITY_WORDS } from '../utils/profanity';
 
-type SectionId = 'preferences' | 'library' | 'playback' | 'a11y' | 'toys';
+type SectionId = 'preferences' | 'library' | 'playback' | 'a11y' | 'toys' | 'share';
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'preferences', label: 'Main preferences' },
   { id: 'library', label: 'Library settings' },
   { id: 'playback', label: 'Playback settings' },
   { id: 'a11y', label: 'Accessibility' },
-  { id: 'toys', label: 'Toys' }
+  { id: 'toys', label: 'Toys' },
+  { id: 'share', label: 'Share settings' }
 ];
 
 const TOAST_VARIANTS: ToastVariant[] = ['success', 'error', 'info', 'warning'];
@@ -57,11 +60,27 @@ export function SettingsPage() {
   const [toastVariant, setToastVariant] = useState<ToastVariant>('info');
   const [toastMessage, setToastMessage] = useState('');
   const [showFilteredWords, setShowFilteredWords] = useState(false);
+  const [pronArtist, setPronArtist] = useState('');
+  const [pronSay, setPronSay] = useState('');
+  const [pendingImport, setPendingImport] = useState<{
+    settings: Partial<Settings>;
+    fromUrl: boolean;
+  } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { section: sectionParam } = useParams<{ section: string }>();
   const active = (SECTIONS.find((s) => s.id === sectionParam)?.id ?? SECTIONS[0].id) as SectionId;
   const section = SECTIONS.find((s) => s.id === active) ?? SECTIONS[0];
   usePageTitle('Settings');
+
+  const folderSongCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const track of tracks) {
+      counts.set(track.folderId, (counts.get(track.folderId) ?? 0) + 1);
+    }
+    return counts;
+  }, [tracks]);
 
   const toggleRule = (key: keyof Omit<IgnoreRules, 'formats'>) => {
     update({ ignoreRules: { ...settings.ignoreRules, [key]: !settings.ignoreRules[key] } });
@@ -91,10 +110,84 @@ export function SettingsPage() {
     toast[toastVariant](toastMessage.trim() || `This is a ${toastVariant} toast`);
   };
 
+  const addPronunciation = () => {
+    const artist = pronArtist.trim();
+    const pronunciation = pronSay.trim();
+    if (!artist || !pronunciation) return;
+    const rest = settings.artistPronunciations.filter(
+      (p) => p.artist.toLowerCase() !== artist.toLowerCase()
+    );
+    update({ artistPronunciations: [...rest, { artist, pronunciation }] });
+    setPronArtist('');
+    setPronSay('');
+  };
+
+  const removePronunciation = (artist: string) => {
+    update({
+      artistPronunciations: settings.artistPronunciations.filter((p) => p.artist !== artist)
+    });
+  };
+
   const announceCurrentSong = () => {
-    if (current) speakText(`Now playing: ${current.track.title} by ${current.track.artist}`);
+    if (current)
+      speakText(
+        applyPronunciations(
+          `Now playing: ${current.track.title} by ${current.track.artist}`,
+          settings.artistPronunciations
+        )
+      );
     else speakText('no');
   };
+
+  const exportJson = () => {
+    const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'xebrine-settings.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importJson = async (file: File) => {
+    try {
+      const parsed = parseSettingsJson(await file.text());
+      if (Object.keys(parsed).length === 0) {
+        toast.error('Nothing to do with this file');
+        return;
+      }
+      setPendingImport({ settings: parsed, fromUrl: false });
+    } catch {
+      toast.error('Invalid Xebrine settings JSON');
+    }
+  };
+
+  const shareUrl = `${window.location.origin}/settings/share?${settingsToParams(settings)}`;
+
+  const copyShareUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success('Share URL copied to clipboard');
+    } catch {
+      toast.error('Could not copy to clipboard');
+    }
+  };
+
+  const incomingSettings = paramsToSettings(searchParams);
+  const incomingCount = Object.keys(incomingSettings).length;
+
+  const applyPendingImport = () => {
+    if (!pendingImport) return;
+    const count = Object.keys(pendingImport.settings).length;
+    update(pendingImport.settings);
+    toast.success(`Applied ${count} setting${count === 1 ? '' : 's'}`);
+    const fromUrl = pendingImport.fromUrl;
+    setPendingImport(null);
+    if (fromUrl) navigate('/settings/share');
+  };
+
+  const formatValue = (value: unknown) =>
+    typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value);
 
   return (
     <div className="xe_page">
@@ -347,7 +440,13 @@ export function SettingsPage() {
                 <ul className="xe_settings__folders">
                   {folders.map((folder) => (
                     <li key={folder.id}>
-                      <span className="xe_settings__folder-name">{folder.name}</span>
+                      <div className="xe_settings__folder-info">
+                        <span className="xe_settings__folder-name">{folder.name}</span>
+                        <span className="xe_settings__folder-count">
+                          {folderSongCounts.get(folder.id) ?? 0} song
+                          {(folderSongCounts.get(folder.id) ?? 0) === 1 ? '' : 's'}
+                        </span>
+                      </div>
                       <div className="xe_settings__folder-actions">
                         <button
                           type="button"
@@ -463,6 +562,68 @@ export function SettingsPage() {
                   <span>Announce when a song is finished or changes over TTS</span>
                 </label>
               </section>
+
+              <section className="xe_settings__section">
+                <h2>Artist pronunciation</h2>
+                <div className="xe_settings__pron-row">
+                  <input
+                    type="text"
+                    className="xe_search-input"
+                    placeholder="Who? (e.g. deadmau5)"
+                    value={pronArtist}
+                    onChange={(e) => setPronArtist(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && addPronunciation()}
+                  />
+                  <input
+                    type="text"
+                    className="xe_search-input"
+                    placeholder="Pronounce as? (e.g. dead mouse)"
+                    value={pronSay}
+                    onChange={(e) => setPronSay(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && addPronunciation()}
+                  />
+                  <button
+                    type="button"
+                    className="xe_btn xe_btn--accent"
+                    onClick={addPronunciation}
+                    disabled={!pronArtist.trim() || !pronSay.trim()}
+                  >
+                    Add
+                  </button>
+                </div>
+                {settings.artistPronunciations.length > 0 && (
+                  <ul className="xe_settings__folders">
+                    {settings.artistPronunciations.map((p) => (
+                      <li key={p.artist}>
+                        <div className="xe_settings__folder-info">
+                          <span className="xe_settings__folder-name">{p.artist}</span>
+                          <span className="xe_settings__folder-count">as <i>{p.pronunciation}</i></span>
+                        </div>
+                        <div className="xe_settings__folder-actions">
+                          <button
+                            type="button"
+                            className="xe_btn xe_btn--accent"
+                            onClick={() => speakText(p.pronunciation)}
+                            aria-label={`Play pronunciation for ${p.artist}`}
+                          >
+                            <PlayIcon size={14} />
+                            Test
+                          </button>
+                          <button
+                            type="button"
+                            className="xe_btn xe_settings__folder-remove"
+                            onClick={() => removePronunciation(p.artist)}
+                            aria-label={`Remove pronunciation for ${p.artist}`}
+                          >
+                            <TrashIcon size={14} />
+                            Remove
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
             </>
           )}
 
@@ -541,6 +702,86 @@ export function SettingsPage() {
                     </div>
                   </Modal>
                 )}
+              </section>
+            </>
+          )}
+
+          {active === 'share' && (
+            <>
+              {incomingCount > 0 && (
+                <div className="xe_banner xe_banner--info">
+                  <span>
+                    <strong>{incomingCount}</strong> shared setting{incomingCount === 1 ? '' : 's'} to apply
+                  </span>
+                  <button
+                    type="button"
+                    className="xe_btn xe_btn--accent"
+                    onClick={() => setPendingImport({ settings: incomingSettings, fromUrl: true })}
+                  >
+                    Review & apply
+                  </button>
+                </div>
+              )}
+
+              {pendingImport && (
+                <Modal title="Import these settings?" onClose={() => setPendingImport(null)}>
+                  <ul className="xe_settings__import-list">
+                    {Object.entries(pendingImport.settings).map(([key, value]) => (
+                      <li key={key}>
+                        <span className="xe_settings__import-key">{key}</span>
+                        <span className="xe_settings__import-value">{formatValue(value)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="xe_settings__actions">
+                    <button type="button" className="xe_btn xe_btn--accent" onClick={applyPendingImport}>
+                      Apply {Object.keys(pendingImport.settings).length} setting
+                      {Object.keys(pendingImport.settings).length === 1 ? '' : 's'}
+                    </button>
+                    <button type="button" className="xe_btn" onClick={() => setPendingImport(null)}>
+                      Cancel
+                    </button>
+                  </div>
+                </Modal>
+              )}
+
+              <section className="xe_settings__section">
+                <h2>As a file</h2>
+                <p className="xe_settings__hint">
+                  Export every setting to a JSON file, or load one back in
+                </p>
+                <div className="xe_settings__actions">
+                  <button type="button" className="xe_btn" onClick={exportJson}>
+                    Export JSON
+                  </button>
+                  <button type="button" className="xe_btn" onClick={() => fileInputRef.current?.click()}>
+                    Import JSON
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/json,.json"
+                    hidden
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void importJson(file);
+                      e.target.value = '';
+                    }}
+                  />
+                </div>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>As a link (recommended)</h2>
+                <p className="xe_settings__hint">
+                  Packs all settings into parameters in a URL
+                </p>
+                <input type="text" className="xe_search-input xe_settings__share-url" value={shareUrl} readOnly onFocus={(e) => e.target.select()} />
+                <div className="xe_settings__actions">
+                  <button type="button" className="xe_btn xe_btn--accent" onClick={copyShareUrl}>
+                    Copy link
+                  </button>
+                </div>
               </section>
             </>
           )}
