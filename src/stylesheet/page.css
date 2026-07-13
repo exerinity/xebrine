@@ -255,24 +255,6 @@
   margin: 0 0 14px;
 }
 
-.xe_about a {
-  color: var(--accent-text);
-  font-weight: 600;
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 120ms ease, opacity 120ms ease;
-}
-
-.xe_about a:hover {
-  border-bottom-color: currentColor;
-}
-
-.xe_about a:focus-visible {
-  outline: none;
-  border-bottom-color: currentColor;
-  opacity: 0.85;
-}
-
 .xe_about__text {
   color: var(--text-dim);
   line-height: 1.6;
