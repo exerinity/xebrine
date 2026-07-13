@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { usePlayer } from '../context/player_context';
 import { useSettings } from '../context/settings_context';
 import { speakWithMeSpeak, stopMeSpeak } from '../utils/mespeak';
+import { applyPronunciations } from '../utils/pronunciation';
 
 export function useSpeechAnnouncements(): void {
   const { current, duckVolume, audioRef, queue, position, repeatMode } = usePlayer();
@@ -9,6 +10,8 @@ export function useSpeechAnnouncements(): void {
 
   const enabledRef = useRef(settings.announceTrackChanges);
   enabledRef.current = settings.announceTrackChanges;
+  const pronunciationsRef = useRef(settings.artistPronunciations);
+  pronunciationsRef.current = settings.artistPronunciations;
   const duckVolumeRef = useRef(duckVolume);
   duckVolumeRef.current = duckVolume;
   const speechIdRef = useRef(0);
@@ -27,7 +30,8 @@ export function useSpeechAnnouncements(): void {
     duckVolumeRef.current(false);
   };
 
-  const announce = (message: string) => {
+  const announce = (rawMessage: string) => {
+    const message = applyPronunciations(rawMessage, pronunciationsRef.current);
     stopSpeaking();
     const id = speechIdRef.current;
     const restore = () => {
