@@ -11,11 +11,13 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
-    version: '3b',
-    date: '2026-07-12',
+    version: '4',
+    date: '2026-07-14',
     notes: [
       <><Link to="/settings/a11y">The TTS engine can now be instructed how to pronounce artists</Link></>,
-      <><Link to="/settings/share">Settings can be exported and imported and shared</Link></>
+      <><Link to="/settings/share">Settings can be exported and imported and shared</Link></>,
+      <><Link to="/lyrics/share">Added a lyrics sharer</Link>, which is a Spotify-inspired lyrics screenshotter</>,
+      'Added a welcome modal'
     ]
   },
   {
