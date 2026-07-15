@@ -209,12 +209,6 @@ export function AboutPage() {
                 <h3 className="xe_about__heading">Dependencies</h3>
                 <ul className="xe_about__list">
                   <li>
-                    <a href="https://mtg.github.io/essentia.js/" target="_blank" rel="noopener noreferrer">
-                      essentia.js
-                    </a>
-                    : BPM and beat detection for auto mix
-                  </li>
-                  <li>
                     <a href="https://github.com/borewit/music-metadata" target="_blank" rel="noopener noreferrer">
                       music-metadata
                     </a>
