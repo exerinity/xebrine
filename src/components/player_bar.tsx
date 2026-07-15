@@ -24,6 +24,7 @@ import {
 } from './icons';
 import { ExplicitBadge } from './explicit_badge';
 import { Spinner } from './spinner';
+import { ScanDrawer } from './scan_drawer';
 
 interface PlayerBarProps {
   fullscreenOpen?: boolean;
@@ -163,6 +164,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
   return (
     <footer className="xe_player-bar">
       {visualizerOn && <Visualizer analyser={analyser} />}
+      <ScanDrawer />
       <div className="xe_player-bar__now">
         {artworkUrl && (
           <button
