@@ -159,6 +159,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const handoffPendingRef = useRef(false);
   const preloadedBufferRef = useRef<{ key: string; buffer: AudioBuffer } | null>(null);
   const preloadingKeyRef = useRef<string | null>(null);
+  const rateGlideRef = useRef<number | null>(null);
 
   function ensureAudioGraph(): { gain: GainNode; analyser: AnalyserNode } {
     if (gainNodeRef.current && analyserRef.current) {
@@ -210,7 +211,34 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     return fadeGain;
   }
 
+  function clearRateGlide() {
+    if (rateGlideRef.current !== null) {
+      window.clearInterval(rateGlideRef.current);
+      rateGlideRef.current = null;
+    }
+  }
+
+  function glidePlaybackRateToUnity(from: number) {
+    clearRateGlide();
+    if (!(from > 0) || Math.abs(from - 1) < 1e-3) {
+      audio.playbackRate = 1;
+      return;
+    }
+    const steps = 30;
+    let i = 0;
+    audio.playbackRate = from;
+    rateGlideRef.current = window.setInterval(() => {
+      i++;
+      const x = i / steps;
+      const eased = 1 - (1 - x) * (1 - x);
+      audio.playbackRate = i >= steps ? 1 : from + (1 - from) * eased;
+      if (i >= steps) clearRateGlide();
+    }, 50);
+  }
+
   function cancelCrossfade() {
+    clearRateGlide();
+    audio.playbackRate = 1;
     if (!crossfadeActiveRef.current) return;
     crossfadeActiveRef.current = false;
     handoffPendingRef.current = false;
@@ -235,7 +263,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  function finishHandoff() {
+  function finishHandoff(handoffRate = 1) {
     const ctx = audioCtxRef.current;
     const src = mixSourceRef.current;
     const fadeGainA = fadeGainARef.current;
@@ -276,6 +304,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           crossfadeActiveRef.current = false;
           handoffPendingRef.current = false;
           setAutoMixPhase('idle');
+          glidePlaybackRateToUnity(handoffRate);
         }
       },
       (SWAP + 0.06) * 1000
@@ -520,22 +549,26 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
         if (isHandoff && mixSourceRef.current && audioCtxRef.current) {
           const ctx = audioCtxRef.current;
+          const rate = mixRateRef.current > 0 ? mixRateRef.current : 1;
           const bufferPos = () =>
             Math.max(
               0,
-              mixStartOffsetRef.current +
-                mixRateRef.current * (ctx.currentTime - mixStartCtxTimeRef.current)
+              mixStartOffsetRef.current + rate * (ctx.currentTime - mixStartCtxTimeRef.current)
             );
           const startMedia = () => {
             if (cancelled) return;
-            audio.currentTime = bufferPos() + 0.1;
+            clearRateGlide();
+            audio.playbackRate = rate;
+            audio.currentTime = bufferPos();
             audioCtxRef.current?.resume().catch(() => {});
             audio.play().then(
               () => {
-                if (!cancelled) finishHandoff();
+                if (cancelled) return;
+                audio.currentTime = bufferPos();
+                finishHandoff(rate);
               },
               () => {
-                if (!cancelled) finishHandoff();
+                if (!cancelled) finishHandoff(rate);
               }
             );
           };
@@ -543,6 +576,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           if (audio.readyState >= 1) startMedia();
           else audio.addEventListener('loadedmetadata', startMedia, { once: true });
         } else {
+          clearRateGlide();
+          audio.playbackRate = 1;
           setCurrentTime(0);
           if (fadeGainARef.current && audioCtxRef.current) {
             fadeGainARef.current.gain.cancelScheduledValues(audioCtxRef.current.currentTime);
