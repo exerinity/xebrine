@@ -66,6 +66,7 @@ export default defineConfig({
     }
   },
   worker: {
+    format: 'es',
     rollupOptions: {
       output: {
         entryFileNames: 'app/scripts/[name]-[hash].js',
