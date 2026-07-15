@@ -5,7 +5,6 @@ import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { TrackList } from '../components/track_list';
 import { TrackListSkeleton } from '../components/skeletons';
-import { Spinner } from '../components/spinner';
 import { SortSelect, type SortOption } from '../components/sort_select';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { usePageTitle } from '../hooks/page_title';
@@ -129,17 +128,6 @@ export function LibraryPage() {
             <KeyIcon size={14} />
             Restore access
           </button>
-        </div>
-      )}
-
-      {scanning && (
-        <div className="xe_banner xe_banner--info">
-          <Spinner />
-          <span>
-            Scanning <strong>{scanning.folderName}</strong>: read {scanning.done}
-            {scanning.total > 0 ? ` / ${scanning.total}` : ''} files so far...
-            {scanning.omitted > 0 ? ` (${scanning.omitted} to be omitted by your filter)` : ''}
-          </span>
         </div>
       )}
 
