@@ -80,6 +80,7 @@ const AUTOMIX_KEY = 'xebrine.automix';
 
 export const MAX_VOLUME = 1.5;
 const DUCK_FACTOR = 0.25;
+const DUCK_FADE_MS = 300;
 
 function loadVolume(): number {
   const raw = localStorage.getItem(VOLUME_KEY);
@@ -135,6 +136,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
+  const volumeFadeFrameRef = useRef<number | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const fadeGainARef = useRef<GainNode | null>(null);
   const eqFiltersRef = useRef<BiquadFilterNode[] | null>(null);
@@ -385,7 +387,21 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  function cancelVolumeFade() {
+    if (volumeFadeFrameRef.current !== null) {
+      cancelAnimationFrame(volumeFadeFrameRef.current);
+      volumeFadeFrameRef.current = null;
+    }
+    const gain = gainNodeRef.current;
+    const ctx = audioCtxRef.current;
+    if (gain && ctx) {
+      gain.gain.cancelScheduledValues(ctx.currentTime);
+      gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
+    }
+  }
+
   function applyVolume(v: number) {
+    cancelVolumeFade();
     if (gainNodeRef.current) {
       gainNodeRef.current.gain.value = v;
       return;
@@ -396,6 +412,50 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
     audio.volume = 1;
     ensureAudioGraph().gain.gain.value = v;
+  }
+
+  function fadeVolumeTo(target: number, durationMs: number) {
+    cancelVolumeFade();
+    if (durationMs <= 0) {
+      applyVolume(target);
+      return;
+    }
+
+    if (gainNodeRef.current) {
+      const gain = gainNodeRef.current;
+      const ctx = audioCtxRef.current;
+      if (ctx) {
+        const now = ctx.currentTime;
+        gain.gain.setValueAtTime(gain.gain.value, now);
+        gain.gain.linearRampToValueAtTime(target, now + durationMs / 1000);
+        return;
+      }
+      gain.gain.value = target;
+      return;
+    }
+
+    if (target > 1) {
+      audio.volume = 1;
+      const { gain } = ensureAudioGraph();
+      const ctx = audioCtxRef.current!;
+      const now = ctx.currentTime;
+      gain.gain.setValueAtTime(1, now);
+      gain.gain.linearRampToValueAtTime(target, now + durationMs / 1000);
+      return;
+    }
+
+    const start = audio.volume;
+    const startTime = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - startTime) / durationMs);
+      audio.volume = start + (target - start) * t;
+      if (t < 1) {
+        volumeFadeFrameRef.current = requestAnimationFrame(step);
+      } else {
+        volumeFadeFrameRef.current = null;
+      }
+    };
+    volumeFadeFrameRef.current = requestAnimationFrame(step);
   }
 
   const getAnalyser = useCallback(() => {
@@ -488,7 +548,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [isPlaying]);
 
   useEffect(() => {
-    applyVolume(volume * (ducking ? DUCK_FACTOR : 1));
+    fadeVolumeTo(volume * (ducking ? DUCK_FACTOR : 1), DUCK_FADE_MS);
     try {
       localStorage.setItem(VOLUME_KEY, String(volume));
     } catch {
