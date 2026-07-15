@@ -1,5 +1,5 @@
 import type { FolderRecord, TrackMeta } from '../types';
-import { fallbackTags, MAX_PARSE_FILE_SIZE, readTrackTags, type TrackTags } from './metadata';
+import { parseTagsBatch } from './scan_pool';
 import { toast } from '../utils/toast';
 
 const AUDIO_EXTENSIONS = new Set([
@@ -59,13 +59,6 @@ export function trackId(folderId: string, relPath: string[]): string {
   return `${folderId}:${relPath.join('/')}`;
 }
 
-const SCAN_DELAY_MS = 75;
-const TAG_READ_TIMEOUT_MS = 8000;
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('timed out')), ms);
@@ -81,46 +74,38 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
     );
   });
 }
-async function readFileTags(handle: FileSystemFileHandle): Promise<TrackTags> {
-  const file = await handle.getFile();
-  if (file.size > MAX_PARSE_FILE_SIZE) {
-    toast.warning(
-      `Skipped tags for "${handle.name}" (${Math.round(file.size / 1024 / 1024)} MB file, too large to parse safely)`
-    );
-    return fallbackTags(handle.name);
-  }
-  return readTrackTags(file);
-}
-
 export async function scanFolder(
   folder: FolderRecord,
   onProgress?: (done: number, total: number, track: TrackMeta) => void,
   signal?: AbortSignal
 ): Promise<TrackMeta[]> {
   const files = await collectAudioFiles(folder.handle);
-  const tracks: TrackMeta[] = [];
-  for (let i = 0; i < files.length; i++) {
-    if (signal?.aborted) break;
-    if (i > 0) await delay(SCAN_DELAY_MS);
-    const { handle, relPath } = files[i];
-    let tags: TrackTags;
-    try {
-      tags = await withTimeout(readFileTags(handle), TAG_READ_TIMEOUT_MS);
-    } catch {
-      toast.warning(`Skipped "${handle.name}" (unreadable, corrupt, or took too long)`);
-      tags = fallbackTags(handle.name);
-    }
-    const track: TrackMeta = {
-      id: trackId(folder.id, relPath),
-      folderId: folder.id,
-      relPath,
-      fileName: handle.name,
-      ...tags
-    };
-    tracks.push(track);
-    onProgress?.(i + 1, files.length, track);
-  }
-  return tracks;
+  const tracks: (TrackMeta | undefined)[] = new Array(files.length);
+  let done = 0;
+  await parseTagsBatch(
+    files.map((f) => f.handle),
+    (index, parsed) => {
+      const { handle, relPath } = files[index];
+      if (parsed.warning === 'oversized') {
+        toast.warning(
+          `Skipped tags for "${handle.name}" (${parsed.sizeMB} MB file, too large to parse safely)`
+        );
+      } else if (parsed.warning === 'unreadable') {
+        toast.warning(`Skipped "${handle.name}" (unreadable, corrupt, or took too long)`);
+      }
+      const track: TrackMeta = {
+        id: trackId(folder.id, relPath),
+        folderId: folder.id,
+        relPath,
+        fileName: handle.name,
+        ...parsed.tags
+      };
+      tracks[index] = track;
+      onProgress?.(++done, files.length, track);
+    },
+    signal
+  );
+  return tracks.filter((t): t is TrackMeta => t !== undefined);
 }
 
 export async function getTrackFile(
