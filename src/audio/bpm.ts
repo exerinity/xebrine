@@ -1,10 +1,13 @@
+import { fitBeatGrid, type BeatGridFit } from './bpm_dsp';
+
 export interface TrackAnalysis {
   bpm: number;
   confidence: number;
   beats: number[];
 }
 
-const ANALYZE_SECONDS = 60;
+const ANALYSIS_SAMPLE_RATE = 22050;
+const MAX_ANALYZE_SECONDS = 900;
 
 interface AnalyzeResponse {
   id: number;
@@ -42,9 +45,12 @@ function getWorker(): Worker {
 
 async function decodeMono(file: File): Promise<Float32Array> {
   const arrayBuffer = await file.arrayBuffer();
-  const ctx = new OfflineAudioContext(1, 1, 44100);
+  const ctx = new OfflineAudioContext(1, 1, ANALYSIS_SAMPLE_RATE);
   const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-  const length = Math.min(audioBuffer.length, Math.floor(audioBuffer.sampleRate * ANALYZE_SECONDS));
+  const length = Math.min(
+    audioBuffer.length,
+    Math.floor(audioBuffer.sampleRate * MAX_ANALYZE_SECONDS)
+  );
   if (audioBuffer.numberOfChannels === 1) {
     return audioBuffer.getChannelData(0).slice(0, length);
   }
@@ -76,16 +82,19 @@ export async function analyzeTrack(trackId: string, file: File): Promise<TrackAn
   const id = nextId++;
   const result = await new Promise<TrackAnalysis>((resolve, reject) => {
     pending.set(id, { resolve, reject });
-    getWorker().postMessage({ id, mono }, [mono.buffer]);
+    getWorker().postMessage({ id, mono, sampleRate: ANALYSIS_SAMPLE_RATE }, [mono.buffer]);
   });
   cachePut(trackId, result);
   return result;
 }
 
 export function classifyBpmDiff(a: number, b: number): 'green' | 'orange' | 'red' {
-  const diff = Math.abs(a - b);
-  if (diff < 5) return 'green';
-  if (diff <= 20) return 'orange';
+  if (!(a > 0) || !(b > 0)) return 'red';
+  let octaves = Math.abs(Math.log2(a / b)) % 1;
+  octaves = Math.min(octaves, 1 - octaves);
+  const stretch = Math.pow(2, octaves) - 1;
+  if (stretch < 0.04) return 'green';
+  if (stretch <= 0.08) return 'orange';
   return 'red';
 }
 
@@ -106,49 +115,38 @@ export function equalPowerFadeCurves(steps = 64): { fadeOut: Float32Array; fadeI
   return { fadeOut, fadeIn };
 }
 
-function beatPeriod(a: TrackAnalysis): number {
+const MAX_STRETCH = 1.08;
+const MIN_TEMPO_CONFIDENCE = 0.2;
+const OUT_GRID_LOOKBACK_SECONDS = 45;
+const OUT_GRID_LOOKAHEAD_SECONDS = 15;
+const IN_GRID_SECONDS = 75;
+const BAR_QUANTIZE_MIN_BEATS = 8;
+
+function medianBeatPeriod(a: TrackAnalysis): number {
   if (a.beats.length >= 3) {
     const diffs: number[] = [];
-    for (let i = 1; i < a.beats.length; i++) diffs.push(a.beats[i] - a.beats[i - 1]);
-    diffs.sort((x, y) => x - y);
-    const mid = diffs[Math.floor(diffs.length / 2)];
-    if (mid > 0.2 && mid < 2) return mid;
+    for (let i = 1; i < a.beats.length; i++) {
+      const d = a.beats[i] - a.beats[i - 1];
+      if (d > 0.2 && d < 2) diffs.push(d);
+    }
+    if (diffs.length >= 2) {
+      diffs.sort((x, y) => x - y);
+      const mid = diffs.length >> 1;
+      return diffs.length % 2 === 1 ? diffs[mid] : (diffs[mid - 1] + diffs[mid]) / 2;
+    }
   }
   return a.bpm > 0 ? 60 / a.bpm : 0.5;
 }
 
-interface BeatGrid {
-  period: number;
-  phase: number;
-}
-
-function beatGrid(a: TrackAnalysis): BeatGrid | null {
-  const beats = a.beats;
-  if (beats.length < 4) return null;
-  const diffs: number[] = [];
-  for (let i = 1; i < beats.length; i++) diffs.push(beats[i] - beats[i - 1]);
-  diffs.sort((x, y) => x - y);
-  const rough = diffs[Math.floor(diffs.length / 2)];
-  if (!(rough > 0.2 && rough < 2)) return null;
-
-  let sx = 0;
-  let sy = 0;
-  let sxx = 0;
-  let sxy = 0;
-  const n = beats.length;
-  for (const b of beats) {
-    const k = Math.round((b - beats[0]) / rough);
-    sx += k;
-    sy += b;
-    sxx += k * k;
-    sxy += k * b;
+function foldPeriodTowards(period: number, reference: number): number {
+  let best = period;
+  for (const factor of [0.5, 2]) {
+    const candidate = period * factor;
+    if (Math.abs(Math.log2(candidate / reference)) < Math.abs(Math.log2(best / reference))) {
+      best = candidate;
+    }
   }
-  const den = n * sxx - sx * sx;
-  if (den === 0) return null;
-  const period = (n * sxy - sx * sy) / den;
-  const phase = (sy - period * sx) / n;
-  if (!(period > 0.2 && period < 2)) return null;
-  return { period, phase };
+  return best;
 }
 
 export function planCrossfade(
@@ -161,29 +159,51 @@ export function planCrossfade(
   if (!outgoing || !incoming || outgoing.bpm <= 0 || incoming.bpm <= 0 || !matchTempo) {
     return { incomingOffset: 0, fadeSeconds: requestedFade, playbackRate: 1 };
   }
+  if (outgoing.confidence < MIN_TEMPO_CONFIDENCE || incoming.confidence < MIN_TEMPO_CONFIDENCE) {
+    return { incomingOffset: 0, fadeSeconds: requestedFade, playbackRate: 1 };
+  }
 
-  const outGrid = beatGrid(outgoing);
-  const inGrid = beatGrid(incoming);
-  const PA = outGrid?.period ?? beatPeriod(outgoing);
-  const PB = inGrid?.period ?? beatPeriod(incoming);
-  const rate = PB / PA;
+  const outGrid: BeatGridFit | null = fitBeatGrid(
+    outgoing.beats,
+    outgoingTime - OUT_GRID_LOOKBACK_SECONDS,
+    outgoingTime + requestedFade + OUT_GRID_LOOKAHEAD_SECONDS
+  );
+  const inGrid: BeatGridFit | null = fitBeatGrid(incoming.beats, 0, IN_GRID_SECONDS);
 
-  const beatsInFade = Math.max(1, Math.floor(requestedFade / PA));
-  const fadeSeconds = Math.min(requestedFade, beatsInFade * PA);
+  const periodOut = outGrid?.period ?? medianBeatPeriod(outgoing);
+  const periodInRaw = inGrid?.period ?? medianBeatPeriod(incoming);
+  if (!(periodOut > 0) || !(periodInRaw > 0)) {
+    return { incomingOffset: 0, fadeSeconds: requestedFade, playbackRate: 1 };
+  }
 
-  if (!outGrid || (!inGrid && !incoming.beats.length)) {
+  const periodIn = foldPeriodTowards(periodInRaw, periodOut);
+  let rate = periodIn / periodOut;
+  if (!Number.isFinite(rate) || rate <= 0 || Math.abs(Math.log2(rate)) > Math.log2(MAX_STRETCH)) {
+    rate = 1;
+  }
+
+  let fadeSeconds = requestedFade;
+  const beatsInFade = Math.floor(requestedFade / periodOut + 1e-6);
+  if (beatsInFade >= 1) {
+    const quantized =
+      beatsInFade >= BAR_QUANTIZE_MIN_BEATS ? beatsInFade - (beatsInFade % 4) : beatsInFade;
+    fadeSeconds = Math.min(requestedFade, quantized * periodOut);
+  }
+
+  if (!outGrid) {
     return { incomingOffset: 0, fadeSeconds, playbackRate: rate };
   }
 
-  const kNext = Math.ceil((outgoingTime - outGrid.phase) / PA - 1e-6);
-  const aNext = outGrid.phase + kNext * PA;
-  const dA = aNext - outgoingTime;
+  const kNext = Math.ceil((outgoingTime - outGrid.phase) / periodOut - 1e-4);
+  const dA = outGrid.phase + kNext * periodOut - outgoingTime;
 
-  const b0 = inGrid ? inGrid.phase : incoming.beats[0];
+  const phaseIn = inGrid?.phase ?? incoming.beats[0];
+  if (phaseIn === undefined) {
+    return { incomingOffset: 0, fadeSeconds, playbackRate: rate };
+  }
+
   const target = rate * dA;
-  const m = Math.max(0, Math.ceil((target - b0) / PB));
-  const bEntry = b0 + m * PB;
-  let incomingOffset = bEntry - target;
+  let incomingOffset = (((phaseIn - target) % periodIn) + periodIn) % periodIn;
   if (!Number.isFinite(incomingOffset) || incomingOffset < 0) incomingOffset = 0;
 
   return { incomingOffset, fadeSeconds, playbackRate: rate };
