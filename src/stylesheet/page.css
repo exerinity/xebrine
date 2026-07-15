@@ -53,30 +53,6 @@
   color: var(--text-dim);
 }
 
-.xe_banner__eta {
-  margin-left: 8px;
-  padding: 1px 8px;
-  border-radius: 99px;
-  background: var(--panel-2);
-  color: var(--accent-text);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.xe_banner__stop {
-  margin-left: auto;
-  flex-shrink: 0;
-  background: var(--danger);
-  border-color: transparent;
-  color: #1a0206;
-  font-weight: 600;
-}
-
-.xe_banner__stop:hover:not(:disabled) {
-  background: #ff9aa5;
-}
-
 .xe_empty-note {
   color: var(--text-dim);
   padding: 24px 0;
