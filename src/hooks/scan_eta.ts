@@ -5,14 +5,19 @@ interface ScanLike {
   total: number;
 }
 
-export function useScanEta(scanning: ScanLike | null): number | null {
+export interface ScanStats {
+  eta: number | null;
+  rate: number | null;
+}
+
+export function useScanStats(scanning: ScanLike | null): ScanStats {
   const samplesRef = useRef<{ t: number; done: number }[]>([]);
-  const [eta, setEta] = useState<number | null>(null);
+  const [stats, setStats] = useState<ScanStats>({ eta: null, rate: null });
 
   useEffect(() => {
     if (!scanning || scanning.total <= 0) {
       samplesRef.current = [];
-      setEta(null);
+      setStats({ eta: null, rate: null });
       return;
     }
 
@@ -34,18 +39,22 @@ export function useScanEta(scanning: ScanLike | null): number | null {
     if (dSeconds >= 0.5 && dDone > 0) {
       const rate = dDone / dSeconds;
       const remaining = scanning.total - scanning.done;
-      setEta(remaining > 0 ? remaining / rate : 0);
+      setStats({ eta: remaining > 0 ? remaining / rate : 0, rate });
     }
   }, [scanning]);
 
-  return eta;
+  return stats;
+}
+
+export function formatRate(rate: number): string {
+  return rate >= 10 ? String(Math.round(rate)) : rate.toFixed(1);
 }
 
 export function formatEta(seconds: number): string {
   if (seconds < 1) return 'almost done';
   const total = Math.ceil(seconds);
-  if (total < 60) return `about ${total}s left`;
+  if (total < 60) return `~${total}s left`;
   const mins = Math.floor(total / 60);
   const rem = total % 60;
-  return rem ? `about ${mins}m ${rem}s left` : `about ${mins}m left`;
+  return rem ? `~${mins}m ${rem}s left` : `~${mins}m left`;
 }
