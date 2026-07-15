@@ -10,7 +10,6 @@
     "icons": "node scripts/gen-icons.mjs"
   },
   "dependencies": {
-    "essentia.js": "^0.1.3",
     "mespeak": "^2.0.2",
     "music-metadata": "^11.0.0",
     "react": "^19.0.0",
