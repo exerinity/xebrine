@@ -97,8 +97,8 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
 function ellipsize(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {
   if (ctx.measureText(text).width <= maxWidth) return text;
   let t = text;
-  while (t.length > 1 && ctx.measureText(`${t}…`).width > maxWidth) t = t.slice(0, -1);
-  return `${t.trimEnd()}…`;
+  while (t.length > 1 && ctx.measureText(`${t}...`).width > maxWidth) t = t.slice(0, -1);
+  return `${t.trimEnd()}...`;
 }
 
 function drawArtwork(
