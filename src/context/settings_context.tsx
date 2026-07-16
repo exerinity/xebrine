@@ -3,6 +3,7 @@ import type { LrclibMode } from '../api/lrclib';
 import { DEFAULT_IGNORE_RULES, type IgnoreRules } from '../utils/ignore_rules';
 import { EQ_FLAT, normalizeBands } from '../audio/eq';
 import type { ArtistPronunciation } from '../utils/pronunciation';
+import { isThemeId, type ThemeId } from '../utils/themes';
 
 export type PlayerBarClickAction = 'copy' | 'open';
 
@@ -20,6 +21,7 @@ export interface Settings {
   announceTrackChanges: boolean;
   artistPronunciations: ArtistPronunciation[];
   tagExplicitSongs: boolean;
+  theme: ThemeId;
 }
 
 interface SettingsContextValue {
@@ -42,14 +44,19 @@ export const DEFAULT_SETTINGS: Settings = {
   reducedMotion: false,
   announceTrackChanges: false,
   artistPronunciations: [],
-  tagExplicitSongs: false
+  tagExplicitSongs: false,
+  theme: 'default'
 };
 
 function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(KEY);
     const merged = raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS;
-    return { ...merged, eqBands: normalizeBands(merged.eqBands) };
+    return {
+      ...merged,
+      eqBands: normalizeBands(merged.eqBands),
+      theme: isThemeId(merged.theme) ? merged.theme : 'default'
+    };
   } catch {
     return DEFAULT_SETTINGS;
   }
