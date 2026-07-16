@@ -12,11 +12,13 @@ interface Release {
 const RELEASES: Release[] = [
   {
     version: '5',
-    date: '2026-07-14',
+    date: '2026-07-16',
     notes: [
-      'The BPM analysis engine has been completely reworked and the auto mix should feel (or sound) better',
+      'The BPM analysis engine has been completely reworked with a bespoke engine and the auto mix should feel (or sound) better',
       'Scanning folders is now done through a worker pool sized to CPU core count, so scanning speed should be tenfold',
-      'When scanning, a small card now grows out of the player bar with progress'
+      'When scanning, a small card now grows out of the player bar with progress',
+      'Ported (most) themes from Voxity',
+      'Fullscreen player overhauled to look less awkward'
     ]
   },
   {
