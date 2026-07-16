@@ -9,6 +9,7 @@ export interface TrackMeta {
   folderId: string;
   relPath: string[];
   fileName: string;
+  sizeBytes: number;
   title: string;
   artist: string;
   album: string;
