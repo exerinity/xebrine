@@ -64,6 +64,14 @@ function Shell() {
   }, [settings.reducedMotion]);
 
   useEffect(() => {
+    if (settings.theme === 'default') {
+      delete document.documentElement.dataset.theme;
+    } else {
+      document.documentElement.dataset.theme = settings.theme;
+    }
+  }, [settings.theme]);
+
+  useEffect(() => {
     if (!current) setFullscreenOpen(false);
   }, [current]);
   useEffect(() => {
