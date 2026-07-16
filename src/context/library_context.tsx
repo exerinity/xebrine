@@ -14,7 +14,8 @@ import {
   getTrackFile,
   hasReadPermission,
   requestReadPermission,
-  scanFolder
+  scanFolder,
+  type SkippedFile
 } from '../management/library';
 import { readCoverArt } from '../management/metadata';
 import { shouldIgnoreTrack } from '../utils/ignore_rules';
@@ -28,18 +29,26 @@ interface ScanProgress {
   done: number;
   total: number;
   omitted: number;
+  audioSeconds: number;
+}
+
+export interface ScanReport {
+  folderName: string;
+  skipped: SkippedFile[];
 }
 
 interface LibraryContextValue {
   folders: FolderRecord[];
   tracks: TrackMeta[];
   scanning: ScanProgress | null;
+  scanReport: ScanReport | null;
   permissionNeeded: boolean;
   supported: boolean;
   addFolder(): Promise<void>;
   removeFolder(folderId: string): Promise<void>;
   rescanFolder(folderId: string): Promise<void>;
   stopScan(): void;
+  dismissScanReport(): void;
   restoreAccess(): Promise<void>;
   getFile(track: TrackMeta): Promise<File>;
 }
@@ -51,6 +60,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   const [folders, setFolders] = useState<FolderRecord[]>([]);
   const [tracks, setTracks] = useState<TrackMeta[]>([]);
   const [scanning, setScanning] = useState<ScanProgress | null>(null);
+  const [scanReport, setScanReport] = useState<ScanReport | null>(null);
   const [permissionNeeded, setPermissionNeeded] = useState(false);
   const supported = typeof window.showDirectoryPicker === 'function';
 
@@ -113,14 +123,17 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     async (folder: FolderRecord) => {
       const controller = new AbortController();
       scanAbortRef.current = controller;
-      setScanning({ folderName: folder.name, done: 0, total: 0, omitted: 0 });
+      setScanning({ folderName: folder.name, done: 0, total: 0, omitted: 0, audioSeconds: 0 });
+      setScanReport(null);
       let omitted = 0;
+      let audioSeconds = 0;
       try {
-        const scanned = await scanFolder(
+        const { tracks: scanned, skipped } = await scanFolder(
           folder,
           (done, total, track) => {
             if (shouldIgnoreTrack(track, settings.ignoreRules)) omitted++;
-            setScanning({ folderName: folder.name, done, total, omitted });
+            if (Number.isFinite(track.duration)) audioSeconds += track.duration;
+            setScanning({ folderName: folder.name, done, total, omitted, audioSeconds });
           },
           controller.signal
         );
@@ -155,6 +168,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
           }
           toast.success(message);
         }
+        if (skipped.length > 0) setScanReport({ folderName: folder.name, skipped });
       } catch (err) {
         toast.error(`Scanning "${folder.name}" failed: ${err instanceof Error ? err.message : 'unknown error'}`);
       } finally {
@@ -167,6 +181,10 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
 
   const stopScan = useCallback(() => {
     scanAbortRef.current?.abort();
+  }, []);
+
+  const dismissScanReport = useCallback(() => {
+    setScanReport(null);
   }, []);
 
   const addFolder = useCallback(async () => {
@@ -230,12 +248,14 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
         folders,
         tracks: visibleTracks,
         scanning,
+        scanReport,
         permissionNeeded,
         supported,
         addFolder,
         removeFolder,
         rescanFolder,
         stopScan,
+        dismissScanReport,
         restoreAccess,
         getFile
       }}
