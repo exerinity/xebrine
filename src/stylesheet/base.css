@@ -1,3 +1,39 @@
+@property --accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #4a29c2;
+}
+
+@property --accent-soft {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(74, 41, 194, 0.22);
+}
+
+@property --accent-text {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #9b82f3;
+}
+
+@property --accent-bright {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #6d4aef;
+}
+
+@property --accent-glow {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(109, 74, 239, 0.52);
+}
+
+@property --accent-wash {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(74, 41, 194, 0.14);
+}
+
 :root {
   --bg: #030003;
   --panel: #070007;
