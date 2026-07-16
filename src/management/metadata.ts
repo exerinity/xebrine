@@ -1,5 +1,6 @@
 import { parseBlob, selectCover } from 'music-metadata';
-export const MAX_PARSE_FILE_SIZE = 100 * 1024 * 1024;
+
+const MAX_COVER_PARSE_SIZE = 100 * 1024 * 1024;
 
 export interface TrackTags {
   title: string;
@@ -35,7 +36,6 @@ export function fallbackTags(fileName: string): TrackTags {
 }
 
 export async function readTrackTags(file: File): Promise<TrackTags> {
-  if (file.size > MAX_PARSE_FILE_SIZE) return fallbackTags(file.name);
   try {
     const meta = await parseBlob(file, { duration: true, skipCovers: true });
     return {
@@ -58,7 +58,7 @@ export async function readTrackTags(file: File): Promise<TrackTags> {
 }
 
 export async function readCoverArt(file: File): Promise<Blob | null> {
-  if (file.size > MAX_PARSE_FILE_SIZE) return null;
+  if (file.size > MAX_COVER_PARSE_SIZE) return null;
   try {
     const meta = await parseBlob(file);
     const cover = selectCover(meta.common.picture);
