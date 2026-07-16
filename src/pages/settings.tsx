@@ -3,7 +3,15 @@ import { useMemo, useRef, useState } from 'react';
 import { useSettings, type Settings } from '../context/settings_context';
 import { useLibrary } from '../context/library_context';
 import { usePlayer } from '../context/player_context';
-import { IGNORABLE_FORMATS, type IgnoredFormat, type IgnoreRules } from '../utils/ignore_rules';
+import {
+  DEFAULT_SIZE_LIMIT_BYTES,
+  IGNORABLE_FORMATS,
+  MAX_SIZE_LIMIT_BYTES,
+  MIN_SIZE_LIMIT_BYTES,
+  SIZE_QUIP_THRESHOLD_BYTES,
+  type IgnoredFormat,
+  type IgnoreRules
+} from '../utils/ignore_rules';
 import { Slider } from '../components/slider';
 import { Equalizer } from '../components/equalizer';
 import { ChevronRightIcon, FolderIcon, KeyIcon, PlayIcon, RefreshIcon, TrashIcon } from '../components/icons';
@@ -12,6 +20,7 @@ import { toast, type ToastVariant } from '../utils/toast';
 import { speakText } from '../utils/speech';
 import { applyPronunciations } from '../utils/pronunciation';
 import { parseSettingsJson, paramsToSettings, settingsToParams } from '../utils/settings_transfer';
+import { clamp, formatBytes } from '../utils/format';
 import { ExplicitIcon } from '../components/explicit_badge';
 import { Modal } from '../components/modal';
 import { PROFANITY_WORDS } from '../utils/profanity';
@@ -29,6 +38,18 @@ const SECTIONS: { id: SectionId; label: string }[] = [
 ];
 
 const TOAST_VARIANTS: ToastVariant[] = ['success', 'error', 'info', 'warning'];
+
+const SIZE_SLIDER_RATIO = MAX_SIZE_LIMIT_BYTES / MIN_SIZE_LIMIT_BYTES;
+
+function sizeToSlider(bytes: number): number {
+  return Math.log(bytes / MIN_SIZE_LIMIT_BYTES) / Math.log(SIZE_SLIDER_RATIO);
+}
+
+function sliderToSize(fraction: number): number {
+  const bytes = MIN_SIZE_LIMIT_BYTES * SIZE_SLIDER_RATIO ** fraction;
+  const MB = 1024 * 1024;
+  return clamp(Math.round(bytes / MB) * MB, MIN_SIZE_LIMIT_BYTES, MAX_SIZE_LIMIT_BYTES);
+}
 
 const FS_BG_PRESETS: { label: string; blur: number; saturate: number }[] = [
   { label: 'None', blur: 0, saturate: 1 },
@@ -79,8 +100,12 @@ export function SettingsPage() {
     return counts;
   }, [tracks]);
 
-  const toggleRule = (key: keyof Omit<IgnoreRules, 'formats'>) => {
+  const toggleRule = (key: keyof Omit<IgnoreRules, 'formats' | 'maxSizeBytes'>) => {
     update({ ignoreRules: { ...settings.ignoreRules, [key]: !settings.ignoreRules[key] } });
+  };
+
+  const setMaxSize = (maxSizeBytes: number | null) => {
+    update({ ignoreRules: { ...settings.ignoreRules, maxSizeBytes } });
   };
 
   const toggleFormat = (format: IgnoredFormat) => {
@@ -427,6 +452,45 @@ export function SettingsPage() {
                     );
                   })}
                 </div>
+                <p className="xe_settings__hint">Or are larger than...</p>
+                <label className="xe_settings__radio">
+                  <input
+                    type="checkbox"
+                    checked={settings.ignoreRules.maxSizeBytes !== null}
+                    onChange={() =>
+                      setMaxSize(
+                        settings.ignoreRules.maxSizeBytes === null ? DEFAULT_SIZE_LIMIT_BYTES : null
+                      )
+                    }
+                  />
+                  <span>a certain file size</span>
+                </label>
+                {settings.ignoreRules.maxSizeBytes !== null && (
+                  <div className="xe_settings__slider-row">
+                    <Slider
+                      value={sizeToSlider(settings.ignoreRules.maxSizeBytes)}
+                      min={0}
+                      max={1}
+                      wheelStep={0.02}
+                      resetTo={sizeToSlider(DEFAULT_SIZE_LIMIT_BYTES)}
+                      onChange={(v) => setMaxSize(sliderToSize(v))}
+                      ariaLabel="Ignore tracks larger than"
+                    />
+                    <span className="xe_settings__slider-value">
+                      {formatBytes(settings.ignoreRules.maxSizeBytes)}
+                      <span
+                        className={`xe_settings__quip${
+                          settings.ignoreRules.maxSizeBytes > SIZE_QUIP_THRESHOLD_BYTES
+                            ? ' xe_settings__quip--shown'
+                            : ''
+                        }`}
+                      >
+                        {' '}
+                        - <i title="Do you really have files this large?" style={{ cursor: 'help' }}>(wtf?)</i>
+                      </span>
+                    </span>
+                  </div>
+                )}
                 <p className="xe_settings__hint">
                   Xebrine automatically omits formats that the browser cannot play, e.g., .aiff, .alac, etc. Thus, use these settings sparingly, and only if your library is full of botchy ripped music with improper tagging. A well-tagged folder with clean streams shouldn't need any of these applied.
                 </p>
