@@ -15,36 +15,36 @@ interface FullscreenPlayerProps {
 
 const EXIT_DURATION_MS = 200;
 
-function UpNextPreview({ item, onPlay }: { item: QueueItem; onPlay(): void }) {
+function TrackPreviewCard({
+  item,
+  onPlay,
+  primary,
+  title
+}: {
+  item: QueueItem;
+  onPlay(): void;
+  primary?: boolean;
+  title?: string;
+}) {
   const artUrl = useAlbumArt(item.track.id, item.track);
 
   return (
-    <button type="button" className="xe_fullscreen-player__next-card" onClick={onPlay}>
-      <span className="xe_fullscreen-player__next-art">
-        {artUrl ? <img src={artUrl} alt="" /> : <NoteIcon size={42} />}
+    <button
+      type="button"
+      className={`xe_fullscreen-player__track-card${primary ? ' xe_fullscreen-player__track-card--primary' : ''}`}
+      onClick={onPlay}
+      title={title}
+    >
+      <span className="xe_fullscreen-player__track-art">
+        {artUrl ? <img src={artUrl} alt="" /> : <NoteIcon size={primary ? 24 : 18} />}
       </span>
-      <span className="xe_fullscreen-player__next-copy">
-        <ScrollingText text={item.track.title} className="xe_fullscreen-player__next-title" />
-        <ScrollingText text={item.track.artist} className="xe_fullscreen-player__next-artist" />
-        <span className="xe_fullscreen-player__next-duration">{formatTime(item.track.duration)}</span>
+      <span className="xe_fullscreen-player__track-copy">
+        <ScrollingText text={item.track.title} className="xe_fullscreen-player__track-title" />
+        <ScrollingText text={item.track.artist} className="xe_fullscreen-player__track-artist" />
       </span>
-    </button>
-  );
-}
-
-function JustPlayedCard({ item, onPlay }: { item: QueueItem; onPlay(): void }) {
-  const artUrl = useAlbumArt(item.track.id, item.track);
-
-  return (
-    <button type="button" className="xe_fullscreen-player__prev-card" onClick={onPlay} title="Back to this track">
-      <span className="xe_fullscreen-player__prev-art">
-        {artUrl ? <img src={artUrl} alt="" /> : <NoteIcon size={20} />}
-      </span>
-      <span className="xe_fullscreen-player__prev-copy">
-        <span className="xe_fullscreen-player__prev-label">Just played</span>
-        <span className="xe_fullscreen-player__prev-title">{item.track.title}</span>
-        <span className="xe_fullscreen-player__prev-artist">{item.track.artist}</span>
-      </span>
+      {primary && (
+        <span className="xe_fullscreen-player__track-duration">{formatTime(item.track.duration)}</span>
+      )}
     </button>
   );
 }
@@ -144,7 +144,6 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
         />
       )}
       <div className="xe_fullscreen-player__top">
-        {displayJustPlayed && <JustPlayedCard item={displayJustPlayed} onPlay={backToJustPlayed} />}
         <button type="button" className="xe_icon-btn" onClick={onClose} title="Close the player">
           <CloseIcon size={20} />
         </button>
@@ -186,12 +185,18 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
           <LyricsPanel showToolbar={false} variant="fullscreen" />
         </section>
 
-        <section className="xe_fullscreen-player__panel xe_fullscreen-player__queue" aria-label="Up next">
+        <section className="xe_fullscreen-player__panel xe_fullscreen-player__queue" aria-label="Up next and just played">
           <h2>Up next</h2>
           {nextItem ? (
-            <UpNextPreview item={nextItem} onPlay={() => jumpTo(displayPosition + 1)} />
+            <TrackPreviewCard item={nextItem} onPlay={() => jumpTo(displayPosition + 1)} primary />
           ) : (
             <p className="xe_empty-note">Nothing up next</p>
+          )}
+          {displayJustPlayed && (
+            <>
+              <h2 className="xe_fullscreen-player__queue-subheading">Just played</h2>
+              <TrackPreviewCard item={displayJustPlayed} onPlay={backToJustPlayed} title="Back to this track" />
+            </>
           )}
         </section>
       </div>
