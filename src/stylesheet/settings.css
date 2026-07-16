@@ -58,6 +58,17 @@
   font-variant-numeric: tabular-nums;
 }
 
+.xe_settings__quip {
+  white-space: nowrap;
+  color: var(--accent-text);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.xe_settings__quip--shown {
+  opacity: 1;
+}
+
 .xe_eq__controls {
   display: flex;
   align-items: flex-end;
