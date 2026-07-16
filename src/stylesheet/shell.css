@@ -6,6 +6,13 @@
     'xe_nav xe_main'
     'player player';
   height: 100vh;
+  transition:
+    --accent 600ms ease,
+    --accent-soft 600ms ease,
+    --accent-text 600ms ease,
+    --accent-bright 600ms ease,
+    --accent-glow 600ms ease,
+    --accent-wash 600ms ease;
 }
 
 .xe_nav {
