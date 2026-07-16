@@ -10,7 +10,8 @@ import { isExplicitId, markExplicit } from '../utils/explicit_tracks';
 import type { Lyrics, StoredLyrics, TrackMeta } from '../types';
 import { LyricsSkeleton } from './skeletons';
 import { Spinner } from './spinner';
-import { DownloadIcon, SearchIcon, ShareIcon, TrashIcon, UploadIcon } from './icons';
+import { Modal } from './modal';
+import { DownloadIcon, NoteIcon, SearchIcon, ShareIcon, TrashIcon, UploadIcon } from './icons';
 
 type Status = 'idle' | 'waiting' | 'loading' | 'notfound' | 'error' | 'badfile';
 const AUTO_SEARCH_DELAY_MS = 2000;
@@ -41,6 +42,8 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
   const [lyrics, setLyrics] = useState<Lyrics | null>(null);
   const [status, setStatus] = useState<Status>('idle');
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [pasteText, setPasteText] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -166,6 +169,20 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
     await dbPut('lyrics', { trackId: track.id, lyrics: parsed } satisfies StoredLyrics);
   };
 
+  const applyPaste = async () => {
+    if (!track) return;
+    const parsed = parseLyricsFile('', pasteText);
+    if (!parsed) {
+      setStatus('badfile');
+      return;
+    }
+    setLyrics(parsed);
+    setStatus('idle');
+    await dbPut('lyrics', { trackId: track.id, lyrics: parsed } satisfies StoredLyrics);
+    setPasteOpen(false);
+    setPasteText('');
+  };
+
   const exportLrc = () => {
     if (!lyrics || !track) return;
     const blob = new Blob([toLrc(lyrics.lines)], { type: 'text/plain' });
@@ -200,6 +217,10 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
             <UploadIcon size={14} />
             Import LRC/SRT/VTT
           </button>
+          <button type="button" className="xe_btn" onClick={() => setPasteOpen(true)}>
+            <NoteIcon size={14} />
+            Paste LRC/SRT/VTT
+          </button>
           {lyrics && lyrics.synced && (
             <button type="button" className="xe_btn" onClick={exportLrc}>
               <DownloadIcon size={14} />
@@ -209,7 +230,7 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
           {lyrics && (
             <button type="button" className="xe_btn" onClick={() => navigate('/lyrics/share')}>
               <ShareIcon size={14} />
-              Share
+              Share as image
             </button>
           )}
           {lyrics && (
@@ -236,6 +257,46 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
           e.target.value = '';
         }}
       />
+
+      {pasteOpen && (
+        <Modal
+          title="Paste lyrics"
+          onClose={() => {
+            setPasteOpen(false);
+            setPasteText('');
+          }}
+        >
+          <div className="xe_paste-form">
+            <textarea
+              className="xe_paste-form__input"
+              autoFocus
+              placeholder="Paste LRC, SRT, or VTT lyrics here..."
+              value={pasteText}
+              onChange={(e) => setPasteText(e.target.value)}
+            />
+            <div className="xe_paste-form__actions">
+              <button
+                type="button"
+                className="xe_btn xe_btn--quiet"
+                onClick={() => {
+                  setPasteOpen(false);
+                  setPasteText('');
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="xe_btn xe_btn--accent"
+                onClick={applyPaste}
+                disabled={pasteText.trim() === ''}
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {status === 'waiting' || status === 'loading' ? (
         <>

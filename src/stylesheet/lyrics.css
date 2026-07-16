@@ -53,6 +53,37 @@
   padding-bottom: 12px;
 }
 
+.xe_paste-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 360px;
+}
+
+.xe_paste-form__input {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 10px 12px;
+  min-height: 200px;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.xe_paste-form__input:focus {
+  border-color: var(--accent-bright);
+}
+
+.xe_paste-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .xe_lyrics-panel__badge {
   color: var(--text-dim);
   font-size: 12px;
