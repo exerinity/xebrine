@@ -1,6 +1,14 @@
 import { DEFAULT_SETTINGS, type Settings } from '../context/settings_context';
+import { normalizeIgnoreRules, type IgnoreRules } from './ignore_rules';
 
 const SETTING_KEYS = Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[];
+
+function normalize(out: Record<string, unknown>): Partial<Settings> {
+  if ('ignoreRules' in out) {
+    out.ignoreRules = normalizeIgnoreRules(out.ignoreRules as Partial<IgnoreRules>);
+  }
+  return out as Partial<Settings>;
+}
 
 function serialize(value: unknown): string {
   return typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value);
@@ -37,7 +45,7 @@ export function paramsToSettings(params: URLSearchParams): Partial<Settings> {
     const value = deserialize(key, raw);
     if (value !== undefined) out[key] = value;
   }
-  return out as Partial<Settings>;
+  return normalize(out);
 }
 
 export function parseSettingsJson(text: string): Partial<Settings> {
@@ -46,5 +54,5 @@ export function parseSettingsJson(text: string): Partial<Settings> {
   for (const key of SETTING_KEYS) {
     if (key in parsed) out[key] = parsed[key];
   }
-  return out as Partial<Settings>;
+  return normalize(out);
 }
