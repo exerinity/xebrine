@@ -5,8 +5,7 @@ const TASK_TIMEOUT_MS = 8000;
 
 export interface ParsedTags {
   tags: TrackTags;
-  warning?: 'oversized' | 'unreadable';
-  sizeMB?: number;
+  warning?: 'unreadable';
 }
 
 interface WorkerResponse extends ParsedTags {
