@@ -25,7 +25,7 @@
   position: absolute;
   left: 18px;
   bottom: calc(100% - 1px);
-  width: min(286px, calc(100vw - 36px));
+  width: min(400px, calc(100vw - 36px));
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -140,6 +140,58 @@
 .xe_scan-drawer__eta {
   flex-shrink: 0;
   color: var(--accent-text);
+}
+
+.xe_scan-drawer__link {
+  color: var(--accent-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-size: inherit;
+  transition: color 140ms ease;
+}
+
+.xe_scan-drawer__link:hover {
+  color: var(--text);
+}
+
+.xe_omitted {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.xe_omitted__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 190px);
+  gap: 14px;
+  padding: 6px 2px;
+  border-bottom: 1px solid var(--border);
+}
+
+.xe_omitted__row--head {
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+  color: var(--text-dim);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.xe_omitted__row:last-child {
+  border-bottom: none;
+}
+
+.xe_omitted__path {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+}
+
+.xe_omitted__reason {
+  color: var(--text-dim);
 }
 
 .xe_player-bar__now {
