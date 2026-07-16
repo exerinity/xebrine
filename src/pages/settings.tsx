@@ -15,6 +15,7 @@ import { parseSettingsJson, paramsToSettings, settingsToParams } from '../utils/
 import { ExplicitIcon } from '../components/explicit_badge';
 import { Modal } from '../components/modal';
 import { PROFANITY_WORDS } from '../utils/profanity';
+import { THEMES } from '../utils/themes';
 
 type SectionId = 'preferences' | 'library' | 'playback' | 'a11y' | 'toys' | 'share';
 
@@ -238,6 +239,35 @@ export function SettingsPage() {
                     <strong>Lax</strong> just searches for the title and artist and going for the first result, if any
                   </span>
                 </label>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>Theme</h2>
+                <div className="xe_settings__chip-row">
+                  {THEMES.map((themeOption) => {
+                    const active = settings.theme === themeOption.id;
+                    return (
+                      <button
+                        key={themeOption.id}
+                        type="button"
+                        className={`xe_theme-swatch${active ? ' xe_theme-swatch--active' : ''}${
+                          themeOption.id === 'adaptive' ? ' xe_theme-swatch--adaptive' : ''
+                        }`}
+                        aria-pressed={active}
+                        onClick={() => update({ theme: themeOption.id })}
+                      >
+                        <span
+                          className="xe_theme-swatch__dot"
+                          style={{
+                            background: `linear-gradient(135deg, ${themeOption.swatch[0]} 50%, ${themeOption.swatch[1]} 50%)`,
+                            borderColor: themeOption.swatch[2]
+                          }}
+                        />
+                        {themeOption.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </section>
 
               <section className="xe_settings__section">
