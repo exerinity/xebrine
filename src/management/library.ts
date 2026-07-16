@@ -14,6 +14,12 @@ function isAudioFile(name: string): boolean {
 interface FoundFile {
   handle: FileSystemFileHandle;
   relPath: string[];
+  sizeBytes: number;
+}
+
+export interface SkippedFile {
+  path: string;
+  reason: string;
 }
 
 const DIR_LIST_TIMEOUT_MS = 15000;
@@ -26,6 +32,8 @@ async function listEntries(dir: FileSystemDirectoryHandle): Promise<FileSystemHa
 
 async function collectAudioFiles(
   dir: FileSystemDirectoryHandle,
+  rootName: string,
+  skipped: SkippedFile[],
   prefix: string[] = []
 ): Promise<FoundFile[]> {
   const found: FoundFile[] = [];
@@ -33,7 +41,9 @@ async function collectAudioFiles(
   try {
     entries = await withTimeout(listEntries(dir), DIR_LIST_TIMEOUT_MS);
   } catch {
-    toast.warning(`Couldn't list "${prefix.join('/') || dir.name}" — skipping that folder`);
+    const path = [rootName, ...prefix].join('/');
+    skipped.push({ path, reason: 'folder could not be listed' });
+    toast.warning(`Couldn't list "${path}" - skipping that folder`);
     return found;
   }
 
@@ -41,15 +51,24 @@ async function collectAudioFiles(
     try {
       if (entry.kind === 'file') {
         if (isAudioFile(entry.name)) {
-          found.push({ handle: entry as FileSystemFileHandle, relPath: [...prefix, entry.name] });
+          const handle = entry as FileSystemFileHandle;
+          const { size } = await handle.getFile();
+          found.push({ handle, relPath: [...prefix, entry.name], sizeBytes: size });
         }
       } else if (entry.kind === 'directory') {
         found.push(
-          ...(await collectAudioFiles(entry as FileSystemDirectoryHandle, [...prefix, entry.name]))
+          ...(await collectAudioFiles(
+            entry as FileSystemDirectoryHandle,
+            rootName,
+            skipped,
+            [...prefix, entry.name]
+          ))
         );
       }
     } catch {
-      toast.warning(`Couldn't read "${[...prefix, entry.name].join('/')}" — skipping`);
+      const path = [rootName, ...prefix, entry.name].join('/');
+      skipped.push({ path, reason: 'could not be read' });
+      toast.warning(`Couldn't read "${path}" - skipping`);
     }
   }
   return found;
@@ -74,30 +93,35 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
     );
   });
 }
+export interface ScanResult {
+  tracks: TrackMeta[];
+  skipped: SkippedFile[];
+}
+
 export async function scanFolder(
   folder: FolderRecord,
   onProgress?: (done: number, total: number, track: TrackMeta) => void,
   signal?: AbortSignal
-): Promise<TrackMeta[]> {
-  const files = await collectAudioFiles(folder.handle);
+): Promise<ScanResult> {
+  const skipped: SkippedFile[] = [];
+  const files = await collectAudioFiles(folder.handle, folder.name, skipped);
   const tracks: (TrackMeta | undefined)[] = new Array(files.length);
   let done = 0;
   await parseTagsBatch(
     files.map((f) => f.handle),
     (index, parsed) => {
-      const { handle, relPath } = files[index];
-      if (parsed.warning === 'oversized') {
-        toast.warning(
-          `Skipped tags for "${handle.name}" (${parsed.sizeMB} MB file, too large to parse safely)`
-        );
-      } else if (parsed.warning === 'unreadable') {
-        toast.warning(`Skipped "${handle.name}" (unreadable, corrupt, or took too long)`);
+      const { handle, relPath, sizeBytes } = files[index];
+      if (parsed.warning === 'unreadable') {
+        const path = [folder.name, ...relPath].join('/');
+        skipped.push({ path, reason: 'unreadable or corrupt' });
+        toast.warning(`Omitting "${path}" (unreadable)`);
       }
       const track: TrackMeta = {
         id: trackId(folder.id, relPath),
         folderId: folder.id,
         relPath,
         fileName: handle.name,
+        sizeBytes,
         ...parsed.tags
       };
       tracks[index] = track;
@@ -105,7 +129,7 @@ export async function scanFolder(
     },
     signal
   );
-  return tracks.filter((t): t is TrackMeta => t !== undefined);
+  return { tracks: tracks.filter((t): t is TrackMeta => t !== undefined), skipped };
 }
 
 export async function getTrackFile(
