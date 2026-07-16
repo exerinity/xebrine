@@ -1,4 +1,5 @@
 import type { TrackMeta } from '../types';
+import { clamp } from './format';
 
 export type IgnoredFormat = 'mp3' | 'aac' | 'm4a' | 'opus' | 'ogg' | 'flac' | 'wav';
 
@@ -11,7 +12,13 @@ export interface IgnoreRules {
   missingTitle: boolean;
   missingAllTags: boolean;
   formats: IgnoredFormat[];
+  maxSizeBytes: number | null;
 }
+
+export const MIN_SIZE_LIMIT_BYTES = 2 * 1024 * 1024;
+export const MAX_SIZE_LIMIT_BYTES = 10 * 1024 * 1024 * 1024;
+export const DEFAULT_SIZE_LIMIT_BYTES = 100 * 1024 * 1024;
+export const SIZE_QUIP_THRESHOLD_BYTES = 750 * 1024 * 1024;
 
 export const DEFAULT_IGNORE_RULES: IgnoreRules = {
   missingCover: false,
@@ -19,8 +26,22 @@ export const DEFAULT_IGNORE_RULES: IgnoreRules = {
   missingArtist: false,
   missingTitle: false,
   missingAllTags: false,
-  formats: []
+  formats: [],
+  maxSizeBytes: null
 };
+
+export function normalizeIgnoreRules(rules: Partial<IgnoreRules> | null | undefined): IgnoreRules {
+  const merged = { ...DEFAULT_IGNORE_RULES, ...rules };
+  const max = merged.maxSizeBytes;
+  return {
+    ...merged,
+    formats: Array.isArray(merged.formats) ? merged.formats : [],
+    maxSizeBytes:
+      typeof max === 'number' && Number.isFinite(max)
+        ? clamp(max, MIN_SIZE_LIMIT_BYTES, MAX_SIZE_LIMIT_BYTES)
+        : null
+  };
+}
 
 function extensionOf(fileName: string): string {
   return fileName.split('.').pop()?.toLowerCase() ?? '';
@@ -33,5 +54,6 @@ export function shouldIgnoreTrack(track: TrackMeta, rules: IgnoreRules): boolean
   if (rules.missingTitle && !track.hasTitleTag) return true;
   if (rules.missingAllTags && !track.hasTitleTag && !track.hasArtistTag && !track.hasAlbumTag) return true;
   if (rules.formats.includes(extensionOf(track.fileName) as IgnoredFormat)) return true;
+  if (rules.maxSizeBytes !== null && track.sizeBytes > rules.maxSizeBytes) return true;
   return false;
 }
