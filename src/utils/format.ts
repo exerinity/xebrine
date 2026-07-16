@@ -8,6 +8,35 @@ export function formatTime(seconds: number): string {
   return `${m}:${String(sec).padStart(2, '0')}`;
 }
 
+export function formatDurationShort(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) seconds = 0;
+  const total = Math.floor(seconds);
+  const parts: string[] = [];
+  const units: [number, string][] = [
+    [86400, 'd'],
+    [3600, 'h'],
+    [60, 'm'],
+    [1, 's']
+  ];
+  let rem = total;
+  for (const [size, label] of units) {
+    const value = Math.floor(rem / size);
+    rem -= value * size;
+    if (value > 0) parts.push(`${value}${label}`);
+  }
+  return parts.length ? parts.join(' ') : '0s';
+}
+
+export function formatBytes(bytes: number): string {
+  const GB = 1024 * 1024 * 1024;
+  const MB = 1024 * 1024;
+  if (bytes >= GB) {
+    const gb = bytes / GB;
+    return `${gb >= 10 ? gb.toFixed(1) : gb.toFixed(2)} GB`;
+  }
+  return `${Math.round(bytes / MB)} MB`;
+}
+
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
