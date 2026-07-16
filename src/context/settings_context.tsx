@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { LrclibMode } from '../api/lrclib';
-import { DEFAULT_IGNORE_RULES, type IgnoreRules } from '../utils/ignore_rules';
+import { DEFAULT_IGNORE_RULES, normalizeIgnoreRules, type IgnoreRules } from '../utils/ignore_rules';
 import { EQ_FLAT, normalizeBands } from '../audio/eq';
 import type { ArtistPronunciation } from '../utils/pronunciation';
 import { isThemeId, type ThemeId } from '../utils/themes';
@@ -55,6 +55,7 @@ function loadSettings(): Settings {
     return {
       ...merged,
       eqBands: normalizeBands(merged.eqBands),
+      ignoreRules: normalizeIgnoreRules(merged.ignoreRules),
       theme: isThemeId(merged.theme) ? merged.theme : 'default'
     };
   } catch {
