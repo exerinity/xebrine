@@ -23,7 +23,6 @@ import {
   VolumeIcon
 } from './icons';
 import { ExplicitBadge } from './explicit_badge';
-import { Spinner } from './spinner';
 import { ScanDrawer } from './scan_drawer';
 
 interface PlayerBarProps {
@@ -276,7 +275,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
         >
           <AutoMixIcon size={14} />
           <span className="xe_automix-pill__label" title={`Auto mix is ${autoMixLabel.toLowerCase()}`}>
-            {autoMixEnabled && autoMixPhase === 'mixing' ? <Spinner size={12} /> : autoMixLabel}
+            {autoMixEnabled && autoMixPhase === 'mixing' ? 'Mixing...' : autoMixLabel}
           </span>
         </button>
         <button
