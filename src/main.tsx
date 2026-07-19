@@ -11,3 +11,15 @@ createRoot(document.getElementById('xebrine')!).render(
     </BrowserRouter>
   </StrictMode>
 );
+
+function revealApp() {
+  document.documentElement.classList.add('xe-ready');
+  const splash = document.getElementById('xebrine-splash');
+  if (splash) {
+    const remove = () => splash.remove();
+    splash.addEventListener('transitionend', remove, { once: true });
+    window.setTimeout(remove, 900);
+  }
+}
+
+requestAnimationFrame(() => requestAnimationFrame(revealApp));

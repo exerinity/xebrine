@@ -29,7 +29,7 @@ import { toast } from '../utils/toast';
 import { EQ_BANDS, EQ_Q, normalizeBands } from '../audio/eq';
 
 export type RepeatMode = 'off' | 'all' | 'one';
-export type AutoMixPhase = 'idle' | 'analyzing-current' | 'analyzing-next' | 'mixing';
+export type AutoMixPhase = 'idle' | 'analyzing-current' | 'analyzing-next' | 'mixing' | 'switching';
 export type AutoMixColor = 'green' | 'orange' | 'red' | null;
 
 const FADE_CURVES = equalPowerFadeCurves(64);
@@ -504,6 +504,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       if (crossfadeActiveRef.current && mixSourceRef.current && s.position + 1 < s.items.length) {
         handoffPendingRef.current = true;
         autoplayRef.current = true;
+        setAutoMixPhase('switching');
         dispatch({ type: 'ADVANCE', delta: 1 });
         return;
       }

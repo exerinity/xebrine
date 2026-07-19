@@ -1,0 +1,21 @@
+# Xebrine PWA
+
+> Xebrine is a heavy-duty, desktop-focused web music player for power users and music hoarders. It plays your own local audio files entirely in the browser - without accounts, streaming, uploads; with a dense, keyboard-friendly interface built for very large personal libraries
+
+Xebrine runs client-side. You point it at folders of audio files and it scans, reads tags and cover art, and organizes everything into artists, albums, and a queue. Playback, analysis, and library data all stay on your machine
+
+## Amenities
+- **Local library**: imports folders of audio files, reads embedded metadata and artwork, and flags files it had to skip during a scan
+- **Auto mix**: analyzes the BPM of the current and upcoming track and beat-matches a crossfade between them, with a live status readout while it prepares, mixes, and hands over
+- **Playback**: gapless-oriented player bar with shuffle, repeat (queue / one), volume boost past 100%, and a scrubber
+- **Visualizer**: real-time audio-reactive visualizer driven by the Web Audio analyser
+- **Lyrics**: per-track lyrics view with a shareable lyric card
+- **Organization**: browse by artist and album, manage a live play queue, and tune behavior in settings
+
+## Routes
+- [Home / library](https://xebrine.exerinity.com/home): the main library view.
+- [About / info](https://xebrine.exerinity.com/i): what Xebrine is, how it works, and release notes.
+
+## Notes for crawlers and models
+- Xebrine is a single-page app; most routes render the same shell and require JavaScript
+- It is not a streaming service and hosts no music catalog

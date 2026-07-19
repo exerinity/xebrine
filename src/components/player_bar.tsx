@@ -7,7 +7,6 @@ import { Scrubber } from './scrubber';
 import { Slider } from './slider';
 import { Visualizer } from './visualizer';
 import { toast } from '../utils/toast';
-import { formatTime } from '../utils/format';
 import { toSlugParam } from '../utils/slug';
 import { displayArtist } from '../utils/groups';
 import {
@@ -24,6 +23,7 @@ import {
 } from './icons';
 import { ExplicitBadge } from './explicit_badge';
 import { ScanDrawer } from './scan_drawer';
+import { AutoMixDrawer } from './auto_mix_drawer';
 
 interface PlayerBarProps {
   fullscreenOpen?: boolean;
@@ -139,25 +139,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
     });
   };
 
-  const secondsUntilMix = duration - settings.autoMixDuration - currentTime;
-  const showCountdown =
-    autoMixEnabled &&
-    autoMixPhase === 'idle' &&
-    autoMixColor !== null &&
-    duration > settings.autoMixDuration &&
-    secondsUntilMix > 0;
-
-  const autoMixLabel = !autoMixEnabled
-    ? 'Disabled'
-    : autoMixPhase === 'analyzing-current'
-      ? 'Analyzing current...'
-      : autoMixPhase === 'analyzing-next'
-        ? 'Analyzing next...'
-        : autoMixPhase === 'mixing'
-          ? 'In progress...'
-          : showCountdown
-            ? `${formatTime(Math.ceil(secondsUntilMix))}`
-            : 'Enabled';
+  const autoMixLabel = autoMixEnabled ? 'Enabled' : 'Disabled';
   const autoMixBusy = autoMixEnabled && (autoMixPhase === 'analyzing-current' || autoMixPhase === 'analyzing-next');
 
   return (
@@ -262,22 +244,25 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
       </div>
 
       <div className="xe_player-bar__volume">
-        <button
-          type="button"
-          className={`xe_automix-pill${autoMixEnabled ? ' xe_automix-pill--on' : ''}${
-            autoMixEnabled && autoMixColor ? ` xe_automix-pill--${autoMixColor}` : ''
-          }${autoMixBusy ? ' xe_automix-pill--busy' : ''}${
-            autoMixPhase === 'mixing' ? ' xe_automix-pill--mixing' : ''
-          }`}
-          onClick={toggleAutoMix}
-          title={`Auto mix is ${autoMixLabel.toLowerCase()}`}
-          aria-pressed={autoMixEnabled}
-        >
-          <AutoMixIcon size={14} />
-          <span className="xe_automix-pill__label" title={`Auto mix is ${autoMixLabel.toLowerCase()}`}>
-            {autoMixEnabled && autoMixPhase === 'mixing' ? 'Mixing...' : autoMixLabel}
-          </span>
-        </button>
+        <div className="xe_automix-pill-wrap">
+          <AutoMixDrawer />
+          <button
+            type="button"
+            className={`xe_automix-pill${autoMixEnabled ? ' xe_automix-pill--on' : ''}${
+              autoMixEnabled && autoMixColor ? ` xe_automix-pill--${autoMixColor}` : ''
+            }${autoMixBusy ? ' xe_automix-pill--busy' : ''}${
+              autoMixPhase === 'mixing' ? ' xe_automix-pill--mixing' : ''
+            }`}
+            onClick={toggleAutoMix}
+            title={`Auto mix is ${autoMixLabel.toLowerCase()}`}
+            aria-pressed={autoMixEnabled}
+          >
+            <AutoMixIcon size={14} />
+            <span className="xe_automix-pill__label" title={`Auto mix is ${autoMixLabel.toLowerCase()}`}>
+              {autoMixLabel}
+            </span>
+          </button>
+        </div>
         <button
           type="button"
           className={`xe_icon-btn${visualizerOn ? ' xe_icon-btn--active' : ''}`}
