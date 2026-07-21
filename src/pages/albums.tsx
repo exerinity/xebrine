@@ -29,7 +29,7 @@ function loadSort(): AlbumSort {
   return SORT_OPTIONS.some((o) => o.value === raw) ? (raw as AlbumSort) : 'artist';
 }
 
-function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
+export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
   const { playNow, enqueueEnd } = usePlayer();
   const art = useAlbumArt(album.key, album.tracks[0]);
 

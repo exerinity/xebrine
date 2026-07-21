@@ -11,6 +11,13 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '6',
+    date: '2026-07-22',
+    notes: [
+      <>Added <Link to="/home">home page</Link> and a sleep timer</>
+    ]
+  },
+  {
     version: '5',
     date: '2026-07-16',
     notes: [

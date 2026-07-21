@@ -70,6 +70,12 @@ interface PlayerContextValue {
   autoMixPhase: AutoMixPhase;
   autoMixColor: AutoMixColor;
   toggleAutoMix(): void;
+  sleepTimerRemaining: number;
+  sleepTimerPaused: boolean;
+  addSleepTimer(minutes: number): void;
+  setSleepTimerMinutes(minutes: number): void;
+  togglePauseSleepTimer(): void;
+  cancelSleepTimer(): void;
 }
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
@@ -81,6 +87,7 @@ const AUTOMIX_KEY = 'xebrine.automix';
 export const MAX_VOLUME = 1.5;
 const DUCK_FACTOR = 0.25;
 const DUCK_FADE_MS = 300;
+const MAX_SLEEP_TIMER_SECONDS = 12 * 60 * 60;
 
 function loadVolume(): number {
   const raw = localStorage.getItem(VOLUME_KEY);
@@ -140,6 +147,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const fadeGainARef = useRef<GainNode | null>(null);
   const eqFiltersRef = useRef<BiquadFilterNode[] | null>(null);
+
+  const [sleepTimerEndAt, setSleepTimerEndAt] = useState<number | null>(null);
+  const [sleepTimerPausedRemaining, setSleepTimerPausedRemaining] = useState<number | null>(null);
+  const [sleepTimerRemaining, setSleepTimerRemaining] = useState(0);
+  const sleepTimerEndAtRef = useRef<number | null>(null);
+  sleepTimerEndAtRef.current = sleepTimerEndAt;
+  const sleepTimerPausedRemainingRef = useRef<number | null>(null);
+  sleepTimerPausedRemainingRef.current = sleepTimerPausedRemaining;
+  const sleepTimerPaused = sleepTimerPausedRemaining !== null;
 
   const [autoMixEnabled, setAutoMixEnabledState] = useState(loadAutoMix);
   const autoMixEnabledRef = useRef(autoMixEnabled);
@@ -447,7 +463,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const start = audio.volume;
     const startTime = performance.now();
     const step = (now: number) => {
-      const t = Math.min(1, (now - startTime) / durationMs);
+      const t = clamp((now - startTime) / durationMs, 0, 1);
       audio.volume = start + (target - start) * t;
       if (t < 1) {
         volumeFadeFrameRef.current = requestAnimationFrame(step);
@@ -565,6 +581,24 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       null;
     }
   }, [audio, repeatMode]);
+
+  useEffect(() => {
+    if (sleepTimerEndAt === null) return;
+    const tick = () => {
+      const endAt = sleepTimerEndAtRef.current;
+      if (endAt === null) return;
+      const remaining = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+      setSleepTimerRemaining(remaining);
+      if (remaining <= 0) {
+        audio.pause();
+        setSleepTimerEndAt(null);
+        toast.info('Sleep timer elapsed, playback paused');
+      }
+    };
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [sleepTimerEndAt, audio]);
 
   useEffect(() => {
     const bands = normalizeBands(settings.eqBands);
@@ -851,6 +885,52 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'KEEP_CURRENT' });
   }, []);
 
+  const currentSleepTimerSeconds = () => {
+    if (sleepTimerPausedRemainingRef.current !== null) return sleepTimerPausedRemainingRef.current;
+    if (sleepTimerEndAtRef.current !== null) {
+      return Math.max(0, Math.round((sleepTimerEndAtRef.current - Date.now()) / 1000));
+    }
+    return 0;
+  };
+
+  const addSleepTimer = useCallback((minutes: number) => {
+    const seconds = clamp(currentSleepTimerSeconds() + minutes * 60, 0, MAX_SLEEP_TIMER_SECONDS);
+    setSleepTimerPausedRemaining(null);
+    setSleepTimerEndAt(Date.now() + seconds * 1000);
+  }, []);
+
+  const setSleepTimerMinutes = useCallback((minutes: number) => {
+    const seconds = clamp(Math.round(minutes * 60), 0, MAX_SLEEP_TIMER_SECONDS);
+    setSleepTimerPausedRemaining(null);
+    if (seconds <= 0) {
+      setSleepTimerEndAt(null);
+      setSleepTimerRemaining(0);
+      return;
+    }
+    setSleepTimerEndAt(Date.now() + seconds * 1000);
+  }, []);
+
+  const togglePauseSleepTimer = useCallback(() => {
+    if (sleepTimerPausedRemainingRef.current !== null) {
+      const seconds = sleepTimerPausedRemainingRef.current;
+      setSleepTimerPausedRemaining(null);
+      setSleepTimerEndAt(Date.now() + seconds * 1000);
+      return;
+    }
+    if (sleepTimerEndAtRef.current !== null) {
+      const seconds = Math.max(0, Math.round((sleepTimerEndAtRef.current - Date.now()) / 1000));
+      setSleepTimerEndAt(null);
+      setSleepTimerPausedRemaining(seconds);
+      setSleepTimerRemaining(seconds);
+    }
+  }, []);
+
+  const cancelSleepTimer = useCallback(() => {
+    setSleepTimerEndAt(null);
+    setSleepTimerPausedRemaining(null);
+    setSleepTimerRemaining(0);
+  }, []);
+
   const toggleAutoMix = useCallback(() => {
     setAutoMixEnabledState((on) => {
       const next = !on;
@@ -899,7 +979,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       autoMixEnabled,
       autoMixPhase,
       autoMixColor,
-      toggleAutoMix
+      toggleAutoMix,
+      sleepTimerRemaining,
+      sleepTimerPaused,
+      addSleepTimer,
+      setSleepTimerMinutes,
+      togglePauseSleepTimer,
+      cancelSleepTimer
     }),
     [
       state,
@@ -932,7 +1018,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       autoMixEnabled,
       autoMixPhase,
       autoMixColor,
-      toggleAutoMix
+      toggleAutoMix,
+      sleepTimerRemaining,
+      sleepTimerPaused,
+      addSleepTimer,
+      setSleepTimerMinutes,
+      togglePauseSleepTimer,
+      cancelSleepTimer
     ]
   );
 

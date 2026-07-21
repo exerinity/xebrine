@@ -2,6 +2,49 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const CHUNK_RULES: [RegExp, string][] = [
+  [/node_modules\/mespeak/, 'mespeak'],
+  [/node_modules\/music-metadata/, 'music-metadata'],
+  [/node_modules\/(react|react-dom|scheduler)\//, 'react-vendor'],
+  [/node_modules\/(react-router|react-router-dom)\//, 'router-vendor'],
+  [/node_modules/, 'vendor'],
+
+  [/pages\/home/, 'page-home'],
+  [/pages\/library/, 'page-library'],
+  [/pages\/(artists|artist_detail)/, 'page-artists'],
+  [/pages\/(albums|album_detail)/, 'page-albums'],
+  [/pages\/queue/, 'page-queue'],
+  [/pages\/(lyrics|share_lyrics)/, 'page-lyrics'],
+  [/pages\/settings/, 'page-settings'],
+  [/pages\/(about|release_notes)/, 'page-about'],
+
+  [/components\/(fs_player|player_bar|scrubber|slider|equalizer|visualizer|auto_mix_drawer|queue_list|sleep_timer)/, 'ui-player'],
+  [/components\/(modal|cover_modal|update_modal|welcome_modal|scan_drawer|context_menu)/, 'ui-modals'],
+  [/components\/(track_list|sort_select|skeletons|explicit_badge)/, 'ui-tracklist'],
+  [/components\/lyrics/, 'ui-lyrics'],
+  [/components\/(sidebar|icons|toast_container|spinner|scrolling_text)/, 'ui-shell'],
+
+  [/hooks\/(media_session|keyboard_shortcuts|queue_finished_sound|track_notifications|wheel)/, 'hooks-player'],
+  [/hooks\/(infinite_scroll|scroll_restoration|page_title|drag_reorder)/, 'hooks-ui'],
+  [/hooks\/(album_art|explicit|scan_eta|speech_announcements|accent_color)/, 'hooks-data'],
+
+  [/context\//, 'context'],
+  [/utils\/settings_transfer/, 'context'],
+
+  [/management\/db/, 'management-db'],
+  [/management\/(library|metadata|covers|scan_pool)/, 'management-library'],
+
+  [/audio\/(bpm|eq)/, 'audio'],
+
+  [/queue\/(history|reducer|shuffle)/, 'queue-state'],
+
+  [/utils\/(format|groups|slug|ignore_rules)/, 'utils-format'],
+  [/utils\/(speech|mespeak|pronunciation|profanity|explicit_tracks)/, 'utils-speech'],
+  [/utils\/(accent_color|themes|toast|share_card|lyrics)/, 'utils-misc'],
+
+  [/api\//, 'api']
+];
+
 export default defineConfig({
   plugins: [
     react(),
@@ -41,7 +84,6 @@ export default defineConfig({
     })
   ],
   build: {
-    minify: false,
     rollupOptions: {
       output: {
         entryFileNames: 'app/scripts/[name]-[hash].js',
@@ -52,15 +94,9 @@ export default defineConfig({
           return 'assets/[name]-[hash][extname]';
         },
         manualChunks(id) {
-          if (id.includes('node_modules/mespeak')) return 'mespeak';
-          if (id.includes('node_modules')) return 'node_modules';
-          if (id.match(/pages\/library/)) return 'library';
-          if (id.match(/pages\/(artists|artist_detail)/)) return 'artists';
-          if (id.match(/pages\/(albums|album_detail)/)) return 'albums';
-          if (id.match(/pages\/queue/)) return 'queue';
-          if (id.match(/pages\/lyrics/)) return 'lyrics';
-          if (id.match(/pages\/settings/)) return 'settings';
-          if (id.match(/context\//)) return 'context';
+          for (const [pattern, name] of CHUNK_RULES) {
+            if (pattern.test(id)) return name;
+          }
         }
       }
     }

@@ -24,6 +24,7 @@ import {
 import { ExplicitBadge } from './explicit_badge';
 import { ScanDrawer } from './scan_drawer';
 import { AutoMixDrawer } from './auto_mix_drawer';
+import { SleepTimerControl } from './sleep_timer';
 
 interface PlayerBarProps {
   fullscreenOpen?: boolean;
@@ -263,6 +264,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
             </span>
           </button>
         </div>
+        <SleepTimerControl />
         <button
           type="button"
           className={`xe_icon-btn${visualizerOn ? ' xe_icon-btn--active' : ''}`}

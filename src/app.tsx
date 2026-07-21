@@ -10,6 +10,7 @@ import { useSpeechAnnouncements } from './hooks/speech_announcements';
 import { useQueueFinishedSound } from './hooks/queue_finished_sound';
 import { useAccentColor } from './hooks/accent_color';
 import { useKeyboardShortcuts } from './hooks/keyboard_shortcuts';
+import { HomePage } from './pages/home';
 import { LibraryPage } from './pages/library';
 import { ArtistsPage } from './pages/artists';
 import { ArtistDetailPage } from './pages/artist_detail';
@@ -90,7 +91,8 @@ function Shell() {
       <main className="xe_main">
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route path="/home" element={<LibraryPage />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/library" element={<LibraryPage />} />
           <Route path="/artists" element={<ArtistsPage />} />
           <Route path="/artists/:artistName" element={<ArtistDetailPage />} />
           <Route path="/artists/:artistName/:albumName" element={<AlbumDetailPage />} />

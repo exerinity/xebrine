@@ -7,13 +7,15 @@ import {
   HomeIcon,
   LogoIcon,
   LyricsIcon,
+  NoteIcon,
   PersonIcon,
   QueueIcon,
   SettingsIcon
 } from './icons';
 
 const NAV_LINKS = [
-  { path: '/home', label: 'Library', icon: HomeIcon },
+  { path: '/home', label: 'Home', icon: HomeIcon },
+  { path: '/library', label: 'Library', icon: NoteIcon },
   { path: '/artists', label: 'Artists', icon: PersonIcon },
   { path: '/albums', label: 'Albums', icon: DiscIcon },
   { path: '/queue', label: 'Queue', icon: QueueIcon },
