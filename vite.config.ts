@@ -55,7 +55,7 @@ export default defineConfig({
         name: 'Xebrine',
         id: 'com.exerinity.xebrine',
         short_name: 'Xebrine',
-        description: 'Xebrine is the library-focused spiritual successor to Voxity',
+        description: 'Yet another music player PWA',
         theme_color: '#4a29c2',
         background_color: '#000000',
         display: 'standalone',
