@@ -11,10 +11,13 @@ import type { Lyrics, StoredLyrics, TrackMeta } from '../types';
 import { LyricsSkeleton } from './skeletons';
 import { Spinner } from './spinner';
 import { Modal } from './modal';
+import { ContextMenu, type ContextMenuItem } from './context_menu';
 import { DownloadIcon, NoteIcon, SearchIcon, ShareIcon, TrashIcon, UploadIcon } from './icons';
 
 type Status = 'idle' | 'waiting' | 'loading' | 'notfound' | 'error' | 'badfile';
 const AUTO_SEARCH_DELAY_MS = 2000;
+const NUDGE_SECONDS = 5;
+const HEADING_MAX = 25;
 
 const STATUS_TEXT: Record<Exclude<Status, 'idle'>, string> = {
   waiting: 'Holding off search for a moment...',
@@ -26,6 +29,11 @@ const STATUS_TEXT: Record<Exclude<Status, 'idle'>, string> = {
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError';
+}
+
+function lineHeading(text: string): string {
+  const trimmed = text.trim() || '♪';
+  return trimmed.length > HEADING_MAX ? `${trimmed.slice(0, HEADING_MAX)}...` : trimmed;
 }
 
 interface LyricsPanelProps {
@@ -44,12 +52,16 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
   const [activeIndex, setActiveIndex] = useState(-1);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteText, setPasteText] = useState('');
+  const [menu, setMenu] = useState<{ x: number; y: number; index: number } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const lineRefs = useRef<(HTMLElement | null)[]>([]);
   const userScrollUntil = useRef(0);
   const requestAbortRef = useRef<AbortController | null>(null);
+  const menuOpenRef = useRef(false);
+
+  menuOpenRef.current = menu !== null;
 
   const runSearch = useCallback(
     async (target: TrackMeta, signal: AbortSignal) => {
@@ -89,6 +101,7 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
     setLyrics(null);
     setStatus('idle');
     setActiveIndex(-1);
+    setMenu(null);
     if (!track) return;
     let cancelled = false;
     let timer = 0;
@@ -143,7 +156,7 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
   }, [lyrics, audioRef]);
 
   useEffect(() => {
-    if (activeIndex < 0 || Date.now() < userScrollUntil.current) return;
+    if (activeIndex < 0 || menuOpenRef.current || Date.now() < userScrollUntil.current) return;
     const container = containerRef.current;
     const line = lineRefs.current[activeIndex];
     if (!container || !line) return;
@@ -192,6 +205,40 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
     a.download = `${track.artist} - ${track.title}.lrc`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const menuItems = (index: number): ContextMenuItem[] => {
+    const line = lyrics?.lines[index];
+    if (!line) return [];
+    const items: ContextMenuItem[] = [];
+    if (line.time !== null) {
+      const time = line.time;
+      items.push(
+        { label: 'Jump to this line', onSelect: () => seek(time) },
+        {
+          label: `Jump to ${NUDGE_SECONDS} seconds before this line`,
+          onSelect: () => seek(time - NUDGE_SECONDS)
+        },
+        {
+          label: `Jump to ${NUDGE_SECONDS} seconds after this line`,
+          onSelect: () => seek(time + NUDGE_SECONDS)
+        }
+      );
+    }
+    if (line.text.trim()) {
+      items.push({
+        label: 'Search for this line (Google)',
+        separatorBefore: items.length > 0,
+        onSelect: () =>
+          window.open(
+            `https://www.google.com/search?q=${encodeURIComponent(line.text)}`,
+            '_blank',
+            'noopener,noreferrer'
+          )
+      });
+    }
+    if (items[0]) items[0].heading = '"' + lineHeading(line.text) + '"';
+    return items;
   };
 
   const removeLyrics = async () => {
@@ -330,6 +377,12 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
                   clickable ? '' : ' xe_lyrics-line--static'
                 }`}
                 onClick={clickable ? () => seek(line.time as number) : undefined}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  if (!clickable && !line.text.trim()) return;
+                  markUserScroll();
+                  setMenu({ x: e.clientX, y: e.clientY, index: i });
+                }}
                 tabIndex={clickable ? 0 : -1}
               >
                 {line.text || '♪'}
@@ -337,6 +390,14 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
             );
           })}
           <div className="xe_lyrics-panel__spacer" />
+          {menu && (
+            <ContextMenu
+              x={menu.x}
+              y={menu.y}
+              items={menuItems(menu.index)}
+              onClose={() => setMenu(null)}
+            />
+          )}
         </div>
       )}
     </div>

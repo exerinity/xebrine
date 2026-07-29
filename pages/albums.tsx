@@ -7,6 +7,7 @@ import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { useAlbumArt } from '../hooks/album_art';
 import { NoteIcon, PlayIcon, PlusIcon, SearchIcon, ShuffleIcon } from '../components/icons';
+import { ContextMenu, type ContextMenuItem } from '../components/context_menu';
 import { SortSelect, type SortOption } from '../components/sort_select';
 import { toSlugParam } from '../utils/slug';
 import { useScrollRestoration } from '../hooks/scroll_restoration';
@@ -32,9 +33,41 @@ function loadSort(): AlbumSort {
 export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
   const { playNow, enqueueEnd } = usePlayer();
   const art = useAlbumArt(album.key, album.tracks[0]);
+  const navigate = useNavigate();
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+
+  const menuItems: ContextMenuItem[] = [
+    {
+      label: 'Open album artist',
+      heading: 'Navigation...',
+      onSelect: () => navigate(`/artists/${toSlugParam(album.artist)}`)
+    },
+    {
+      label: 'Google this album',
+      onSelect: () =>
+        window.open(
+          `https://www.google.com/search?q=${encodeURIComponent(`${album.album} by ${album.artist}`)}`,
+          '_blank',
+          'noopener,noreferrer'
+        )
+    },
+    {
+      label: 'Enqueue this album',
+      heading: 'Queue...',
+      onSelect: () => enqueueEnd(album.tracks)
+    },
+    { label: 'Play this album now', onSelect: () => playNow(album.tracks, 0) }
+  ];
 
   return (
-    <div className="xe_album-card" onClick={onOpen}>
+    <div
+      className="xe_album-card"
+      onClick={onOpen}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setMenu({ x: e.clientX, y: e.clientY });
+      }}
+    >
       <div className="xe_album-card__art">
         {art ? <img src={art} alt="" loading="lazy" /> : <NoteIcon size={36} />}
         <div className="xe_album-card__actions">
@@ -78,8 +111,22 @@ export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void
       </div>
       <span className="xe_album-card__title">{album.album}</span>
       <span className="xe_album-card__artist">
-        by {album.artist}
+        by{' '}
+        <button
+          type="button"
+          className="xe_album-card__artist-link"
+          title={`Go to ${album.artist}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/artists/${toSlugParam(album.artist)}`);
+          }}
+        >
+          {album.artist}
+        </button>
       </span>
+      {menu && (
+        <ContextMenu x={menu.x} y={menu.y} items={menuItems} onClose={() => setMenu(null)} />
+      )}
     </div>
   );
 }

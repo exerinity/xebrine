@@ -38,7 +38,7 @@ export const DEFAULT_SETTINGS: Settings = {
   autoMixDuration: 15,
   eqEnabled: false,
   eqBands: [...EQ_FLAT],
-  playerBarClickAction: 'copy',
+  playerBarClickAction: 'open',
   fsBlur: 56,
   fsSaturate: 1.35,
   reducedMotion: false,

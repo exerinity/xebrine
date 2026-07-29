@@ -11,6 +11,15 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '7',
+    date: '2026-07-30',
+    notes: [
+      'Added a Deep search to the library page, to search for songs based on one or more metadata objects',
+      'Almost every page has a context menu now',
+      'You can now use context menus in the one right-click drag, releasing on your target performs it'
+    ]
+  },
+  {
     version: '6',
     date: '2026-07-22',
     notes: [

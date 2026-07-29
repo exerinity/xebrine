@@ -8,6 +8,7 @@
   border-radius: 10px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
   animation: xe_context-menu-in 0.09s ease;
+  user-select: none;
 }
 
 @keyframes xe_context-menu-in {

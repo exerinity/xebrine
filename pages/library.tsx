@@ -9,6 +9,13 @@ import { SortSelect, type SortOption } from '../components/sort_select';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { usePageTitle } from '../hooks/page_title';
 import { FolderIcon, KeyIcon, PlayIcon, SearchIcon, ShuffleIcon } from '../components/icons';
+import {
+  DeepSearchModal,
+  EMPTY_DEEP_SEARCH,
+  isDeepSearchActive,
+  matchesDeepSearch,
+  type DeepSearchCriteria
+} from '../components/deep_search';
 
 type LibrarySort = 'artist' | 'album' | 'title' | 'title-desc' | 'duration';
 
@@ -25,6 +32,9 @@ export function LibraryPage() {
   const { playNow } = usePlayer();
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<LibrarySort>('artist');
+  const [deep, setDeep] = useState<DeepSearchCriteria>(EMPTY_DEEP_SEARCH);
+  const [deepOpen, setDeepOpen] = useState(false);
+  const deepActive = isDeepSearchActive(deep);
   usePageTitle('Library');
 
   const sorted = useMemo(() => {
@@ -62,14 +72,18 @@ export function LibraryPage() {
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return sorted;
-    return sorted.filter(
-      (t) =>
-        t.title.toLowerCase().includes(q) ||
-        t.artist.toLowerCase().includes(q) ||
-        t.album.toLowerCase().includes(q)
-    );
-  }, [sorted, query]);
+    let result = sorted;
+    if (q) {
+      result = result.filter(
+        (t) =>
+          t.title.toLowerCase().includes(q) ||
+          t.artist.toLowerCase().includes(q) ||
+          t.album.toLowerCase().includes(q)
+      );
+    }
+    if (deepActive) result = result.filter((t) => matchesDeepSearch(t, deep));
+    return result;
+  }, [sorted, query, deep, deepActive]);
 
   const { visible: paged, hasMore, sentinelRef } = useInfiniteScroll(visible);
 
@@ -105,6 +119,15 @@ export function LibraryPage() {
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
+        <button
+          type="button"
+          className={`xe_btn${deepActive ? ' xe_btn--accent' : ''}`}
+          onClick={() => setDeepOpen(true)}
+          title={deepActive ? 'Deep Search is filtering these results' : undefined}
+        >
+          <SearchIcon size={14} />
+          Deep search{deepActive ? 'ing' : ''}
+        </button>
         <SortSelect value={sort} onChange={(v) => setSort(v)} options={SORT_OPTIONS} />
         <button type="button" className="xe_btn" onClick={() => playNow(visible, 0)} disabled={visible.length === 0}>
           <PlayIcon size={14} />
@@ -143,6 +166,8 @@ export function LibraryPage() {
         <div className="xe_page__scroll">
           {scanning ? (
             <TrackListSkeleton rows={15} />
+          ) : visible.length === 0 ? (
+            <p className="xe_empty-note">No tracks match...</p>
           ) : (
             <>
               <TrackList tracks={paged} />
@@ -150,6 +175,17 @@ export function LibraryPage() {
             </>
           )}
         </div>
+      )}
+
+      {deepOpen && (
+        <DeepSearchModal
+          initial={deep}
+          onApply={(criteria) => {
+            setDeep(criteria);
+            setDeepOpen(false);
+          }}
+          onClose={() => setDeepOpen(false)}
+        />
       )}
     </div>
   );

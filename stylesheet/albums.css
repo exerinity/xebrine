@@ -107,6 +107,25 @@
   white-space: nowrap;
 }
 
+.xe_album-card__artist-link {
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.xe_album-card__artist-link:hover {
+  color: var(--accent-text);
+  text-decoration: underline;
+}
+
 .xe_album-hero {
   display: flex;
   align-items: flex-end;
@@ -165,6 +184,20 @@
 .xe_album-hero__meta {
   color: var(--text-dim);
   margin: 0 0 14px;
+}
+
+.xe_album-hero__artist-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.xe_album-hero__artist-btn:hover {
+  color: var(--accent-text);
+  text-decoration: underline;
 }
 
 .xe_album-hero__actions {
