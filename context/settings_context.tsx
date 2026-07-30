@@ -4,6 +4,7 @@ import { DEFAULT_IGNORE_RULES, normalizeIgnoreRules, type IgnoreRules } from '..
 import { EQ_FLAT, normalizeBands } from '../audio/eq';
 import type { ArtistPronunciation } from '../utils/pronunciation';
 import { isThemeId, type ThemeId } from '../utils/themes';
+import { isSearchEngineId, type SearchEngineId } from '../utils/search_engine';
 
 export type PlayerBarClickAction = 'copy' | 'open';
 
@@ -22,6 +23,8 @@ export interface Settings {
   artistPronunciations: ArtistPronunciation[];
   tagExplicitSongs: boolean;
   theme: ThemeId;
+  searchEngine: SearchEngineId;
+  customSearchUrl: string;
 }
 
 interface SettingsContextValue {
@@ -45,7 +48,9 @@ export const DEFAULT_SETTINGS: Settings = {
   announceTrackChanges: false,
   artistPronunciations: [],
   tagExplicitSongs: false,
-  theme: 'default'
+  theme: 'default',
+  searchEngine: 'google',
+  customSearchUrl: ''
 };
 
 function loadSettings(): Settings {
@@ -56,7 +61,9 @@ function loadSettings(): Settings {
       ...merged,
       eqBands: normalizeBands(merged.eqBands),
       ignoreRules: normalizeIgnoreRules(merged.ignoreRules),
-      theme: isThemeId(merged.theme) ? merged.theme : 'default'
+      theme: isThemeId(merged.theme) ? merged.theme : 'default',
+      searchEngine: isSearchEngineId(merged.searchEngine) ? merged.searchEngine : 'google',
+      customSearchUrl: typeof merged.customSearchUrl === 'string' ? merged.customSearchUrl : ''
     };
   } catch {
     return DEFAULT_SETTINGS;

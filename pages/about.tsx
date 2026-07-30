@@ -97,18 +97,10 @@ export function AboutPage() {
                   PWA music player by <a href="https://exerinity.com" target="_blank">exerinity</a>. Xebrine was released exactly 1 year after Voxity was created.
                 </p>
                 <p className="xe_about__text">
-                  It is a clear-cut and modern reimplementation of the same core ideas: fast, bizarre, and very opinionated.
-                  Point Xebrine at a folder and it crawls your collection, reads the tags and cover art, and keeps everything
-                  organized.
-                  <br></br><small>
-                    (No - Xebrine is not <i>replacing</i> Voxity nor am I canning it, this is just something more)
-                  </small>
+                    (No - Xebrine is not <i>replacing</i> Voxity nor am I canning it)
                 </p>
 
                 <h3 className="xe_about__heading">Stack</h3>
-                <p className="xe_about__text">
-                  <Link to="/i/acknowledgements">(see all in acknowledgements)</Link>
-                </p>
                 <ul className="xe_about__list xe_about__packages">
                   <li>
                     <code>react</code>

@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
 import { usePlayer } from '../context/player_context';
+import { useSettings } from '../context/settings_context';
 import { groupArtists, type ArtistGroup } from '../utils/groups';
+import { openSearch, searchLabel } from '../utils/search_engine';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { toSlugParam } from '../utils/slug';
@@ -32,6 +34,7 @@ function loadSort(): ArtistSort {
 export function ArtistsPage() {
   const { tracks } = useLibrary();
   const { playNow, enqueueEnd } = usePlayer();
+  const { settings } = useSettings();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<ArtistSort>(loadSort);
@@ -66,14 +69,9 @@ export function ArtistsPage() {
     },
     { label: 'Enqueue all music', onSelect: () => enqueueEnd(artist.tracks) },
     {
-      label: 'Google this artist',
+      label: searchLabel(settings.searchEngine, settings.customSearchUrl),
       separatorBefore: true,
-      onSelect: () =>
-        window.open(
-          `https://www.google.com/search?q=${encodeURIComponent(artist.name)}`,
-          '_blank',
-          'noopener,noreferrer'
-        )
+      onSelect: () => openSearch(artist.name, settings.searchEngine, settings.customSearchUrl)
     },
     { label: 'Copy name', onSelect: () => copyName(artist.name) }
   ];

@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
 import { usePlayer } from '../context/player_context';
+import { useSettings } from '../context/settings_context';
 import { groupAlbums, type AlbumGroup } from '../utils/groups';
+import { openSearch, searchLabel } from '../utils/search_engine';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { useAlbumArt } from '../hooks/album_art';
@@ -32,6 +34,7 @@ function loadSort(): AlbumSort {
 
 export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
   const { playNow, enqueueEnd } = usePlayer();
+  const { settings } = useSettings();
   const art = useAlbumArt(album.key, album.tracks[0]);
   const navigate = useNavigate();
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
@@ -43,12 +46,12 @@ export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void
       onSelect: () => navigate(`/artists/${toSlugParam(album.artist)}`)
     },
     {
-      label: 'Google this album',
+      label: searchLabel(settings.searchEngine, settings.customSearchUrl),
       onSelect: () =>
-        window.open(
-          `https://www.google.com/search?q=${encodeURIComponent(`${album.album} by ${album.artist}`)}`,
-          '_blank',
-          'noopener,noreferrer'
+        openSearch(
+          `${album.album} by ${album.artist}`,
+          settings.searchEngine,
+          settings.customSearchUrl
         )
     },
     {

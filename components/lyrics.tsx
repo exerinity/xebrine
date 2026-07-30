@@ -7,6 +7,7 @@ import { parseLyricsFile, toLrc } from '../utils/lyrics';
 import { dbDelete, dbGet, dbPut } from '../management/db';
 import { containsProfanity } from '../utils/profanity';
 import { isExplicitId, markExplicit } from '../utils/explicit_tracks';
+import { openSearch, searchLabel } from '../utils/search_engine';
 import type { Lyrics, StoredLyrics, TrackMeta } from '../types';
 import { LyricsSkeleton } from './skeletons';
 import { Spinner } from './spinner';
@@ -227,14 +228,9 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
     }
     if (line.text.trim()) {
       items.push({
-        label: 'Search for this line (Google)',
+        label: searchLabel(settings.searchEngine, settings.customSearchUrl),
         separatorBefore: items.length > 0,
-        onSelect: () =>
-          window.open(
-            `https://www.google.com/search?q=${encodeURIComponent(line.text)}`,
-            '_blank',
-            'noopener,noreferrer'
-          )
+        onSelect: () => openSearch(line.text, settings.searchEngine, settings.customSearchUrl)
       });
     }
     if (items[0]) items[0].heading = '"' + lineHeading(line.text) + '"';

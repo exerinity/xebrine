@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../context/player_context';
+import { useSettings } from '../context/settings_context';
+import { openSearch, searchLabel } from '../utils/search_engine';
 import { formatTime } from '../utils/format';
 import { toSlugParam } from '../utils/slug';
 import { displayArtist } from '../utils/groups';
@@ -23,6 +25,7 @@ interface MenuState {
 
 export function TrackList({ tracks }: TrackListProps) {
   const { current, isPlaying, playNow, enqueueNext, enqueueEnd } = usePlayer();
+  const { settings } = useSettings();
   const navigate = useNavigate();
   const currentTrackId = current?.track.id;
   const [menu, setMenu] = useState<MenuState | null>(null);
@@ -52,7 +55,17 @@ export function TrackList({ tracks }: TrackListProps) {
       onSelect: () => copy(`${m.track.title} by ${m.track.artist}`, 'info')
     },
     { label: 'Go to album', heading: 'Navigation...', onSelect: () => goToAlbum(m.track) },
-    { label: 'Go to artist', onSelect: () => goToArtist(m.track) }
+    { label: 'Go to artist', onSelect: () => goToArtist(m.track) },
+    {
+      label: searchLabel(settings.searchEngine, settings.customSearchUrl),
+      separatorBefore: true,
+      onSelect: () =>
+        openSearch(
+          `${m.track.title} by ${m.track.artist}`,
+          settings.searchEngine,
+          settings.customSearchUrl
+        )
+    }
   ];
 
   return (

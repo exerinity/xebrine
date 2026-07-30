@@ -31,6 +31,19 @@
   margin: 6px 0 12px;
 }
 
+.xe_settings__search-url {
+  display: block;
+  width: 100%;
+  max-width: 440px;
+  margin-top: 10px;
+}
+
+.xe_settings__hint code {
+  background: var(--panel-2);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
 .xe_link-btn {
   color: var(--accent-text);
   text-decoration: underline;

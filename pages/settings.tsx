@@ -25,8 +25,18 @@ import { ExplicitIcon } from '../components/explicit_badge';
 import { Modal } from '../components/modal';
 import { PROFANITY_WORDS } from '../utils/profanity';
 import { THEMES } from '../utils/themes';
+import {
+  buildSearchUrl,
+  ENGINE_GROUPS,
+  engineKind,
+  QUERY_TOKEN,
+  SEARCH_ENGINES,
+  type SearchEngineId
+} from '../utils/search_engine';
 
 type SectionId = 'preferences' | 'library' | 'playback' | 'a11y' | 'toys' | 'share';
+
+const SEARCH_PREVIEW = '4x4=12 by deadmau5';
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'preferences', label: 'Main preferences' },
@@ -293,6 +303,47 @@ export function SettingsPage() {
                     );
                   })}
                 </div>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>Context menu search engine/source</h2>
+                <select
+                  className="xe_sort-select"
+                  aria-label="Context menu search engine/source"
+                  value={settings.searchEngine}
+                  onChange={(e) => update({ searchEngine: e.target.value as SearchEngineId })}
+                >
+                  {ENGINE_GROUPS.map((group) => (
+                    <optgroup key={group.kind} label={group.label}>
+                      {SEARCH_ENGINES.filter((engine) => engineKind(engine.id) === group.kind).map(
+                        (engine) => (
+                          <option key={engine.id} value={engine.id}>
+                            {engine.label}
+                          </option>
+                        )
+                      )}
+                    </optgroup>
+                  ))}
+                </select>
+                {settings.searchEngine === 'custom' && (
+                  <>
+                    <input
+                      type="text"
+                      className="xe_search-input xe_settings__search-url"
+                      placeholder={`https://sigma.com/search?q=${QUERY_TOKEN}`}
+                      value={settings.customSearchUrl}
+                      onChange={(e) => update({ customSearchUrl: e.target.value })}
+                    />
+                    <p className="xe_settings__hint">
+                      Put <code>{QUERY_TOKEN}</code> where the query goes
+                    </p>
+                  </>
+                )}
+                <p className="xe_settings__hint">
+                  This will open {' '}
+                  <u>{buildSearchUrl(SEARCH_PREVIEW, settings.searchEngine, settings.customSearchUrl)}</u> {' '}
+                  when selected
+                </p>
               </section>
 
               <section className="xe_settings__section">
