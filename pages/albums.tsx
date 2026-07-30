@@ -6,7 +6,7 @@ import { groupAlbums, type AlbumGroup } from '../utils/groups';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { useAlbumArt } from '../hooks/album_art';
-import { NoteIcon, PlayIcon, PlusIcon, SearchIcon, ShuffleIcon } from '../components/icons';
+import { LogoIcon, PlayIcon, PlusIcon, SearchIcon, ShuffleIcon } from '../components/icons';
 import { ContextMenu, type ContextMenuItem } from '../components/context_menu';
 import { SortSelect, type SortOption } from '../components/sort_select';
 import { toSlugParam } from '../utils/slug';
@@ -69,7 +69,7 @@ export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void
       }}
     >
       <div className="xe_album-card__art">
-        {art ? <img src={art} alt="" loading="lazy" /> : <NoteIcon size={36} />}
+        {art ? <img src={art} alt="" loading="lazy" /> : <LogoIcon size={36} />}
         <div className="xe_album-card__actions">
           <button
             type="button"

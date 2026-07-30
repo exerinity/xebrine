@@ -6,7 +6,7 @@ import { formatTime } from '../utils/format';
 import type { QueueItem } from '../types';
 import { LyricsPanel } from './lyrics';
 import { ScrollingText } from './scrolling_text';
-import { CloseIcon, LogoIcon, NoteIcon, PauseIcon, PlayIcon } from './icons';
+import { CloseIcon, LogoIcon, PauseIcon, PlayIcon } from './icons';
 
 interface FullscreenPlayerProps {
   open: boolean;
@@ -36,7 +36,7 @@ function TrackPreviewCard({
       title={title}
     >
       <span className="xe_fullscreen-player__track-art">
-        {artUrl ? <img src={artUrl} alt="" /> : <NoteIcon size={primary ? 24 : 18} />}
+        {artUrl ? <img src={artUrl} alt="" /> : <LogoIcon size={primary ? 24 : 18} />}
       </span>
       <span className="xe_fullscreen-player__track-copy">
         <ScrollingText text={item.track.title} className="xe_fullscreen-player__track-title" />
@@ -164,7 +164,7 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
               title="Close fullscreen player"
               aria-label="Close fullscreen player"
             >
-              {displayArtworkUrl ? <img src={displayArtworkUrl} alt="" /> : <NoteIcon size={88} />}
+              {displayArtworkUrl ? <img src={displayArtworkUrl} alt="" /> : <LogoIcon size={88} />}
             </button>
           </div>
           <div className="xe_fullscreen-player__identity">

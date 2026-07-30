@@ -2,7 +2,7 @@ import { usePlayer } from '../context/player_context';
 import { LyricsPanel } from '../components/lyrics';
 import { ScrollingText } from '../components/scrolling_text';
 import { usePageTitle } from '../hooks/page_title';
-import { NoteIcon } from '../components/icons';
+import { LogoIcon } from '../components/icons';
 
 export function LyricsPage() {
   const { current, artworkUrl } = usePlayer();
@@ -14,7 +14,7 @@ export function LyricsPage() {
       {track && (
         <div className="xe_lyrics-header">
           <div className="xe_lyrics-header__art">
-            {artworkUrl ? <img src={artworkUrl} alt="" /> : <NoteIcon size={32} />}
+            {artworkUrl ? <img src={artworkUrl} alt="" /> : <LogoIcon size={32} />}
           </div>
           <div className="xe_lyrics-header__titles">
             <ScrollingText text={track.title} className="xe_lyrics-header__title" />

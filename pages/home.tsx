@@ -11,6 +11,7 @@ import { AlbumCard } from './albums';
 import {
   FolderIcon,
   KeyIcon,
+  LogoIcon,
   NoteIcon,
   PlayIcon,
   PlusIcon,
@@ -46,7 +47,7 @@ function RandomSongCard({ track, onAnother }: { track: TrackMeta; onAnother(): v
   return (
     <div className="xe_home-song-card">
       <div className="xe_home-song-card__art">
-        {art ? <img src={art} alt="" loading="lazy" /> : <NoteIcon size={30} />}
+        {art ? <img src={art} alt="" loading="lazy" /> : <LogoIcon size={30} />}
       </div>
       <div className="xe_home-song-card__info">
         <span className="xe_home-song-card__title">{track.title}</span>

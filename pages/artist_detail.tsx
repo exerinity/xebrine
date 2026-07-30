@@ -6,7 +6,7 @@ import { groupArtists, groupAlbums, type AlbumGroup } from '../utils/groups';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { TrackList } from '../components/track_list';
-import { BackIcon, NoteIcon, PlayIcon, ShuffleIcon } from '../components/icons';
+import { BackIcon, LogoIcon, PlayIcon, ShuffleIcon } from '../components/icons';
 import { slugify, toSlugParam } from '../utils/slug';
 import { useAlbumArt } from '../hooks/album_art';
 import { useScrollRestoration } from '../hooks/scroll_restoration';
@@ -23,7 +23,7 @@ function AlbumSection({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) 
           onClick={onOpen}
           title={`Open ${album.album}`}
         >
-          {art ? <img src={art} alt="" loading="lazy" /> : <NoteIcon size={30} />}
+          {art ? <img src={art} alt="" loading="lazy" /> : <LogoIcon size={30} />}
         </button>
         <div className="xe_album-section__heading">
           <button type="button" className="xe_album-section__link" onClick={onOpen}>

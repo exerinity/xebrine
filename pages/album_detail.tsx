@@ -7,7 +7,7 @@ import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { useAlbumArt } from '../hooks/album_art';
 import { TrackList } from '../components/track_list';
-import { BackIcon, NoteIcon, PlayIcon, ShuffleIcon } from '../components/icons';
+import { BackIcon, LogoIcon, PlayIcon, ShuffleIcon } from '../components/icons';
 import { formatTime } from '../utils/format';
 import { CoverModal } from '../components/cover_modal';
 import { slugify, toSlugParam } from '../utils/slug';
@@ -83,7 +83,7 @@ export function AlbumDetailPage() {
           disabled={!art}
           title={art ? 'Enlarge cover' : undefined}
         >
-          {art ? <img src={art} alt="" /> : <NoteIcon size={48} />}
+          {art ? <img src={art} alt="" /> : <LogoIcon size={48} />}
         </button>
         <div className="xe_album-hero__info">
           <h1 className="xe_album-hero__title">
