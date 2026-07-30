@@ -8,6 +8,7 @@ import { dbDelete, dbGet, dbPut } from '../management/db';
 import { containsProfanity } from '../utils/profanity';
 import { isExplicitId, markExplicit } from '../utils/explicit_tracks';
 import { openSearch, searchLabel } from '../utils/search_engine';
+import { toast } from '../utils/toast';
 import type { Lyrics, StoredLyrics, TrackMeta } from '../types';
 import { LyricsSkeleton } from './skeletons';
 import { Spinner } from './spinner';
@@ -227,11 +228,21 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
       );
     }
     if (line.text.trim()) {
-      items.push({
-        label: searchLabel(settings.searchEngine, settings.customSearchUrl),
-        separatorBefore: items.length > 0,
-        onSelect: () => openSearch(line.text, settings.searchEngine, settings.customSearchUrl)
-      });
+      items.push(
+        {
+          label: 'Copy this line',
+          separatorBefore: items.length > 0,
+          onSelect: () =>
+            navigator.clipboard
+              .writeText(line.text)
+              .then(() => toast.success('Copied the line'))
+              .catch(() => toast.error("Couldn't copy the line"))
+        },
+        {
+          label: searchLabel(settings.searchEngine, settings.customSearchUrl),
+          onSelect: () => openSearch(line.text, settings.searchEngine, settings.customSearchUrl)
+        }
+      );
     }
     if (items[0]) items[0].heading = '"' + lineHeading(line.text) + '"';
     return items;
