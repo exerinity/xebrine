@@ -40,12 +40,17 @@ export interface ElectronBridge {
 
 declare global {
   interface Window {
-    xebrine?: ElectronBridge;
+    xebrineShell?: ElectronBridge;
   }
 }
 
-export const electron: ElectronBridge | null =
-  typeof window === 'undefined' ? null : (window.xebrine ?? null);
+function resolveBridge(): ElectronBridge | null {
+  if (typeof window === 'undefined') return null;
+  const bridge = window.xebrineShell;
+  return bridge && typeof bridge.updateState === 'function' ? bridge : null;
+}
+
+export const electron: ElectronBridge | null = resolveBridge();
 
 export const isElectron = electron !== null;
 

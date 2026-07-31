@@ -15,6 +15,7 @@ export type SearchEngineId =
   | 'groktw'
   | 'claude'
   | 'twitter'
+  | 'tunebat'
   | 'custom';
 
 export const QUERY_TOKEN = '%s';
@@ -49,6 +50,7 @@ export const SEARCH_ENGINES: { id: SearchEngineId; label: string; template: stri
   { id: 'claude', label: 'Claude', template: `https://claude.ai/new?q=${QUERY_TOKEN}`},
   
   { id: 'twitter', label: 'Twitter', template: `https://twitter.com/search?q=${QUERY_TOKEN}` },
+  { id: 'tunebat', label: 'Tunebat', template: `https://tunebat.com/Search?q=${QUERY_TOKEN}`},
   { id: 'custom', label: 'Custom', template: '' }
 ];
 
@@ -72,7 +74,7 @@ export const ENGINE_GROUPS: { kind: SearchEngineKind; label: string }[] = [
   { kind: 'more', label: 'More' }
 ];
 
-const MORE_ENGINES = new Set<SearchEngineId>(['twitter', 'custom']);
+const MORE_ENGINES = new Set<SearchEngineId>(['twitter', 'tunebat', 'custom']);
 
 export function engineKind(engine: SearchEngineId): SearchEngineKind {
   if (MORE_ENGINES.has(engine)) return 'more';
