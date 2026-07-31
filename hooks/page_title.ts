@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
+import { isElectron } from '../utils/electron';
 
 const SUFFIX = 'Xebrine';
 export function usePageTitle(crumbs: string | string[]) {
   const parts = (Array.isArray(crumbs) ? crumbs : [crumbs]).filter(Boolean);
-  const title = [...parts, SUFFIX].join(' / ');
+  const title = (isElectron && parts.length ? parts : [...parts, SUFFIX]).join(' / ');
   useEffect(() => {
     document.title = title;
     return () => {

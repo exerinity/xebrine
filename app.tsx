@@ -5,6 +5,8 @@ import { LibraryProvider } from './context/library_context';
 import { PlayerProvider, usePlayer } from './context/player_context';
 import { useSettings } from './context/settings_context';
 import { useMediaSession } from './hooks/media_session';
+import { useElectronBridge } from './hooks/electron_bridge';
+import { isElectron } from './utils/electron';
 import { useTrackNotifications } from './hooks/track_notifications';
 import { useSpeechAnnouncements } from './hooks/speech_announcements';
 import { useQueueFinishedSound } from './hooks/queue_finished_sound';
@@ -31,6 +33,7 @@ import { WelcomeModal } from './components/welcome_modal';
 
 function MediaBridge() {
   useMediaSession();
+  useElectronBridge();
   useTrackNotifications();
   useSpeechAnnouncements();
   useQueueFinishedSound();
@@ -79,7 +82,7 @@ function Shell() {
     if (!fullscreenOpen || !current) return;
     const previous = document.title;
     const { title, artist } = current.track;
-    document.title = `${title} by ${artist} / Xebrine`;
+    document.title = isElectron ? `${title} by ${artist}` : `${title} by ${artist} / Xebrine`;
     return () => {
       document.title = previous;
     };

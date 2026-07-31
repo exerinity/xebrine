@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
 import { BackIcon, ChevronRightIcon, LogoIcon, NoteIcon } from '../components/icons';
 import { usePageTitle } from '../hooks/page_title';
+import { electronVersion, isElectron } from '../utils/electron';
 
 const HOTKEYS: { chords: string[][]; action: string }[] = [
   { chords: [['Space'], ['K']], action: 'Play / pause' },
@@ -86,6 +87,9 @@ export function AboutPage() {
                   </span>
                   <div>
                     <h2 className="xe_about__name">Xebrine Alpha</h2>
+                    {isElectron && (
+                      <p className="xe_about__version">Desktop shell · Electron {electronVersion()}</p>
+                    )}
                   </div>
                 </div>
 
