@@ -118,6 +118,57 @@
   border-color: var(--accent);
 }
 
+.xe_eq__levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  margin-bottom: 10px;
+}
+
+.xe_eq__levels--off {
+  opacity: 0.45;
+}
+
+.xe_eq__level {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 260px;
+  max-width: 340px;
+}
+
+.xe_eq__level-label {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.xe_eq__level .xe_settings__slider-value {
+  min-width: 58px;
+  font-size: 13px;
+}
+
+.xe_eq__headroom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: 12px;
+}
+
+.xe_eq__headroom-value {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.xe_eq__headroom-value--hot {
+  color: #f5a623;
+}
+
+.xe_eq__headroom .xe_btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .xe_eq__bands {
   display: flex;
   gap: 4px;

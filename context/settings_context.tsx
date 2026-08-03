@@ -1,7 +1,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { LrclibMode } from '../api/lrclib';
 import { DEFAULT_IGNORE_RULES, normalizeIgnoreRules, type IgnoreRules } from '../utils/ignore_rules';
-import { EQ_FLAT, normalizeBands } from '../audio/eq';
+import {
+  EQ_FLAT,
+  EQ_INTENSITY_DEFAULT,
+  EQ_PREAMP_DEFAULT,
+  normalizeBands,
+  normalizeIntensity,
+  normalizePreamp
+} from '../audio/eq';
 import type { ArtistPronunciation } from '../utils/pronunciation';
 import { isThemeId, type ThemeId } from '../utils/themes';
 import { isSearchEngineId, type SearchEngineId } from '../utils/search_engine';
@@ -17,10 +24,13 @@ export type PlayerBarClickAction = 'copy' | 'open';
 export interface Settings {
   lrclibMode: LrclibMode;
   notifications: boolean;
+  preventExit: boolean;
   ignoreRules: IgnoreRules;
   autoMixDuration: number;
   eqEnabled: boolean;
   eqBands: number[];
+  eqPreamp: number;
+  eqIntensity: number;
   playerBarClickAction: PlayerBarClickAction;
   fsBlur: number;
   fsSaturate: number;
@@ -47,10 +57,13 @@ const KEY = 'xebrine.settings';
 export const DEFAULT_SETTINGS: Settings = {
   lrclibMode: 'strict',
   notifications: true,
+  preventExit: true,
   ignoreRules: DEFAULT_IGNORE_RULES,
   autoMixDuration: 15,
   eqEnabled: false,
   eqBands: [...EQ_FLAT],
+  eqPreamp: EQ_PREAMP_DEFAULT,
+  eqIntensity: EQ_INTENSITY_DEFAULT,
   playerBarClickAction: 'open',
   fsBlur: 56,
   fsSaturate: 1.35,
@@ -74,6 +87,8 @@ function loadSettings(): Settings {
     return {
       ...merged,
       eqBands: normalizeBands(merged.eqBands),
+      eqPreamp: normalizePreamp(merged.eqPreamp),
+      eqIntensity: normalizeIntensity(merged.eqIntensity),
       ignoreRules: normalizeIgnoreRules(merged.ignoreRules),
       theme: isThemeId(merged.theme) ? merged.theme : 'default',
       searchEngine: isSearchEngineId(merged.searchEngine) ? merged.searchEngine : 'google',

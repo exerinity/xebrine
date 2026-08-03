@@ -402,6 +402,21 @@ export function SettingsPage() {
               </section>
 
               <section className="xe_settings__section">
+                <h2>Prevent exit</h2>
+                <label className="xe_settings__radio">
+                  <input
+                    type="checkbox"
+                    checked={settings.preventExit}
+                    onChange={(e) => update({ preventExit: e.target.checked })}
+                  />
+                  <span>Ask for confirmation before closing while a track is playing</span>
+                </label>
+                <p className="xe_settings__hint">
+                  When off, the "Leave site?" prompt will not appear
+                </p>
+              </section>
+
+              <section className="xe_settings__section">
                 <h2>Fullscreen player background</h2>
                 <p className="xe_settings__hint">
                   Right-click a slider to reset it to default

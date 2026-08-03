@@ -26,7 +26,14 @@ import {
   type TrackAnalysis
 } from '../audio/bpm';
 import { toast } from '../utils/toast';
-import { EQ_BANDS, EQ_Q, normalizeBands } from '../audio/eq';
+import {
+  EQ_BANDS,
+  EQ_Q,
+  dbToGain,
+  normalizeBands,
+  normalizeIntensity,
+  normalizePreamp
+} from '../audio/eq';
 
 export type RepeatMode = 'off' | 'all' | 'one';
 export type AutoMixPhase = 'idle' | 'analyzing-current' | 'analyzing-next' | 'mixing' | 'switching';
@@ -147,6 +154,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const fadeGainARef = useRef<GainNode | null>(null);
   const eqFiltersRef = useRef<BiquadFilterNode[] | null>(null);
+  const eqPreampRef = useRef<GainNode | null>(null);
 
   const [sleepTimerEndAt, setSleepTimerEndAt] = useState<number | null>(null);
   const [sleepTimerPausedRemaining, setSleepTimerPausedRemaining] = useState<number | null>(null);
@@ -192,6 +200,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const analyser = ctx.createAnalyser();
     analyser.fftSize = 512;
 
+    const eqPreamp = ctx.createGain();
+    eqPreamp.gain.value = 1;
+
     const eqFilters = EQ_BANDS.map((freq) => {
       const filter = ctx.createBiquadFilter();
       filter.type = 'peaking';
@@ -203,7 +214,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     source.connect(fadeGainA);
     fadeGainA.connect(gain);
-    let tail: AudioNode = gain;
+    gain.connect(eqPreamp);
+    let tail: AudioNode = eqPreamp;
     for (const filter of eqFilters) {
       tail.connect(filter);
       tail = filter;
@@ -215,6 +227,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     gainNodeRef.current = gain;
     analyserRef.current = analyser;
     eqFiltersRef.current = eqFilters;
+    eqPreampRef.current = eqPreamp;
     return { gain, analyser };
   }
 
@@ -555,14 +568,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [audio]);
 
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || !settings.preventExit) return;
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       e.returnValue = '';
     };
     window.addEventListener('beforeunload', onBeforeUnload);
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
-  }, [isPlaying]);
+  }, [isPlaying, settings.preventExit]);
 
   useEffect(() => {
     fadeVolumeTo(volume * (ducking ? DUCK_FACTOR : 1), DUCK_FADE_MS);
@@ -602,16 +615,23 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const bands = normalizeBands(settings.eqBands);
-    const active = settings.eqEnabled && bands.some((v) => v !== 0);
+    const intensity = normalizeIntensity(settings.eqIntensity);
+    const preampDb = normalizePreamp(settings.eqPreamp);
+    const active = settings.eqEnabled && (bands.some((v) => v !== 0) || preampDb !== 0);
     if (!active && !eqFiltersRef.current) return;
     ensureAudioGraph();
     const ctx = audioCtxRef.current!;
     const filters = eqFiltersRef.current!;
     filters.forEach((filter, i) => {
-      const target = active ? bands[i] : 0;
+      const target = active ? bands[i] * intensity : 0;
       filter.gain.setTargetAtTime(target, ctx.currentTime, 0.02);
     });
-  }, [settings.eqEnabled, settings.eqBands]);
+    eqPreampRef.current!.gain.setTargetAtTime(
+      active ? dbToGain(preampDb) : 1,
+      ctx.currentTime,
+      0.02
+    );
+  }, [settings.eqEnabled, settings.eqBands, settings.eqIntensity, settings.eqPreamp]);
 
   useEffect(() => {
     setLoadError(null);
