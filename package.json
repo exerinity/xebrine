@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "icons": "node scripts/gen-icons.mjs"
+    "icons": "node scripts/gen-icons.mjs",
+    "icons:transparent": "node scripts/gen-icons-transparent.mjs"
   },
   "dependencies": {
     "mespeak": "^2.0.2",

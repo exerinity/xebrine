@@ -10,11 +10,13 @@ import {
   NoteIcon,
   PersonIcon,
   QueueIcon,
+  SearchIcon,
   SettingsIcon
 } from './icons';
 
 const NAV_LINKS = [
   { path: '/home', label: 'Home', icon: HomeIcon },
+  { path: '/search', label: 'Search', icon: SearchIcon },
   { path: '/library', label: 'Library', icon: NoteIcon },
   { path: '/artists', label: 'Artists', icon: PersonIcon },
   { path: '/albums', label: 'Albums', icon: DiscIcon },

@@ -14,6 +14,7 @@ import { useAccentColor } from './hooks/accent_color';
 import { useKeyboardShortcuts } from './hooks/keyboard_shortcuts';
 import { HomePage } from './pages/home';
 import { LibraryPage } from './pages/library';
+import { SearchPage } from './pages/search';
 import { ArtistsPage } from './pages/artists';
 import { ArtistDetailPage } from './pages/artist_detail';
 import { AlbumsPage } from './pages/albums';
@@ -95,6 +96,7 @@ function Shell() {
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<HomePage />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/artists" element={<ArtistsPage />} />
           <Route path="/artists/:artistName" element={<ArtistDetailPage />} />

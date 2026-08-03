@@ -1,3 +1,8 @@
+.xe_view-toggle {
+  display: flex;
+  gap: 2px;
+}
+
 .xe_artist-row {
   display: flex;
   align-items: center;

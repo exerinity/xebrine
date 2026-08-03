@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
 import { usePlayer } from '../context/player_context';
@@ -6,11 +6,36 @@ import { groupArtists, groupAlbums, type AlbumGroup } from '../utils/groups';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { TrackList } from '../components/track_list';
-import { BackIcon, LogoIcon, PlayIcon, ShuffleIcon } from '../components/icons';
+import { BackIcon, GridIcon, ListIcon, LogoIcon, PlayIcon, ShuffleIcon } from '../components/icons';
 import { slugify, toSlugParam } from '../utils/slug';
 import { useAlbumArt } from '../hooks/album_art';
 import { useScrollRestoration } from '../hooks/scroll_restoration';
 import { usePageTitle } from '../hooks/page_title';
+import { SortSelect, type SortOption } from '../components/sort_select';
+import { AlbumCard } from './albums';
+
+type AlbumsView = 'list' | 'grid';
+const VIEW_KEY = 'xebrine.artistAlbumsView';
+
+function loadView(): AlbumsView {
+  return localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'list';
+}
+
+type AlbumsSort = 'year' | 'title' | 'title-desc' | 'tracks';
+
+const SORT_OPTIONS: SortOption<AlbumsSort>[] = [
+  { value: 'year', label: 'Year' },
+  { value: 'title', label: 'Title (A - Z)' },
+  { value: 'title-desc', label: 'Title (Z - A)' },
+  { value: 'tracks', label: 'Tracks' }
+];
+
+const SORT_KEY = 'xebrine.artistAlbumsSort';
+
+function loadSort(): AlbumsSort {
+  const raw = localStorage.getItem(SORT_KEY);
+  return SORT_OPTIONS.some((o) => o.value === raw) ? (raw as AlbumsSort) : 'year';
+}
 
 function AlbumSection({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
   const art = useAlbumArt(album.key, album.tracks[0]);
@@ -46,6 +71,26 @@ export function ArtistDetailPage() {
   const { tracks } = useLibrary();
   const { playNow } = usePlayer();
   const scrollRef = useScrollRestoration<HTMLDivElement>();
+  const [view, setView] = useState<AlbumsView>(loadView);
+  const [sort, setSort] = useState<AlbumsSort>(loadSort);
+
+  const changeView = (value: AlbumsView) => {
+    setView(value);
+    try {
+      localStorage.setItem(VIEW_KEY, value);
+    } catch {
+      null;
+    }
+  };
+
+  const changeSort = (value: AlbumsSort) => {
+    setSort(value);
+    try {
+      localStorage.setItem(SORT_KEY, value);
+    } catch {
+      null;
+    }
+  };
 
   const artists = useMemo(() => groupArtists(tracks), [tracks]);
   const artist = useMemo(
@@ -68,7 +113,18 @@ export function ArtistDetailPage() {
     );
   }
 
-  const albums = groupAlbums(artist.tracks);
+  const albums = groupAlbums(artist.tracks).sort((a, b) => {
+    switch (sort) {
+      case 'title':
+        return a.album.localeCompare(b.album);
+      case 'title-desc':
+        return b.album.localeCompare(a.album);
+      case 'tracks':
+        return b.tracks.length - a.tracks.length || a.album.localeCompare(b.album);
+      default:
+        return (a.year ?? 0) - (b.year ?? 0) || a.album.localeCompare(b.album);
+    }
+  });
   const shuffle = () =>
     playNow(
       intelligentShuffle(artist.tracks, (t) => ({ id: t.id, artist: t.artist }), getRecentIds()),
@@ -95,19 +151,54 @@ export function ArtistDetailPage() {
           <ShuffleIcon size={14} />
           Shuffle
         </button>
+        <SortSelect value={sort} onChange={changeSort} options={SORT_OPTIONS} />
+        <div className="xe_view-toggle">
+          <button
+            type="button"
+            className={`xe_icon-btn${view === 'list' ? ' xe_icon-btn--active' : ''}`}
+            title="List view"
+            onClick={() => changeView('list')}
+          >
+            <ListIcon size={16} />
+          </button>
+          <button
+            type="button"
+            className={`xe_icon-btn${view === 'grid' ? ' xe_icon-btn--active' : ''}`}
+            title="Grid view"
+            onClick={() => changeView('grid')}
+          >
+            <GridIcon size={16} />
+          </button>
+        </div>
       </div>
       <div className="xe_page__scroll" ref={scrollRef}>
-        {albums.map((album) => (
-          <AlbumSection
-            key={album.key}
-            album={album}
-            onOpen={() =>
-              navigate(`/artists/${toSlugParam(artist.name)}/${toSlugParam(album.album)}`, {
-                state: { from: `/artists/${toSlugParam(artist.name)}` }
-              })
-            }
-          />
-        ))}
+        {view === 'list' ? (
+          albums.map((album) => (
+            <AlbumSection
+              key={album.key}
+              album={album}
+              onOpen={() =>
+                navigate(`/artists/${toSlugParam(artist.name)}/${toSlugParam(album.album)}`, {
+                  state: { from: `/artists/${toSlugParam(artist.name)}` }
+                })
+              }
+            />
+          ))
+        ) : (
+          <div className="xe_album-grid">
+            {albums.map((album) => (
+              <AlbumCard
+                key={album.key}
+                album={album}
+                onOpen={() =>
+                  navigate(`/artists/${toSlugParam(artist.name)}/${toSlugParam(album.album)}`, {
+                    state: { from: `/artists/${toSlugParam(artist.name)}` }
+                  })
+                }
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

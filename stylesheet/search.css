@@ -1,0 +1,15 @@
+.xe_search-field--big {
+  width: 100%;
+  max-width: 460px;
+  margin-bottom: 14px;
+}
+
+.xe_search-field--big svg {
+  left: 12px;
+}
+
+.xe_search-input--big {
+  width: 100%;
+  padding: 9px 14px 9px 34px;
+  font-size: 14px;
+}

@@ -505,6 +505,26 @@ export const MoonIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const ListIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="4" y="5.5" width="3" height="3" rx="1" />
+    <rect x="4" y="10.5" width="3" height="3" rx="1" />
+    <rect x="4" y="15.5" width="3" height="3" rx="1" />
+    <rect x="10" y="6" width="10" height="2" rx="1" />
+    <rect x="10" y="11" width="10" height="2" rx="1" />
+    <rect x="10" y="16" width="10" height="2" rx="1" />
+  </Svg>
+);
+
+export const GridIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="4" y="4" width="7" height="7" rx="1.5" />
+    <rect x="13" y="4" width="7" height="7" rx="1.5" />
+    <rect x="4" y="13" width="7" height="7" rx="1.5" />
+    <rect x="13" y="13" width="7" height="7" rx="1.5" />
+  </Svg>
+);
+
 export const LogoIcon = ({ size = 20 }: IconProps) => (
   <svg width={size} height={size} viewBox="70 260 563 545" fill="currentColor" aria-hidden="true">
     <path d="M86 413c26 -8 54 -12 84 -12s58 4 85 12v318h-169v-131h150v-56c-20 -4 -42 -6 -66 -6c-29 0 -57 4 -84 12v-137zM617 552c-27 -8 -56 -12 -85 -12c-30 0 -58 4 -84 12v-137c26 -8 54 -12 84 -12c29 0 58 4 85 12v137zM447 415c-27 -8 -55 -12 -84 -12c-23 0 -44 2 -66 6v384h-19v-515c27 -8 56 -12 85 -12c30 0 58 4 84 12v137z" />
