@@ -51,7 +51,7 @@ const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'preferences', label: 'Main preferences' },
   { id: 'library', label: 'Library settings' },
   { id: 'playback', label: 'Playback settings' },
-  { id: 'scrobbling', label: 'Scrobbling' },
+  { id: 'scrobbling', label: 'Last.fm scrobbling' },
   { id: 'a11y', label: 'Accessibility' },
   { id: 'toys', label: 'Toys' },
   { id: 'share', label: 'Share settings' }
