@@ -14,7 +14,7 @@ const RELEASES: Release[] = [
     version: '8',
     date: '2026-08-03',
     notes: [
-      <>Added <Link to="/settings/scrobbling">Last.fm scrobbling!!!!!!!!!11111111111</Link> You can connect your account,
+      <>Added <Link to="/i/lastfm">Last.fm scrobbling!!!!!!!!!11111111111</Link> You can connect your account,
       manage how hard it should look for scrobble targets,
       and it even has an offline queue to bulk-scrobble previous offline listens,
       Still a lot to do, but give it a spin!</>,

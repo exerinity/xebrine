@@ -18,7 +18,6 @@ import {
   ChevronRightIcon,
   FolderIcon,
   KeyIcon,
-  LastfmWordmark,
   PlayIcon,
   RefreshIcon,
   TrashIcon
@@ -30,7 +29,6 @@ import { applyPronunciations } from '../utils/pronunciation';
 import { parseSettingsJson, paramsToSettings, settingsToParams } from '../utils/settings_transfer';
 import { clamp, formatBytes } from '../utils/format';
 import { ExplicitIcon } from '../components/explicit_badge';
-import { ScrobblingSettings } from '../components/scrobbling_settings';
 import { Modal } from '../components/modal';
 import { PROFANITY_WORDS } from '../utils/profanity';
 import { THEMES } from '../utils/themes';
@@ -43,7 +41,7 @@ import {
   type SearchEngineId
 } from '../utils/search_engine';
 
-type SectionId = 'preferences' | 'library' | 'playback' | 'scrobbling' | 'a11y' | 'toys' | 'share';
+type SectionId = 'preferences' | 'library' | 'playback' | 'a11y' | 'toys' | 'share';
 
 const SEARCH_PREVIEW = '4x4=12 by deadmau5';
 
@@ -51,7 +49,6 @@ const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'preferences', label: 'Main preferences' },
   { id: 'library', label: 'Library settings' },
   { id: 'playback', label: 'Playback settings' },
-  { id: 'scrobbling', label: 'Last.fm scrobbling' },
   { id: 'a11y', label: 'Accessibility' },
   { id: 'toys', label: 'Toys' },
   { id: 'share', label: 'Share settings' }
@@ -256,7 +253,6 @@ export function SettingsPage() {
         <div className="xe_split__detail xe_page__scroll xe_settings">
           <header className="xe_split__head">
             <h2 className="xe_split__title">{section.label}</h2>
-            {active === 'scrobbling' && <LastfmWordmark height={20} />}
           </header>
 
           {active === 'preferences' && (
@@ -684,8 +680,6 @@ export function SettingsPage() {
               <Equalizer />
             </>
           )}
-
-          {active === 'scrobbling' && <ScrobblingSettings />}
 
           {active === 'a11y' && (
             <>

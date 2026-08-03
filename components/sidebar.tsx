@@ -5,6 +5,7 @@ import { clamp } from '../utils/format';
 import {
   DiscIcon,
   HomeIcon,
+  LastfmMarkIcon,
   LogoIcon,
   LyricsIcon,
   NoteIcon,
@@ -22,6 +23,7 @@ const NAV_LINKS = [
   { path: '/albums', label: 'Albums', icon: DiscIcon },
   { path: '/queue', label: 'Queue', icon: QueueIcon },
   { path: '/lyrics', label: 'Lyrics', icon: LyricsIcon },
+  { path: '/i/lastfm', label: 'Last.fm', icon: LastfmMarkIcon },
   { path: '/settings', label: 'Settings', icon: SettingsIcon }
 ];
 

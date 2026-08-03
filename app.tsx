@@ -26,6 +26,7 @@ import { ShareLyricsPage } from './pages/share_lyrics';
 import { SettingsPage } from './pages/settings';
 import { AboutPage } from './pages/about';
 import { ReleaseNotesPage } from './pages/release_notes';
+import { LastfmPage } from './pages/lastfm';
 import { Sidebar } from './components/sidebar';
 import { PlayerBar } from './components/player_bar';
 import { FullscreenPlayer } from './components/fs_player';
@@ -108,10 +109,12 @@ function Shell() {
           <Route path="/lyrics" element={<LyricsPage />} />
           <Route path="/lyrics/share" element={<ShareLyricsPage />} />
           <Route path="/settings" element={<Navigate to="/settings/preferences" replace />} />
+          <Route path="/settings/scrobbling" element={<Navigate to="/i/lastfm" replace />} />
           <Route path="/settings/:section" element={<SettingsPage />} />
           <Route path="/i" element={<Navigate to="/i/info" replace />} />
           <Route path="/i/:section" element={<AboutPage />} />
           <Route path="/i/release_notes" element={<ReleaseNotesPage />} />
+          <Route path="/i/lastfm" element={<LastfmPage />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </main>
