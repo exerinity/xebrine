@@ -27,7 +27,7 @@ const CHUNK_RULES: [RegExp, string][] = [
 
   [/hooks\/(media_session|keyboard_shortcuts|queue_finished_sound|track_notifications|wheel|electron_bridge|scrobbler)/, 'hooks-player'],
   [/hooks\/(infinite_scroll|scroll_restoration|page_title|drag_reorder)/, 'hooks-ui'],
-  [/hooks\/(album_art|explicit|scan_eta|speech_announcements|accent_color|lastfm_session)/, 'hooks-data'],
+  [/hooks\/(album_art|explicit|scan_eta|speech_announcements|accent_color|lastfm_session|scrobble_status)/, 'hooks-data'],
 
   [/context\//, 'context'],
   [/utils\/settings_transfer/, 'context'],
@@ -41,7 +41,7 @@ const CHUNK_RULES: [RegExp, string][] = [
 
   [/utils\/(format|groups|slug|ignore_rules)/, 'utils-format'],
   [/utils\/(speech|mespeak|pronunciation|profanity|explicit_tracks)/, 'utils-speech'],
-  [/utils\/(accent_color|themes|toast|share_card|lyrics|electron|scrobble_rules|lastfm_session)/, 'utils-misc'],
+  [/utils\/(accent_color|themes|toast|share_card|lyrics|electron|scrobble_rules|lastfm_session|scrobble_status)/, 'utils-misc'],
 
   [/api\//, 'api']
 ];

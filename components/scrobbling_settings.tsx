@@ -304,8 +304,7 @@ export function ScrobblingSettings() {
         <h2>Waiting to be sent</h2>
         {pending.length === 0 ? (
           <p className="xe_settings__hint">
-            Nothing is waiting. Scrobbles made while you are offline are kept here until you are
-            back.
+            No entries are waiting to be sent - if you're offline, songs you listen to will be enqueued here and sent when you're back online
           </p>
         ) : (
           <>
@@ -323,10 +322,10 @@ export function ScrobblingSettings() {
             <div className="xe_settings__chip-row">
               <button type="button" className="xe_btn xe_btn--accent" onClick={retry} disabled={!session}>
                 <RefreshIcon size={14} />
-                Send {pending.length} now
+                Push {pending.length} now
               </button>
               <button type="button" className="xe_btn xe_btn--quiet" onClick={() => void clearPending()}>
-                Discard them
+                Forget about it
               </button>
             </div>
           </>
@@ -338,7 +337,14 @@ export function ScrobblingSettings() {
           <h2>Recent scrobbles</h2>
           {recent.length === 0 ? (
             <p className="xe_settings__hint">
-              {loading ? 'Loading your history...' : 'No scrobbles found on your account yet.'}
+              {loading ? (
+                <span className="xe_scrobble-profile__loading">
+                  <Spinner size={11} />
+                  Loading your history...
+                </span>
+              ) : (
+                'Nothing!'
+              )}
             </p>
           ) : (
             <ul className="xe_scrobble-list">

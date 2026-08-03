@@ -24,6 +24,8 @@ import {
   VolumeIcon
 } from './icons';
 import { useLastfmSession } from '../hooks/lastfm_session';
+import { useScrobbleStatus } from '../hooks/scrobble_status';
+import { SCROBBLE_STATUS_LABEL } from '../utils/scrobble_status';
 import { ExplicitBadge } from './explicit_badge';
 import { ScanDrawer } from './scan_drawer';
 import { AutoMixDrawer } from './auto_mix_drawer';
@@ -60,6 +62,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
   } = usePlayer();
   const { settings, update } = useSettings();
   const lastfm = useLastfmSession();
+  const scrobbleStatus = useScrobbleStatus();
   const lastAudibleVolumeRef = useRef(volume > 0 ? volume : 0.8);
   const [copiedField, setCopiedField] = useState<'title' | 'artist' | 'album' | null>(null);
   const copiedTimeoutRef = useRef<number | null>(null);
@@ -291,7 +294,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
           {lastfm && (
             <button
               type="button"
-              className={`xe_icon-btn${settings.scrobbleEnabled ? ' xe_icon-btn--active' : ''}`}
+              className={`xe_scrobble-pill xe_scrobble-pill--${scrobbleStatus}`}
               onClick={() => update({ scrobbleEnabled: !settings.scrobbleEnabled })}
               title={
                 settings.scrobbleEnabled
@@ -300,7 +303,10 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
               }
               aria-pressed={settings.scrobbleEnabled}
             >
-              <LastfmIcon size={16} />
+              <LastfmIcon size={14} />
+              <span className="xe_scrobble-pill__label">
+                {SCROBBLE_STATUS_LABEL[scrobbleStatus]}
+              </span>
             </button>
           )}
           <button

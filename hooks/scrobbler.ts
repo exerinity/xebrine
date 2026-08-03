@@ -11,6 +11,7 @@ import {
   shouldIgnoreScrobble
 } from '../utils/scrobble_rules';
 import { toast } from '../utils/toast';
+import { setScrobbleStatus } from '../utils/scrobble_status';
 
 interface PlayState {
   startedAt: number;
@@ -25,11 +26,17 @@ function nowSeconds(): number {
 }
 
 async function submit(sessionKey: string, entry: ScrobbleEntry): Promise<void> {
+  setScrobbleStatus('sending');
   await queueScrobble(entry);
-  if (!navigator.onLine) return;
+  if (!navigator.onLine) {
+    setScrobbleStatus('failed');
+    return;
+  }
   try {
     await flushScrobbles(sessionKey);
+    setScrobbleStatus('scrobbled');
   } catch (error) {
+    setScrobbleStatus('failed');
     const message = error instanceof Error ? error.message : 'Unknown error';
     toast.error(`Couldn't scrobble "${entry.track}" to Last.fm: ${message}`, 0);
   }
@@ -64,6 +71,19 @@ export function useScrobbler(): void {
   useEffect(() => {
     stateRef.current = key ? { startedAt: nowSeconds(), nowPlayingSent: false, scrobbled: false } : null;
   }, [key]);
+
+  useEffect(() => {
+    if (!settings.scrobbleEnabled) {
+      setScrobbleStatus('off');
+      return;
+    }
+    if (!sessionKey) {
+      setScrobbleStatus('ready');
+      return;
+    }
+    if (stateRef.current?.scrobbled) return;
+    setScrobbleStatus(key && isPlaying ? 'tracking' : 'ready');
+  }, [key, isPlaying, sessionKey, settings.scrobbleEnabled]);
 
   useEffect(() => {
     const state = stateRef.current;
