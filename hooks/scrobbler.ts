@@ -20,6 +20,7 @@ interface PlayState {
 }
 
 const RESTART_WINDOW = 1;
+const NOW_PLAYING_DELAY_MS = 2000;
 
 function nowSeconds(): number {
   return Math.floor(Date.now() / 1000);
@@ -95,8 +96,11 @@ export function useScrobbler(): void {
     if (shouldIgnoreScrobble(track, config.scrobbleIgnoreRules)) return;
     const payload = buildScrobblePayload(track, config.scrobbleMode);
     if (!payload) return;
-    state.nowPlayingSent = true;
-    sendNowPlaying(sk, payload).catch(() => null);
+    const timer = window.setTimeout(() => {
+      state.nowPlayingSent = true;
+      sendNowPlaying(sk, payload).catch(() => null);
+    }, NOW_PLAYING_DELAY_MS);
+    return () => window.clearTimeout(timer);
   }, [key, isPlaying, sessionKey]);
 
   useEffect(() => {
