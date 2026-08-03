@@ -11,6 +11,23 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '8',
+    date: '2026-08-03',
+    notes: [
+      <>Added <Link to="/settings/scrobbling">Last.fm scrobbling!!!!!!!!!11111111111</Link> You can connect your account,
+      manage how hard it should look for scrobble targets,
+      and it even has an offline queue to bulk-scrobble previous offline listens,
+      Still a lot to do, but give it a spin!</>,
+      'The player bar can now be collapsed with an arrow on the top in the middle',
+      'Made the fullscreen player more beautiful; especially in tandem with folding the player bar away',
+      <>Added a <Link to="/settings">"Prevent exit"</Link> toggle</>,
+      <><Link to="/settings/playback">The equalizer</Link> now has an intensity and preamp slider so it should now be listenable</>,
+      <>Added a new <Link to="/search">Search</Link> page which, instead of a simple keyword filter,
+      has a user-friendly advanced algorithmical to feel almost as natural as Spotify
+      search (no idea how they do searching). No - it is not replacing every search bar; on the other pages, it is still a simple filter search, and it will remain that way.</>
+    ]
+  },
+  {
     version: '7',
     date: '2026-07-30',
     notes: [

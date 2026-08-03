@@ -99,7 +99,7 @@ const MAX_SLEEP_TIMER_SECONDS = 12 * 60 * 60;
 function loadVolume(): number {
   const raw = localStorage.getItem(VOLUME_KEY);
   const v = raw === null ? NaN : parseFloat(raw);
-  return Number.isFinite(v) ? clamp(v, 0, MAX_VOLUME) : 0.8;
+  return Number.isFinite(v) ? clamp(v, 0, MAX_VOLUME) : 1;
 }
 
 function loadRepeat(): RepeatMode {
