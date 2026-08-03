@@ -158,8 +158,19 @@
   color: var(--text-dim);
   font-size: 12px;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
   transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.xe_automix-pill svg {
+  flex-shrink: 0;
+}
+
+.xe_automix-pill__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .xe_automix-pill:hover {
@@ -210,8 +221,19 @@
   color: var(--text-dim);
   font-size: 12px;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
   transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.xe_scrobble-pill svg {
+  flex-shrink: 0;
+}
+
+.xe_scrobble-pill__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .xe_scrobble-pill:hover {

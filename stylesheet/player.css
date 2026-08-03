@@ -3,7 +3,7 @@
   position: relative;
   z-index: 20;
   display: grid;
-  grid-template-columns: minmax(330px, 430px) 1fr minmax(330px, 430px);
+  grid-template-columns: minmax(300px, 560px) 1fr minmax(300px, 560px);
   align-items: center;
   gap: 18px;
   height: var(--player-height);
@@ -491,6 +491,8 @@ button.xe_scrubber__time:hover {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  justify-content: flex-end;
 }
 
 .xe_player-bar__volume-label {
@@ -511,7 +513,6 @@ button.xe_scrubber__time:hover {
 .xe_player-bar__volume-slider-wrap {
   position: relative;
   flex: 0 0 132px;
-  margin-left: auto;
 }
 
 .xe_player-bar__volume-slider-wrap::after {
