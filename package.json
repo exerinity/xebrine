@@ -5,8 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "dev:worker": "wrangler dev",
+    "types": "wrangler types",
+    "build": "wrangler types && tsc --noEmit && tsc -p worker --noEmit && vite build",
     "preview": "vite preview",
+    "deploy": "npm run build && wrangler deploy",
     "icons": "node scripts/gen-icons.mjs",
     "icons:transparent": "node scripts/gen-icons-transparent.mjs"
   },

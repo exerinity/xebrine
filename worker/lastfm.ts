@@ -1,5 +1,5 @@
 import { md5 } from './md5';
-import { LastfmError, type Env, type ScrobbleItem } from './types';
+import { LastfmError, type ScrobbleItem } from './types';
 
 const API = 'https://ws.audioscrobbler.com/2.0/';
 const AUTH = 'https://www.last.fm/api/auth/';

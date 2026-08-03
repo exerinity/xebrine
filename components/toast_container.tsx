@@ -14,6 +14,7 @@ function Toast({ item }: { item: ToastItem }) {
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
+    if (!Number.isFinite(item.duration) || item.duration <= 0) return;
     const timer = window.setTimeout(() => setLeaving(true), item.duration);
     return () => window.clearTimeout(timer);
   }, [item.id, item.duration]);

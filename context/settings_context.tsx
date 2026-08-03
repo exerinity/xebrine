@@ -5,6 +5,12 @@ import { EQ_FLAT, normalizeBands } from '../audio/eq';
 import type { ArtistPronunciation } from '../utils/pronunciation';
 import { isThemeId, type ThemeId } from '../utils/themes';
 import { isSearchEngineId, type SearchEngineId } from '../utils/search_engine';
+import {
+  DEFAULT_SCROBBLE_IGNORE_RULES,
+  normalizeScrobbleIgnoreRules,
+  type ScrobbleIgnoreRules,
+  type ScrobbleMode
+} from '../utils/scrobble_rules';
 
 export type PlayerBarClickAction = 'copy' | 'open';
 
@@ -25,6 +31,10 @@ export interface Settings {
   theme: ThemeId;
   searchEngine: SearchEngineId;
   customSearchUrl: string;
+  scrobbleEnabled: boolean;
+  scrobbleNowPlaying: boolean;
+  scrobbleMode: ScrobbleMode;
+  scrobbleIgnoreRules: ScrobbleIgnoreRules;
 }
 
 interface SettingsContextValue {
@@ -50,7 +60,11 @@ export const DEFAULT_SETTINGS: Settings = {
   tagExplicitSongs: false,
   theme: 'default',
   searchEngine: 'google',
-  customSearchUrl: ''
+  customSearchUrl: '',
+  scrobbleEnabled: true,
+  scrobbleNowPlaying: true,
+  scrobbleMode: 'strict',
+  scrobbleIgnoreRules: DEFAULT_SCROBBLE_IGNORE_RULES
 };
 
 function loadSettings(): Settings {
@@ -63,7 +77,9 @@ function loadSettings(): Settings {
       ignoreRules: normalizeIgnoreRules(merged.ignoreRules),
       theme: isThemeId(merged.theme) ? merged.theme : 'default',
       searchEngine: isSearchEngineId(merged.searchEngine) ? merged.searchEngine : 'google',
-      customSearchUrl: typeof merged.customSearchUrl === 'string' ? merged.customSearchUrl : ''
+      customSearchUrl: typeof merged.customSearchUrl === 'string' ? merged.customSearchUrl : '',
+      scrobbleMode: merged.scrobbleMode === 'lax' ? 'lax' : 'strict',
+      scrobbleIgnoreRules: normalizeScrobbleIgnoreRules(merged.scrobbleIgnoreRules)
     };
   } catch {
     return DEFAULT_SETTINGS;

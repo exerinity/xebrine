@@ -1,7 +1,7 @@
 const DB_NAME = 'xebrine';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
-export type StoreName = 'folders' | 'tracks' | 'lyrics' | 'covers';
+export type StoreName = 'folders' | 'tracks' | 'lyrics' | 'covers' | 'scrobbles';
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -15,6 +15,7 @@ function openDb(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains('tracks')) db.createObjectStore('tracks', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('lyrics')) db.createObjectStore('lyrics', { keyPath: 'trackId' });
       if (!db.objectStoreNames.contains('covers')) db.createObjectStore('covers', { keyPath: 'key' });
+      if (!db.objectStoreNames.contains('scrobbles')) db.createObjectStore('scrobbles', { keyPath: 'id' });
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);

@@ -1,4 +1,4 @@
-import { LastfmError, type Env, type ScrobbleItem } from './types';
+import { LastfmError, type ScrobbleItem } from './types';
 import {
   authUrl,
   getRecentTracks,
@@ -30,13 +30,13 @@ function embed(value: unknown): string {
 }
 
 function callbackPage(origin: string, payload: unknown): Response {
-  const html = `<!doctype html><meta charset="utf-8"><title>Connecting...</title>
+  const html = `<!doctype html><meta charset="utf-8"><title>xebrine</title>
 <body style="font:14px system-ui;background:#0f1115;color:#e6e8ee;padding:24px">
-<p>Finishing sign-in, you can close this window.</p>
+<p>Finishing connection... this window should automatically close soon. If not, just close it.</p>
 <script>
   var payload = ${embed(payload)};
   if (window.opener) window.opener.postMessage(payload, ${embed(origin)});
-  setTimeout(function () { window.close(); }, 200);
+  setTimeout(function () { window.close(); }, 1000);
 </script>`;
   return new Response(html, {
     headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' }

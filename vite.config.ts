@@ -16,6 +16,7 @@ const CHUNK_RULES: [RegExp, string][] = [
   [/pages\/queue/, 'page-queue'],
   [/pages\/(lyrics|share_lyrics)/, 'page-lyrics'],
   [/pages\/settings/, 'page-settings'],
+  [/components\/scrobbling_settings/, 'page-settings'],
   [/pages\/(about|release_notes)/, 'page-about'],
 
   [/components\/(fs_player|player_bar|scrubber|slider|equalizer|visualizer|auto_mix_drawer|queue_list|sleep_timer)/, 'ui-player'],
@@ -24,14 +25,14 @@ const CHUNK_RULES: [RegExp, string][] = [
   [/components\/lyrics/, 'ui-lyrics'],
   [/components\/(sidebar|icons|toast_container|spinner|scrolling_text)/, 'ui-shell'],
 
-  [/hooks\/(media_session|keyboard_shortcuts|queue_finished_sound|track_notifications|wheel|electron_bridge)/, 'hooks-player'],
+  [/hooks\/(media_session|keyboard_shortcuts|queue_finished_sound|track_notifications|wheel|electron_bridge|scrobbler)/, 'hooks-player'],
   [/hooks\/(infinite_scroll|scroll_restoration|page_title|drag_reorder)/, 'hooks-ui'],
-  [/hooks\/(album_art|explicit|scan_eta|speech_announcements|accent_color)/, 'hooks-data'],
+  [/hooks\/(album_art|explicit|scan_eta|speech_announcements|accent_color|lastfm_session)/, 'hooks-data'],
 
   [/context\//, 'context'],
   [/utils\/settings_transfer/, 'context'],
 
-  [/management\/db/, 'management-db'],
+  [/management\/(db|scrobbles)/, 'management-db'],
   [/management\/(library|metadata|covers|scan_pool)/, 'management-library'],
 
   [/audio\/(bpm|eq)/, 'audio'],
@@ -40,7 +41,7 @@ const CHUNK_RULES: [RegExp, string][] = [
 
   [/utils\/(format|groups|slug|ignore_rules)/, 'utils-format'],
   [/utils\/(speech|mespeak|pronunciation|profanity|explicit_tracks)/, 'utils-speech'],
-  [/utils\/(accent_color|themes|toast|share_card|lyrics|electron)/, 'utils-misc'],
+  [/utils\/(accent_color|themes|toast|share_card|lyrics|electron|scrobble_rules|lastfm_session)/, 'utils-misc'],
 
   [/api\//, 'api']
 ];
@@ -69,6 +70,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,woff2,json}'],
         navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/i\/services\//],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         runtimeCaching: [
           {
@@ -83,6 +85,11 @@ export default defineConfig({
       }
     })
   ],
+  server: {
+    proxy: {
+      '/i/services': { target: 'http://127.0.0.1:8787', changeOrigin: false }
+    }
+  },
   build: {
     rollupOptions: {
       output: {

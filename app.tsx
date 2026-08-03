@@ -10,6 +10,7 @@ import { isElectron } from './utils/electron';
 import { useTrackNotifications } from './hooks/track_notifications';
 import { useSpeechAnnouncements } from './hooks/speech_announcements';
 import { useQueueFinishedSound } from './hooks/queue_finished_sound';
+import { useScrobbler } from './hooks/scrobbler';
 import { useAccentColor } from './hooks/accent_color';
 import { useKeyboardShortcuts } from './hooks/keyboard_shortcuts';
 import { HomePage } from './pages/home';
@@ -38,6 +39,7 @@ function MediaBridge() {
   useTrackNotifications();
   useSpeechAnnouncements();
   useQueueFinishedSound();
+  useScrobbler();
   return null;
 }
 

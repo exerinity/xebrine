@@ -49,6 +49,7 @@
   --accent-wash: rgba(74, 41, 194, 0.14);
   --danger: #ff7c8a;
   --radius: 10px;
+  --player-height: 92px;
 }
 
 * {
