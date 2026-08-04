@@ -9,7 +9,7 @@ import {
   type ReactNode
 } from 'react';
 import type { FolderRecord, TrackMeta } from '../types';
-import { dbDelete, dbGetAll, dbPut } from '../management/db';
+import { dbDelete, dbGetAll, dbPut, dbWriteBatch } from '../management/db';
 import {
   getTrackFile,
   hasReadPermission,
@@ -147,12 +147,9 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
           (t) => !shouldIgnoreTrack(t, settings.ignoreRules)
         ).length;
 
-        for (const track of scanned) await dbPut('tracks', track);
-        const kept = aborted ? folderTracks.filter((t) => !scannedIds.has(t.id)) : [];
-        if (!aborted) {
-          const stale = folderTracks.filter((t) => !scannedIds.has(t.id));
-          for (const track of stale) await dbDelete('tracks', track.id);
-        }
+        const unseen = folderTracks.filter((t) => !scannedIds.has(t.id));
+        const kept = aborted ? unseen : [];
+        await dbWriteBatch('tracks', scanned, aborted ? [] : unseen.map((t) => t.id));
         const folderResult = [...scanned, ...kept];
         setTracks((prev) => [...prev.filter((t) => t.folderId !== folder.id), ...folderResult]);
         void fillCoverFlags(scanned);
@@ -203,9 +200,11 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   const removeFolder = useCallback(async (folderId: string) => {
     await dbDelete('folders', folderId);
     const all = await dbGetAll<TrackMeta>('tracks');
-    for (const track of all.filter((t) => t.folderId === folderId)) {
-      await dbDelete('tracks', track.id);
-    }
+    await dbWriteBatch(
+      'tracks',
+      [],
+      all.filter((t) => t.folderId === folderId).map((t) => t.id)
+    );
     setFolders((prev) => prev.filter((f) => f.id !== folderId));
     setTracks((prev) => prev.filter((t) => t.folderId !== folderId));
   }, []);

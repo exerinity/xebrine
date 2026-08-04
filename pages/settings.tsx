@@ -1,5 +1,5 @@
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSettings, type Settings } from '../context/settings_context';
 import { useLibrary } from '../context/library_context';
 import { usePlayer } from '../context/player_context';
@@ -63,6 +63,8 @@ const SECTIONS: { id: SectionId; label: string }[] = [
 
 const TOAST_VARIANTS: ToastVariant[] = ['success', 'error', 'info', 'warning'];
 
+const REMOVE_CONFIRM_MS = 2000;
+
 const SIZE_SLIDER_RATIO = MAX_SIZE_LIMIT_BYTES / MIN_SIZE_LIMIT_BYTES;
 
 function sizeToSlider(bytes: number): number {
@@ -109,6 +111,8 @@ export function SettingsPage() {
     fromUrl: boolean;
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
+  const confirmRemoveTimer = useRef<number | null>(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { section: sectionParam } = useParams<{ section: string }>();
@@ -150,6 +154,27 @@ export function SettingsPage() {
     for (const folder of folders) {
       await rescanFolder(folder.id);
     }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (confirmRemoveTimer.current !== null) window.clearTimeout(confirmRemoveTimer.current);
+    };
+  }, []);
+
+  const requestRemoveFolder = (folderId: string) => {
+    if (confirmRemoveTimer.current !== null) window.clearTimeout(confirmRemoveTimer.current);
+    if (confirmRemoveId === folderId) {
+      confirmRemoveTimer.current = null;
+      setConfirmRemoveId(null);
+      void removeFolder(folderId);
+      return;
+    }
+    setConfirmRemoveId(folderId);
+    confirmRemoveTimer.current = window.setTimeout(() => {
+      confirmRemoveTimer.current = null;
+      setConfirmRemoveId(null);
+    }, REMOVE_CONFIRM_MS);
   };
 
   const createToast = () => {
@@ -643,12 +668,20 @@ export function SettingsPage() {
                         </button>
                         <button
                           type="button"
-                          className="xe_btn xe_settings__folder-remove"
-                          onClick={() => void removeFolder(folder.id)}
-                          aria-label={`Remove ${folder.name}`}
+                          className={`xe_btn xe_settings__folder-remove${
+                            confirmRemoveId === folder.id
+                              ? ' xe_settings__folder-remove--armed'
+                              : ''
+                          }`}
+                          onClick={() => requestRemoveFolder(folder.id)}
+                          aria-label={
+                            confirmRemoveId === folder.id
+                              ? `Confirm removing ${folder.name}`
+                              : `Remove ${folder.name}`
+                          }
                         >
                           <TrashIcon size={14} />
-                          Remove
+                          {confirmRemoveId === folder.id ? 'Really?' : 'Remove'}
                         </button>
                       </div>
                     </li>

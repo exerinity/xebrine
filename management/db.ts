@@ -50,6 +50,24 @@ export async function dbDelete(store: StoreName, key: IDBValidKey): Promise<void
   await request(db.transaction(store, 'readwrite').objectStore(store).delete(key));
 }
 
+export async function dbWriteBatch(
+  store: StoreName,
+  puts: readonly unknown[] = [],
+  deletes: readonly IDBValidKey[] = []
+): Promise<void> {
+  if (puts.length === 0 && deletes.length === 0) return;
+  const db = await openDb();
+  const tx = db.transaction(store, 'readwrite', { durability: 'relaxed' });
+  const objectStore = tx.objectStore(store);
+  for (const value of puts) objectStore.put(value);
+  for (const key of deletes) objectStore.delete(key);
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+
 export async function dbClear(store: StoreName): Promise<void> {
   const db = await openDb();
   await request(db.transaction(store, 'readwrite').objectStore(store).clear());

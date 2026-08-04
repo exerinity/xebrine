@@ -334,6 +334,18 @@
   color: var(--danger);
 }
 
+.xe_settings__folder-remove--armed {
+  background: color-mix(in srgb, var(--danger) 28%, transparent);
+  border-color: var(--danger);
+  color: var(--text);
+}
+
+.xe_settings__folder-remove--armed:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 38%, transparent);
+  border-color: var(--danger);
+  color: var(--text);
+}
+
 .xe_settings__actions {
   display: flex;
   gap: 8px;

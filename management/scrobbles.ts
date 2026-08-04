@@ -1,5 +1,5 @@
 import { sendScrobbles, type ScrobbleEntry } from '../api/lastfm';
-import { dbDelete, dbGetAll, dbPut } from './db';
+import { dbDelete, dbGetAll, dbPut, dbWriteBatch } from './db';
 
 const MAX_BATCH = 50;
 const MAX_ATTEMPTS = 20;
@@ -53,7 +53,7 @@ export async function discardScrobble(id: string): Promise<void> {
 
 export async function clearPending(): Promise<void> {
   const all = await pendingScrobbles();
-  for (const item of all) await dbDelete('scrobbles', item.id);
+  await dbWriteBatch('scrobbles', [], all.map((item) => item.id));
   announce();
 }
 
@@ -67,15 +67,18 @@ export async function flushScrobbles(sessionKey: string): Promise<number> {
     const batch = all.slice(i, i + MAX_BATCH);
     try {
       await sendScrobbles(sessionKey, batch.map(toEntry));
-      for (const item of batch) await dbDelete('scrobbles', item.id);
+      await dbWriteBatch('scrobbles', [], batch.map((item) => item.id));
       sent += batch.length;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
+      const retries: PendingScrobble[] = [];
+      const exhausted: string[] = [];
       for (const item of batch) {
         const attempts = item.attempts + 1;
-        if (attempts >= MAX_ATTEMPTS) await dbDelete('scrobbles', item.id);
-        else await dbPut('scrobbles', { ...item, attempts, lastError: message });
+        if (attempts >= MAX_ATTEMPTS) exhausted.push(item.id);
+        else retries.push({ ...item, attempts, lastError: message });
       }
+      await dbWriteBatch('scrobbles', retries, exhausted);
       announce();
       throw error;
     }
