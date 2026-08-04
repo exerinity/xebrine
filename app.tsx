@@ -13,6 +13,7 @@ import { useQueueFinishedSound } from './hooks/queue_finished_sound';
 import { useScrobbler } from './hooks/scrobbler';
 import { useAccentColor } from './hooks/accent_color';
 import { useKeyboardShortcuts } from './hooks/keyboard_shortcuts';
+import { usePageKeys } from './hooks/page_keys';
 import { HomePage } from './pages/home';
 import { LibraryPage } from './pages/library';
 import { SearchPage } from './pages/search';
@@ -54,6 +55,7 @@ function Shell() {
   const { current, artworkUrl } = usePlayer();
   const { settings } = useSettings();
   const accent = useAccentColor(artworkUrl);
+  usePageKeys(settings.pageKeyMode);
   const accentStyle = useMemo(
     () =>
       ({
@@ -94,7 +96,7 @@ function Shell() {
 
   return (
     <div className="xe_app" style={accentStyle}>
-      <Sidebar />
+      <Sidebar onOpenFullscreen={() => setFullscreenOpen(true)} />
       <main className="xe_main">
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />

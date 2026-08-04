@@ -69,8 +69,10 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
   const [visualizerOn, setVisualizerOn] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
+  const [nowEntering, setNowEntering] = useState(false);
 
   const track = current?.track ?? null;
+  const hadTrackRef = useRef(Boolean(track));
   const volumeLevel = volume <= 0 ? 0 : volume < 0.34 ? 1 : volume < 0.67 ? 2 : 3;
   const boosted = volume > 1;
   const elapsedPercent = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
@@ -89,6 +91,12 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
     document.documentElement.classList.toggle('xe_player-hidden', collapsed);
     return () => document.documentElement.classList.remove('xe_player-hidden');
   }, [collapsed]);
+
+  useEffect(() => {
+    const hasTrack = Boolean(track);
+    if (hasTrack && !hadTrackRef.current) setNowEntering(true);
+    hadTrackRef.current = hasTrack;
+  }, [track]);
 
   const copyField = (field: 'title' | 'artist' | 'album', value: string) => {
     navigator.clipboard
@@ -173,7 +181,12 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
       <footer className={`xe_player-bar${collapsed ? ' xe_player-bar--collapsed' : ''}`}>
         {visualizerOn && <Visualizer analyser={analyser} />}
         <ScanDrawer />
-        <div className="xe_player-bar__now">
+        <div
+          className={`xe_player-bar__now${nowEntering ? ' xe_player-bar__now--entering' : ''}`}
+          onAnimationEnd={(e) => {
+            if (e.target === e.currentTarget) setNowEntering(false);
+          }}
+        >
           {artworkUrl && (
             <button
               type="button"

@@ -71,6 +71,29 @@
   font-variant-numeric: tabular-nums;
 }
 
+.xe_settings__stops {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  max-width: 420px;
+  margin-top: 8px;
+}
+
+.xe_settings__stop {
+  color: var(--text-dim);
+  font-size: 12px;
+  transition: color 120ms ease;
+}
+
+.xe_settings__stop:hover {
+  color: var(--text);
+}
+
+.xe_settings__stop--active {
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
 .xe_settings__quip {
   white-space: nowrap;
   color: var(--accent-text);

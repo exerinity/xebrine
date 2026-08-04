@@ -13,6 +13,13 @@ import {
   type IgnoreRules
 } from '../utils/ignore_rules';
 import { Slider } from '../components/slider';
+import {
+  PAGE_KEY_HINTS,
+  PAGE_KEY_LABELS,
+  PAGE_KEY_MODES,
+  pageKeyLevel,
+  pageKeyModeFromLevel
+} from '../utils/page_keys';
 import { Equalizer } from '../components/equalizer';
 import {
   ChevronRightIcon,
@@ -378,6 +385,38 @@ export function SettingsPage() {
                   </span>
                 </label>
                 <p className="xe_settings__hint">Secondary clicking will always do the opposite action set here</p>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>Page keys navigation</h2>
+                <div className="xe_settings__slider-row">
+                  <Slider
+                    value={pageKeyLevel(settings.pageKeyMode)}
+                    min={1}
+                    max={PAGE_KEY_MODES.length}
+                    wheelStep={1}
+                    resetTo={1}
+                    markAt={2}
+                    onChange={(v) => update({ pageKeyMode: pageKeyModeFromLevel(v) })}
+                    ariaLabel="Page keys navigation mode"
+                  />
+                </div>
+                <div className="xe_settings__stops">
+                  {PAGE_KEY_MODES.map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      className={`xe_settings__stop${
+                        settings.pageKeyMode === mode ? ' xe_settings__stop--active' : ''
+                      }`}
+                      aria-pressed={settings.pageKeyMode === mode}
+                      onClick={() => update({ pageKeyMode: mode })}
+                    >
+                      {PAGE_KEY_LABELS[mode]}
+                    </button>
+                  ))}
+                </div>
+                <p className="xe_settings__hint">{PAGE_KEY_HINTS[settings.pageKeyMode]}</p>
               </section>
 
               <section className="xe_settings__section">

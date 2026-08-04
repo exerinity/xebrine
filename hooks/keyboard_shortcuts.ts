@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { MAX_VOLUME, usePlayer } from '../context/player_context';
 import { formatTime } from '../utils/format';
 import { dismissToast, toast } from '../utils/toast';
+import { isTypingTarget } from '../utils/keyboard';
 
 const STATUS_DURATION = 1200;
 
@@ -24,19 +25,10 @@ export function useKeyboardShortcuts({ toggleFullscreen }: KeyboardShortcutOptio
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement | null;
-      const tag = t?.tagName?.toLowerCase() ?? '';
-      if (
-        t?.isContentEditable ||
-        tag === 'input' ||
-        tag === 'textarea' ||
-        tag === 'select' ||
-        tag === 'button' ||
-        tag === 'a' ||
-        t?.closest('[role="textbox"], [contenteditable="true"]')
-      ) {
-        return;
-      }
+      if (isTypingTarget(e.target)) return;
+
+      const tag = (e.target as HTMLElement | null)?.tagName?.toLowerCase() ?? '';
+      if (tag === 'button' && e.code === 'Space') return;
 
       const { audioRef, seek, setVolume, togglePlay, next, prev, toggleShuffle, cycleRepeat } = ref.current;
       const audio = audioRef.current;

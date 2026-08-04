@@ -156,10 +156,10 @@ export function LibraryPage() {
 
       {tracks.length === 0 && !scanning ? (
         <div className="xe_empty-hero">
-          <p>Your library is empty.</p>
+          <p>Your library is empty!</p>
           <button type="button" className="xe_btn xe_btn--accent" onClick={() => void addFolder()}>
             <FolderIcon size={14} />
-            Add a music folder
+            Add a folder
           </button>
         </div>
       ) : (

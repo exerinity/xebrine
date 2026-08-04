@@ -26,6 +26,17 @@
   margin: 0 0 12px;
 }
 
+.xe_home-section__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.xe_home-section__header .xe_home-section__title {
+  margin: 0;
+}
+
 .xe_home-carousel {
   display: flex;
   gap: 18px;

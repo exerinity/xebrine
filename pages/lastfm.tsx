@@ -8,8 +8,9 @@ export function LastfmPage() {
   return (
     <div className="xe_page">
       <div className="xe_page__toolbar">
-        <h1 className="xe_page__title">Last.fm scrobbling</h1>
-        <LastfmWordmark height={20} />
+        <h1 className="xe_page__title xe_page__title--wordmark" aria-label="Last.fm scrobbling">
+          <LastfmWordmark height={22} />
+        </h1>
       </div>
 
       <div className="xe_page__scroll">

@@ -12,6 +12,7 @@ import {
 import type { ArtistPronunciation } from '../utils/pronunciation';
 import { isThemeId, type ThemeId } from '../utils/themes';
 import { isSearchEngineId, type SearchEngineId } from '../utils/search_engine';
+import { isPageKeyMode, type PageKeyMode } from '../utils/page_keys';
 import {
   DEFAULT_SCROBBLE_IGNORE_RULES,
   normalizeScrobbleIgnoreRules,
@@ -41,6 +42,7 @@ export interface Settings {
   theme: ThemeId;
   searchEngine: SearchEngineId;
   customSearchUrl: string;
+  pageKeyMode: PageKeyMode;
   scrobbleEnabled: boolean;
   scrobbleNowPlaying: boolean;
   scrobbleMode: ScrobbleMode;
@@ -74,6 +76,7 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'adaptive',
   searchEngine: 'google',
   customSearchUrl: '',
+  pageKeyMode: 'off',
   scrobbleEnabled: true,
   scrobbleNowPlaying: true,
   scrobbleMode: 'strict',
@@ -93,6 +96,7 @@ function loadSettings(): Settings {
       theme: isThemeId(merged.theme) ? merged.theme : 'adaptive',
       searchEngine: isSearchEngineId(merged.searchEngine) ? merged.searchEngine : 'google',
       customSearchUrl: typeof merged.customSearchUrl === 'string' ? merged.customSearchUrl : '',
+      pageKeyMode: isPageKeyMode(merged.pageKeyMode) ? merged.pageKeyMode : 'off',
       scrobbleMode: merged.scrobbleMode === 'lax' ? 'lax' : 'strict',
       scrobbleIgnoreRules: normalizeScrobbleIgnoreRules(merged.scrobbleIgnoreRules)
     };

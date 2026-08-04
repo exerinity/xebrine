@@ -499,6 +499,19 @@ export const AutoMixIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const FullscreenIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path
+      d="M9 4H5.5A1.5 1.5 0 0 0 4 5.5V9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M4 15v3.5A1.5 1.5 0 0 0 5.5 20H9"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
 export const MoonIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M20.5 14.4A8.5 8.5 0 1 1 9.6 3.5a7 7 0 0 0 10.9 10.9Z" />

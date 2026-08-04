@@ -21,6 +21,11 @@
   margin-right: auto;
 }
 
+.xe_page__title--wordmark {
+  display: flex;
+  align-items: center;
+}
+
 .xe_page__meta {
   color: var(--text-dim);
 }

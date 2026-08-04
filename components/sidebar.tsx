@@ -4,6 +4,7 @@ import { usePlayer } from '../context/player_context';
 import { clamp } from '../utils/format';
 import {
   DiscIcon,
+  FullscreenIcon,
   HomeIcon,
   LastfmMarkIcon,
   LogoIcon,
@@ -15,7 +16,7 @@ import {
   SettingsIcon
 } from './icons';
 
-const NAV_LINKS = [
+export const NAV_LINKS = [
   { path: '/home', label: 'Home', icon: HomeIcon },
   { path: '/search', label: 'Search', icon: SearchIcon },
   { path: '/library', label: 'Library', icon: NoteIcon },
@@ -41,8 +42,12 @@ function loadWidth(): number {
   return Number.isFinite(n) ? clamp(n, MIN_WIDTH, MAX_WIDTH) : DEFAULT_WIDTH;
 }
 
-export function Sidebar() {
-  const { queue } = usePlayer();
+interface SidebarProps {
+  onOpenFullscreen?: () => void;
+}
+
+export function Sidebar({ onOpenFullscreen }: SidebarProps) {
+  const { queue, current } = usePlayer();
   const [navWidth, setNavWidth] = useState(loadWidth);
   const navWidthRef = useRef(navWidth);
   navWidthRef.current = navWidth;
@@ -121,6 +126,22 @@ export function Sidebar() {
             ))}
         </NavLink>
       ))}
+      {current && (
+        <div className="xe_nav__fullscreen-slot">
+          <button
+            type="button"
+            className="xe_nav__link xe_nav__fullscreen"
+            onClick={onOpenFullscreen}
+            title="Open fullscreen player"
+            aria-label="Open fullscreen player"
+          >
+            <span className="xe_nav__link-content">
+              <FullscreenIcon size={16} />
+              {!collapsed && 'Fullscreen'}
+            </span>
+          </button>
+        </div>
+      )}
       {!smallScreen && (
         <div
           className="xe_nav__resize"

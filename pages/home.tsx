@@ -81,10 +81,11 @@ export function HomePage() {
     setRandomTrack(pickRandom(tracks));
   }, [tracks.length]);
 
+  const [albumSeed, setAlbumSeed] = useState(0);
   const albums = useMemo(() => groupAlbums(tracks), [tracks]);
   const randomAlbums = useMemo(
     () => intelligentShuffle(albums, (a) => ({ id: a.key, artist: a.artist })).slice(0, 9),
-    [albums.length]
+    [albums.length, albumSeed]
   );
 
   const shuffleAll = () => {
@@ -156,7 +157,18 @@ export function HomePage() {
         ) : (
           <>
             <section className="xe_home-section">
-              <h2 className="xe_home-section__title">Pick some random albums</h2>
+              <div className="xe_home-section__header">
+                <h2 className="xe_home-section__title">Pick some random albums</h2>
+                <button
+                  type="button"
+                  className="xe_btn xe_btn--quiet"
+                  onClick={() => setAlbumSeed((seed) => seed + 1)}
+                  disabled={albums.length <= 1}
+                >
+                  <RefreshIcon size={14} />
+                  Reshuffle
+                </button>
+              </div>
               <div className="xe_home-carousel">
                 {randomAlbums.map((album) => (
                   <div className="xe_home-carousel__item" key={album.key}>
