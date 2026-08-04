@@ -27,6 +27,33 @@ export function formatDurationShort(seconds: number): string {
   return parts.length ? parts.join(' ') : '0s';
 }
 
+export interface DurationPart {
+  value: number;
+  unit: string;
+}
+
+const BREAKDOWN_UNITS: [number, string][] = [
+  [365 * 86400, 'year'],
+  [30 * 86400, 'month'],
+  [7 * 86400, 'week'],
+  [86400, 'day'],
+  [3600, 'hour'],
+  [60, 'minute'],
+  [1, 'second']
+];
+
+export function durationBreakdown(seconds: number): DurationPart[] {
+  if (!Number.isFinite(seconds) || seconds < 0) seconds = 0;
+  let rem = Math.floor(seconds);
+  const parts: DurationPart[] = [];
+  for (const [size, unit] of BREAKDOWN_UNITS) {
+    const value = Math.floor(rem / size);
+    rem -= value * size;
+    if (value > 0) parts.push({ value, unit });
+  }
+  return parts;
+}
+
 export function formatBytes(bytes: number): string {
   const GB = 1024 * 1024 * 1024;
   const MB = 1024 * 1024;

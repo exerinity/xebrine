@@ -252,9 +252,58 @@
 }
 
 .xe_about__stats {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 26px;
+}
+
+.xe_about__scanning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 0;
+}
+
+.xe_about__duration {
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  margin-bottom: 26px;
+}
+
+.xe_about__duration-parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+}
+
+.xe_about__duration-part {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.xe_about__duration-part strong {
+  font-size: 26px;
+  line-height: 1.1;
+  color: var(--accent-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.xe_about__duration-part span {
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.xe_about__duration-note {
+  margin: 14px 0 0;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .xe_about__stat {

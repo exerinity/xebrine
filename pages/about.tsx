@@ -1,9 +1,14 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
 import { BackIcon, ChevronRightIcon, LogoIcon, NoteIcon } from '../components/icons';
 import { usePageTitle } from '../hooks/page_title';
 import { electronVersion, isElectron } from '../utils/electron';
+import { CountUp } from '../components/count_up';
+import { Spinner } from '../components/spinner';
+import { albumKey, displayArtist } from '../utils/groups';
+import { durationBreakdown, formatBytes, formatTime } from '../utils/format';
+import type { TrackMeta } from '../types';
 
 const HOTKEYS: { chords: string[][]; action: string }[] = [
   { chords: [['Space'], ['K']], action: 'Play / pause' },
@@ -32,12 +37,73 @@ const SECTIONS: { id: SectionId; label: string }[] = [
 
 export function AboutPage() {
   const navigate = useNavigate();
-  const { tracks, folders } = useLibrary();
+  const { tracks, folders, scanning } = useLibrary();
   const { section: sectionParam } = useParams<{ section: string }>();
   const active = (SECTIONS.find((s) => s.id === sectionParam)?.id ?? SECTIONS[0].id) as SectionId;
   const [spinning, setSpinning] = useState(false);
   const section = SECTIONS.find((s) => s.id === active) ?? SECTIONS[0];
   usePageTitle('About');
+
+  const stats = useMemo(() => {
+    const artists = new Set<string>();
+    const albums = new Set<string>();
+    const genres = new Set<string>();
+    const subfolders = new Set<string>();
+    const formats = new Map<string, number>();
+    let totalSeconds = 0;
+    let totalBytes = 0;
+    let withCoverArt = 0;
+    let longest: TrackMeta | null = null;
+    let shortest: TrackMeta | null = null;
+    let earliestYear = 0;
+    let latestYear = 0;
+
+    for (const track of tracks) {
+      totalSeconds += track.duration || 0;
+      totalBytes += track.sizeBytes || 0;
+      artists.add(displayArtist(track).toLowerCase());
+      albums.add(albumKey(track));
+      if (track.genre?.trim()) genres.add(track.genre.trim().toLowerCase());
+      if (track.hasCoverArt) withCoverArt++;
+
+      const ext = track.fileName.includes('.')
+        ? track.fileName.split('.').pop()!.toLowerCase()
+        : '';
+      if (ext) formats.set(ext, (formats.get(ext) ?? 0) + 1);
+
+      const dir = track.relPath.slice(0, -1);
+      for (let i = 1; i <= dir.length; i++) {
+        subfolders.add(`${track.folderId}/${dir.slice(0, i).join('/')}`);
+      }
+
+      if (track.duration > 0) {
+        if (!longest || track.duration > longest.duration) longest = track;
+        if (!shortest || track.duration < shortest.duration) shortest = track;
+      }
+      if (track.year) {
+        earliestYear = earliestYear ? Math.min(earliestYear, track.year) : track.year;
+        latestYear = Math.max(latestYear, track.year);
+      }
+    }
+
+    return {
+      totalSeconds,
+      totalBytes,
+      artists: artists.size,
+      albums: albums.size,
+      genres: genres.size,
+      subfolders: subfolders.size,
+      withCoverArt,
+      longest: longest as TrackMeta | null,
+      shortest: shortest as TrackMeta | null,
+      earliestYear,
+      latestYear,
+      formats: [...formats.entries()].sort((a, b) => b[1] - a[1]),
+      averageSeconds: tracks.length ? totalSeconds / tracks.length : 0
+    };
+  }, [tracks]);
+
+  const breakdown = durationBreakdown(stats.totalSeconds);
 
   return (
     <div className="xe_page">
@@ -187,18 +253,131 @@ export function AboutPage() {
               </>
             )}
 
-            {active === 'stats' && (
-              <div className="xe_about__stats">
-                <div className="xe_about__stat">
-                  <strong>{tracks.length}</strong>
-                  <span>track{tracks.length === 1 ? '' : 's'}</span>
+            {active === 'stats' &&
+              (scanning ? (
+                <div className="xe_about__scanning">
+                  <Spinner size={30} />
                 </div>
-                <div className="xe_about__stat">
-                  <strong>{folders.length}</strong>
-                  <span>folder{folders.length === 1 ? '' : 's'}</span>
-                </div>
-              </div>
-            )}
+              ) : tracks.length === 0 ? (
+                <p className="xe_empty-note">
+                  Nothing to measure yet - <Link to="/settings/library">add a folder</Link>!
+                </p>
+              ) : (
+                <>
+                  <h3 className="xe_about__heading">Back to back, your library runs for</h3>
+                  <div className="xe_about__duration">
+                    <div className="xe_about__duration-parts">
+                      {breakdown.map((part, i) => (
+                        <div key={part.unit} className="xe_about__duration-part">
+                          <strong>
+                            <CountUp value={part.value} delay={i * 110} />
+                          </strong>
+                          <span>
+                            {part.unit}
+                            {part.value === 1 ? '' : 's'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="xe_about__duration-note">
+                      <CountUp value={Math.floor(stats.totalSeconds)} delay={breakdown.length * 110} />{' '}
+                      seconds in total, counting years as 365 days, months as 30, and weeks as 7
+                    </p>
+                  </div>
+
+                  <h3 className="xe_about__heading">The collection</h3>
+                  <div className="xe_about__stats">
+                    <div className="xe_about__stat">
+                      <strong>
+                        <CountUp value={tracks.length} />
+                      </strong>
+                      <span>track{tracks.length === 1 ? '' : 's'}</span>
+                    </div>
+                    <div className="xe_about__stat">
+                      <strong>
+                        <CountUp value={stats.artists} delay={60} />
+                      </strong>
+                      <span>artist{stats.artists === 1 ? '' : 's'}</span>
+                    </div>
+                    <div className="xe_about__stat">
+                      <strong>
+                        <CountUp value={stats.albums} delay={120} />
+                      </strong>
+                      <span>album{stats.albums === 1 ? '' : 's'}</span>
+                    </div>
+                    <div className="xe_about__stat">
+                      <strong>
+                        <CountUp value={stats.genres} delay={180} />
+                      </strong>
+                      <span>genre{stats.genres === 1 ? '' : 's'}</span>
+                    </div>
+                    <div className="xe_about__stat">
+                      <strong>
+                        <CountUp value={folders.length} delay={240} />
+                      </strong>
+                      <span>library folder{folders.length === 1 ? '' : 's'}</span>
+                    </div>
+                    <div className="xe_about__stat">
+                      <strong>
+                        <CountUp value={stats.subfolders} delay={300} />
+                      </strong>
+                      <span>subfolder{stats.subfolders === 1 ? '' : 's'}</span>
+                    </div>
+                    <div className="xe_about__stat">
+                      <strong>
+                        <CountUp value={stats.totalBytes} delay={360} format={formatBytes} />
+                      </strong>
+                      <span>on disk</span>
+                    </div>
+                    <div className="xe_about__stat">
+                      <strong>
+                        <CountUp value={stats.averageSeconds} delay={420} format={formatTime} />
+                      </strong>
+                      <span>average track</span>
+                    </div>
+                  </div>
+
+                  <h3 className="xe_about__heading">Odds and ends</h3>
+                  <ul className="xe_about__list">
+                    {stats.longest && (
+                      <li>
+                        Longest track: <strong>{stats.longest.title}</strong> by{' '}
+                        {stats.longest.artist} ({formatTime(stats.longest.duration)})
+                      </li>
+                    )}
+                    {stats.shortest && (
+                      <li>
+                        Shortest track: <strong>{stats.shortest.title}</strong> by{' '}
+                        {stats.shortest.artist} ({formatTime(stats.shortest.duration)})
+                      </li>
+                    )}
+                    {stats.earliestYear > 0 && (
+                      <li>
+                        Released between <strong>{stats.earliestYear}</strong> and{' '}
+                        <strong>{stats.latestYear}</strong>, spanning{' '}
+                        {stats.latestYear - stats.earliestYear + 1} year
+                        {stats.latestYear - stats.earliestYear === 0 ? '' : 's'}
+                      </li>
+                    )}
+                    <li>
+                      <strong>{stats.withCoverArt.toLocaleString()}</strong> of {tracks.length}{' '}
+                      track{tracks.length === 1 ? '' : 's'} have cover art (
+                      {Math.round((stats.withCoverArt / tracks.length) * 100)}%)
+                    </li>
+                    <li>
+                      Averaging{' '}
+                      <strong>{formatBytes(Math.round(stats.totalBytes / tracks.length))}</strong>{' '}
+                      and {(tracks.length / Math.max(1, stats.albums)).toFixed(1)} tracks per album
+                    </li>
+                    <li>
+                      Formats:{' '}
+                      {stats.formats
+                        .map(([ext, count]) => `${ext.toLowerCase()} (${count.toLocaleString()})`)
+                        .join(', ')}
+                    </li>
+                  </ul>
+                </>
+              ))}
 
             {active === 'acknowledgements' && (
               <>
