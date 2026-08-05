@@ -6,8 +6,10 @@ import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { groupAlbums, albumKey } from '../utils/groups';
 import { useAlbumArt } from '../hooks/album_art';
+import { useTrackMenu } from '../hooks/track_menu';
 import { toSlugParam } from '../utils/slug';
 import { AlbumCard } from './albums';
+import { ContextMenu } from '../components/context_menu';
 import {
   FolderIcon,
   KeyIcon,
@@ -42,10 +44,18 @@ function pickRandom(tracks: TrackMeta[], excludeId?: string): TrackMeta | null {
 
 function RandomSongCard({ track, onAnother }: { track: TrackMeta; onAnother(): void }) {
   const { playNow, enqueueEnd } = usePlayer();
+  const { buildMenu } = useTrackMenu();
   const art = useAlbumArt(albumKey(track), track);
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
 
   return (
-    <div className="xe_home-song-card">
+    <div
+      className="xe_home-song-card"
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setMenu({ x: e.clientX, y: e.clientY });
+      }}
+    >
       <div className="xe_home-song-card__art">
         {art ? <img src={art} alt="" loading="lazy" /> : <LogoIcon size={30} />}
       </div>
@@ -67,6 +77,14 @@ function RandomSongCard({ track, onAnother }: { track: TrackMeta; onAnother(): v
           Pick another
         </button>
       </div>
+      {menu && (
+        <ContextMenu
+          x={menu.x}
+          y={menu.y}
+          items={buildMenu(track)}
+          onClose={() => setMenu(null)}
+        />
+      )}
     </div>
   );
 }
