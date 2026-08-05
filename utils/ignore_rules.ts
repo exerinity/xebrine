@@ -47,6 +47,14 @@ function extensionOf(fileName: string): string {
   return fileName.split('.').pop()?.toLowerCase() ?? '';
 }
 
+export function isIgnoredFormat(fileName: string, rules: IgnoreRules): boolean {
+  return rules.formats.includes(extensionOf(fileName) as IgnoredFormat);
+}
+
+export function isIgnoredSize(sizeBytes: number, rules: IgnoreRules): boolean {
+  return rules.maxSizeBytes !== null && sizeBytes > rules.maxSizeBytes;
+}
+
 export function shouldIgnoreTrack(track: TrackMeta, rules: IgnoreRules): boolean {
   if (rules.missingCover && !track.hasCoverArt) return true;
   if (rules.missingAlbum && !track.hasAlbumTag) return true;
