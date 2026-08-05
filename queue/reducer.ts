@@ -27,6 +27,7 @@ export type QueueAction =
   | { type: 'JUMP'; index: number }
   | { type: 'ADVANCE'; delta: number }
   | { type: 'APPLY_SHUFFLE'; upcoming: QueueItem[] }
+  | { type: 'JUMBLE'; items: QueueItem[] }
   | { type: 'UNSHUFFLE' }
   | { type: 'KEEP_CURRENT' }
   | { type: 'CLEAR' };
@@ -91,6 +92,18 @@ export function queueReducer(state: QueueState, action: QueueAction): QueueState
         shuffled: true,
         original: state.original ?? state.items
       };
+
+    case 'JUMBLE': {
+      const current = state.items[state.position];
+      const next = current ? action.items.findIndex((i) => i.key === current.key) : -1;
+      return {
+        ...state,
+        items: action.items,
+        position: next < 0 ? state.position : next,
+        shuffled: false,
+        original: null
+      };
+    }
 
     case 'UNSHUFFLE': {
       if (!state.original) return { ...state, shuffled: false, original: null };
