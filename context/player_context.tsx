@@ -12,7 +12,7 @@ import {
 } from 'react';
 import type { QueueItem, TrackMeta } from '../types';
 import { initialQueue, makeItems, queueReducer } from '../queue/reducer';
-import { intelligentShuffle } from '../queue/shuffle';
+import { intelligentShuffle, jumble } from '../queue/shuffle';
 import { getRecentIds, pushRecent } from '../queue/history';
 import { readCoverArt } from '../management/metadata';
 import { useLibrary } from './library_context';
@@ -69,6 +69,7 @@ interface PlayerContextValue {
   setVolume(volume: number): void;
   duckVolume(ducking: boolean): void;
   toggleShuffle(): void;
+  jumbleQueue(): void;
   cycleRepeat(): void;
   clearQueue(): void;
   clearOthers(): void;
@@ -879,6 +880,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const jumbleQueue = useCallback(() => {
+    cancelCrossfade();
+    dispatch({ type: 'JUMBLE', items: jumble(stateRef.current.items) });
+  }, []);
+
   const setVolume = useCallback((v: number) => {
     const clamped = clamp(v, 0, MAX_VOLUME);
     applyVolume(clamped * (duckingRef.current ? DUCK_FACTOR : 1));
@@ -992,6 +998,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setVolume,
       duckVolume,
       toggleShuffle,
+      jumbleQueue,
       cycleRepeat,
       clearQueue,
       clearOthers,
@@ -1031,6 +1038,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setVolume,
       duckVolume,
       toggleShuffle,
+      jumbleQueue,
       cycleRepeat,
       clearQueue,
       clearOthers,
