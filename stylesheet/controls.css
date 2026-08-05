@@ -99,6 +99,18 @@
   color: var(--text);
 }
 
+.xe_btn--armed {
+  background: color-mix(in srgb, var(--danger) 28%, transparent);
+  border-color: var(--danger);
+  color: var(--text);
+}
+
+.xe_btn--armed:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 38%, transparent);
+  border-color: var(--danger);
+  color: var(--text);
+}
+
 .xe_mini-btn {
   display: inline-flex;
   align-items: center;
