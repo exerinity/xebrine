@@ -1,21 +1,27 @@
 import { useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { MAX_VOLUME, usePlayer } from '../context/player_context';
 import { formatTime } from '../utils/format';
 import { dismissToast, toast } from '../utils/toast';
 import { isTypingTarget } from '../utils/keyboard';
 
 const STATUS_DURATION = 1200;
+const HOTKEYS_PATH = '/i/hotkeys';
 
 interface KeyboardShortcutOptions {
   toggleFullscreen?: () => void;
 }
 export function useKeyboardShortcuts({ toggleFullscreen }: KeyboardShortcutOptions = {}) {
   const player = usePlayer();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const ref = useRef(player);
   ref.current = player;
   const fullscreenRef = useRef(toggleFullscreen);
   fullscreenRef.current = toggleFullscreen;
+  const routeRef = useRef({ navigate, pathname });
+  routeRef.current = { navigate, pathname };
   const statusId = useRef<number | null>(null);
 
   useEffect(() => {
@@ -26,6 +32,13 @@ export function useKeyboardShortcuts({ toggleFullscreen }: KeyboardShortcutOptio
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (isTypingTarget(e.target)) return;
+
+      if (e.key === '?') {
+        e.preventDefault();
+        const route = routeRef.current;
+        if (route.pathname !== HOTKEYS_PATH) route.navigate(HOTKEYS_PATH);
+        return;
+      }
 
       const tag = (e.target as HTMLElement | null)?.tagName?.toLowerCase() ?? '';
       if (tag === 'button' && e.code === 'Space') return;

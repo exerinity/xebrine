@@ -23,7 +23,8 @@ const HOTKEYS: { chords: string[][]; action: string }[] = [
   { chords: [['Arrow Right'], ['L'], ['D']], action: 'Seek forward 10s (Shift 1s / Ctrl 5s / Alt 30s)' },
   { chords: [['Arrow Up'], ['W']], action: 'Volume up' },
   { chords: [['Arrow Down'], ['S']], action: 'Volume down' },
-  { chords: [['0 - 9']], action: 'Jump to 0 - 90% of the track (Shift nudges 5%)' }
+  { chords: [['0 - 9']], action: 'Jump to 0 - 90% of the track (Shift nudges 5%)' },
+  { chords: [['?']], action: 'Open this list' }
 ];
 
 type SectionId = 'info' | 'stats' | 'acknowledgements' | 'hotkeys';
