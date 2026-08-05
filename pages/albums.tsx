@@ -59,7 +59,15 @@ export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void
       heading: 'Queue...',
       onSelect: () => enqueueEnd(album.tracks)
     },
-    { label: 'Play this album now', onSelect: () => playNow(album.tracks, 0) }
+    { label: 'Play this album now', onSelect: () => playNow(album.tracks, 0) },
+    {
+      label: 'Shuffle this album',
+      onSelect: () =>
+        playNow(
+          intelligentShuffle(album.tracks, (t) => ({ id: t.id, artist: t.artist }), getRecentIds()),
+          0
+        )
+    }
   ];
 
   return (
