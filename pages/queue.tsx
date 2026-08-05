@@ -1,15 +1,41 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePlayer } from '../context/player_context';
 import { QueueList } from '../components/queue_list';
 import { formatTime } from '../utils/format';
 import { usePageTitle } from '../hooks/page_title';
-import { SearchIcon, ShuffleIcon, TrashIcon } from '../components/icons';
+import { RefreshIcon, SearchIcon, ShuffleIcon, TrashIcon } from '../components/icons';
+
+const JUMBLE_CONFIRM_MS = 2000;
 
 export function QueuePage() {
-  const { queue, current, shuffled, toggleShuffle, clearQueue, clearOthers } = usePlayer();
+  const { queue, current, shuffled, toggleShuffle, jumbleQueue, clearQueue, clearOthers } =
+    usePlayer();
   const totalSeconds = queue.reduce((sum, item) => sum + item.track.duration, 0);
   const [query, setQuery] = useState('');
+  const [confirmJumble, setConfirmJumble] = useState(false);
+  const jumbleTimer = useRef<number | null>(null);
   usePageTitle('Queue');
+
+  useEffect(() => {
+    return () => {
+      if (jumbleTimer.current !== null) window.clearTimeout(jumbleTimer.current);
+    };
+  }, []);
+
+  const requestJumble = () => {
+    if (jumbleTimer.current !== null) window.clearTimeout(jumbleTimer.current);
+    if (confirmJumble) {
+      jumbleTimer.current = null;
+      setConfirmJumble(false);
+      jumbleQueue();
+      return;
+    }
+    setConfirmJumble(true);
+    jumbleTimer.current = window.setTimeout(() => {
+      jumbleTimer.current = null;
+      setConfirmJumble(false);
+    }, JUMBLE_CONFIRM_MS);
+  };
 
   return (
     <div className="xe_page">
@@ -36,6 +62,16 @@ export function QueuePage() {
         >
           <ShuffleIcon size={14} />
           Shuffle {shuffled ? 'ON' : 'OFF'}
+        </button>
+        <button
+          type="button"
+          className={`xe_btn xe_btn--quiet${confirmJumble ? ' xe_btn--armed' : ''}`}
+          onClick={requestJumble}
+          disabled={queue.length < 2}
+          title="Randomise the entire queue order"
+        >
+          <RefreshIcon size={14} />
+          {confirmJumble ? 'Really jumble?' : 'Jumble queue'}
         </button>
         <button
           type="button"
