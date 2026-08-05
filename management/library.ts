@@ -1,5 +1,6 @@
 import type { FolderRecord, TrackMeta } from '../types';
 import { parseTagsBatch } from './scan_pool';
+import { isIgnoredFormat, isIgnoredSize, type IgnoreRules } from '../utils/ignore_rules';
 import { toast } from '../utils/toast';
 
 const AUDIO_EXTENSIONS = new Set([
@@ -30,10 +31,16 @@ async function listEntries(dir: FileSystemDirectoryHandle): Promise<FileSystemHa
   return entries;
 }
 
+interface CollectStats {
+  excluded: number;
+}
+
 async function collectAudioFiles(
   dir: FileSystemDirectoryHandle,
   rootName: string,
+  rules: IgnoreRules,
   skipped: SkippedFile[],
+  stats: CollectStats,
   prefix: string[] = []
 ): Promise<FoundFile[]> {
   const found: FoundFile[] = [];
@@ -50,17 +57,26 @@ async function collectAudioFiles(
   for (const entry of entries) {
     try {
       if (entry.kind === 'file') {
-        if (isAudioFile(entry.name)) {
-          const handle = entry as FileSystemFileHandle;
-          const { size } = await handle.getFile();
-          found.push({ handle, relPath: [...prefix, entry.name], sizeBytes: size });
+        if (!isAudioFile(entry.name)) continue;
+        if (isIgnoredFormat(entry.name, rules)) {
+          stats.excluded++;
+          continue;
         }
+        const handle = entry as FileSystemFileHandle;
+        const { size } = await handle.getFile();
+        if (isIgnoredSize(size, rules)) {
+          stats.excluded++;
+          continue;
+        }
+        found.push({ handle, relPath: [...prefix, entry.name], sizeBytes: size });
       } else if (entry.kind === 'directory') {
         found.push(
           ...(await collectAudioFiles(
             entry as FileSystemDirectoryHandle,
             rootName,
+            rules,
             skipped,
+            stats,
             [...prefix, entry.name]
           ))
         );
@@ -96,15 +112,18 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 export interface ScanResult {
   tracks: TrackMeta[];
   skipped: SkippedFile[];
+  excluded: number;
 }
 
 export async function scanFolder(
   folder: FolderRecord,
-  onProgress?: (done: number, total: number, track: TrackMeta) => void,
+  rules: IgnoreRules,
+  onProgress?: (done: number, total: number, track: TrackMeta, excluded: number) => void,
   signal?: AbortSignal
 ): Promise<ScanResult> {
   const skipped: SkippedFile[] = [];
-  const files = await collectAudioFiles(folder.handle, folder.name, skipped);
+  const stats: CollectStats = { excluded: 0 };
+  const files = await collectAudioFiles(folder.handle, folder.name, rules, skipped, stats);
   const tracks: (TrackMeta | undefined)[] = new Array(files.length);
   let done = 0;
   await parseTagsBatch(
@@ -125,11 +144,15 @@ export async function scanFolder(
         ...parsed.tags
       };
       tracks[index] = track;
-      onProgress?.(++done, files.length, track);
+      onProgress?.(++done, files.length, track, stats.excluded);
     },
     signal
   );
-  return { tracks: tracks.filter((t): t is TrackMeta => t !== undefined), skipped };
+  return {
+    tracks: tracks.filter((t): t is TrackMeta => t !== undefined),
+    skipped,
+    excluded: stats.excluded
+  };
 }
 
 export async function getTrackFile(
