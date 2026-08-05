@@ -125,15 +125,22 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       scanAbortRef.current = controller;
       setScanning({ folderName: folder.name, done: 0, total: 0, omitted: 0, audioSeconds: 0 });
       setScanReport(null);
-      let omitted = 0;
+      let hidden = 0;
       let audioSeconds = 0;
       try {
-        const { tracks: scanned, skipped } = await scanFolder(
+        const { tracks: scanned, skipped, excluded } = await scanFolder(
           folder,
-          (done, total, track) => {
-            if (shouldIgnoreTrack(track, settings.ignoreRules)) omitted++;
+          settings.ignoreRules,
+          (done, total, track, skippedByRules) => {
+            if (shouldIgnoreTrack(track, settings.ignoreRules)) hidden++;
             if (Number.isFinite(track.duration)) audioSeconds += track.duration;
-            setScanning({ folderName: folder.name, done, total, omitted, audioSeconds });
+            setScanning({
+              folderName: folder.name,
+              done,
+              total,
+              omitted: skippedByRules + hidden,
+              audioSeconds
+            });
           },
           controller.signal
         );
@@ -162,6 +169,9 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
           const delta = found - prevCount;
           if (isRescan && delta !== 0) {
             message += ` ${Math.abs(delta)} ${delta > 0 ? 'more' : 'less'} found than last scan.`;
+          }
+          if (excluded > 0) {
+            message += ` Excluded ${excluded} file${excluded === 1 ? '' : 's'} as per your ignore rules`;
           }
           toast.success(message);
         }
