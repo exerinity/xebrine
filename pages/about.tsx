@@ -250,6 +250,7 @@ export function AboutPage() {
                   <li><Link to="/settings/preferences">System notifications</Link> on track change</li>
                   <li><Link to="/settings/a11y">Spoken track announcements</Link> with volume ducking</li>
                   <li>Installable PWA that works offline</li>
+                  <li><Link to="/i/lastfm">Last.fm scrobbling</Link></li>
                 </ul>
               </>
             )}
