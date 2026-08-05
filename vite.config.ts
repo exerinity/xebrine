@@ -26,7 +26,7 @@ const CHUNK_RULES: [RegExp, string][] = [
   [/components\/(sidebar|icons|toast_container|spinner|scrolling_text)/, 'ui-shell'],
 
   [/hooks\/(media_session|keyboard_shortcuts|queue_finished_sound|track_notifications|wheel|electron_bridge|scrobbler)/, 'hooks-player'],
-  [/hooks\/(infinite_scroll|scroll_restoration|page_title|drag_reorder)/, 'hooks-ui'],
+  [/hooks\/(infinite_scroll|scroll_restoration|page_title|drag_reorder|track_menu)/, 'hooks-ui'],
   [/hooks\/(album_art|explicit|scan_eta|speech_announcements|accent_color|lastfm_session|scrobble_status)/, 'hooks-data'],
 
   [/context\//, 'context'],
