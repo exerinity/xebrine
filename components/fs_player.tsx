@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePlayer } from '../context/player_context';
 import { useSettings } from '../context/settings_context';
 import { useAlbumArt } from '../hooks/album_art';
+import { useKenBurns } from '../hooks/ken_burns';
 import { formatTime } from '../utils/format';
 import type { QueueItem } from '../types';
 import { LyricsPanel } from './lyrics';
@@ -67,6 +68,7 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
   const visible = open && Boolean(track);
   const [rendered, setRendered] = useState(visible);
   const [leaving, setLeaving] = useState(false);
+  const washRef = useRef<HTMLDivElement | null>(null);
   const snapshotRef = useRef<{
     track: NonNullable<typeof track>;
     queue: typeof queue;
@@ -105,6 +107,15 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose, open]);
 
+  useKenBurns(
+    washRef,
+    rendered &&
+      Boolean(snapshotRef.current?.artworkUrl) &&
+      settings.fsKenBurns &&
+      !settings.reducedMotion,
+    settings.fsKenBurnsIntensity
+  );
+
   if (!rendered || !snapshotRef.current) return null;
 
   const {
@@ -135,6 +146,7 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
     >
       {displayArtworkUrl && (
         <div
+          ref={washRef}
           className="xe_fullscreen-player__wash"
           style={{
             backgroundImage: `url(${displayArtworkUrl})`,

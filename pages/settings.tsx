@@ -30,6 +30,11 @@ import {
   TrashIcon
 } from '../components/icons';
 import { usePageTitle } from '../hooks/page_title';
+import {
+  KEN_BURNS_DEFAULT_INTENSITY,
+  KEN_BURNS_MAX_INTENSITY,
+  KEN_BURNS_MIN_INTENSITY
+} from '../hooks/ken_burns';
 import { toast, type ToastVariant } from '../utils/toast';
 import { speakText } from '../utils/speech';
 import { applyPronunciations } from '../utils/pronunciation';
@@ -524,6 +529,36 @@ export function SettingsPage() {
                   />
                   <span className="xe_settings__slider-value">{settings.fsSaturate.toFixed(2)}x</span>
                 </div>
+                <h2>Ken Burns</h2>
+                <label className="xe_settings__radio">
+                  <input
+                    type="checkbox"
+                    checked={settings.fsKenBurns}
+                    onChange={(e) => update({ fsKenBurns: e.target.checked })}
+                  />
+                  <span>Slowly zoom and pan the background</span>
+                </label>
+                {settings.fsKenBurns && (
+                  <div className="xe_settings__slider-row">
+                    <Slider
+                      value={settings.fsKenBurnsIntensity}
+                      min={KEN_BURNS_MIN_INTENSITY}
+                      max={KEN_BURNS_MAX_INTENSITY}
+                      wheelStep={0.1}
+                      resetTo={KEN_BURNS_DEFAULT_INTENSITY}
+                      onChange={(v) => update({ fsKenBurnsIntensity: Math.round(v * 10) / 10 })}
+                      ariaLabel="Ken Burns speed"
+                    />
+                    <span className="xe_settings__slider-value">
+                      {settings.fsKenBurnsIntensity.toFixed(1)}x
+                    </span>
+                  </div>
+                )}
+                <p className="xe_settings__hint">
+                  {settings.reducedMotion
+                    ? 'Reduced motion is on...'
+                    : 'Higher is faster'}
+                </p>
               </section>
             </>
           )}

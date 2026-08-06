@@ -9,6 +9,7 @@ import {
   normalizeIntensity,
   normalizePreamp
 } from '../audio/eq';
+import { KEN_BURNS_DEFAULT_INTENSITY } from '../hooks/ken_burns';
 import type { ArtistPronunciation } from '../utils/pronunciation';
 import { isThemeId, type ThemeId } from '../utils/themes';
 import { isSearchEngineId, type SearchEngineId } from '../utils/search_engine';
@@ -35,6 +36,8 @@ export interface Settings {
   playerBarClickAction: PlayerBarClickAction;
   fsBlur: number;
   fsSaturate: number;
+  fsKenBurns: boolean;
+  fsKenBurnsIntensity: number;
   reducedMotion: boolean;
   announceTrackChanges: boolean;
   artistPronunciations: ArtistPronunciation[];
@@ -69,6 +72,8 @@ export const DEFAULT_SETTINGS: Settings = {
   playerBarClickAction: 'open',
   fsBlur: 56,
   fsSaturate: 1.35,
+  fsKenBurns: false,
+  fsKenBurnsIntensity: KEN_BURNS_DEFAULT_INTENSITY,
   reducedMotion: false,
   announceTrackChanges: false,
   artistPronunciations: [],

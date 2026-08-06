@@ -28,6 +28,7 @@ const CHUNK_RULES: [RegExp, string][] = [
   [/hooks\/(media_session|keyboard_shortcuts|queue_finished_sound|track_notifications|wheel|electron_bridge|scrobbler)/, 'hooks-player'],
   [/hooks\/(infinite_scroll|scroll_restoration|page_title|drag_reorder|track_menu)/, 'hooks-ui'],
   [/hooks\/(album_art|explicit|scan_eta|speech_announcements|accent_color|lastfm_session|scrobble_status)/, 'hooks-data'],
+  [/hooks\/ken_burns/, 'context'],
 
   [/context\//, 'context'],
   [/utils\/settings_transfer/, 'context'],
