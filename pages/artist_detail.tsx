@@ -70,7 +70,7 @@ export function ArtistDetailPage() {
   const navigate = useNavigate();
   const { tracks } = useLibrary();
   const { playNow } = usePlayer();
-  const scrollRef = useScrollRestoration<HTMLDivElement>();
+  const scrollRef = useScrollRestoration();
   const [view, setView] = useState<AlbumsView>(loadView);
   const [sort, setSort] = useState<AlbumsSort>(loadSort);
 

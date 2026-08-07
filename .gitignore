@@ -1,5 +1,6 @@
 node_modules
 dist
+tools/icon-gen/target
 package-lock.json
 electron
 .dev.vars

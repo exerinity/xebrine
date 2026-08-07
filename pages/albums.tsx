@@ -147,7 +147,7 @@ export function AlbumsPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<AlbumSort>(loadSort);
-  const scrollRef = useScrollRestoration<HTMLDivElement>();
+  const scrollRef = useScrollRestoration();
   usePageTitle('Albums');
 
   const changeSort = (value: AlbumSort) => {

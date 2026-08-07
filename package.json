@@ -10,8 +10,8 @@
     "build": "wrangler types && tsc --noEmit && tsc -p worker --noEmit && vite build",
     "preview": "vite preview",
     "deploy": "npm run build && wrangler deploy",
-    "icons": "node scripts/gen-icons.mjs",
-    "icons:transparent": "node scripts/gen-icons-transparent.mjs"
+    "icons": "cargo run --quiet --release --manifest-path tools/icon-gen/Cargo.toml",
+    "icons:transparent": "cargo run --quiet --release --manifest-path tools/icon-gen/Cargo.toml -- --transparent"
   },
   "dependencies": {
     "mespeak": "^2.0.2",
