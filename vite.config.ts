@@ -18,6 +18,11 @@ const CHUNK_RULES: [RegExp, string][] = [
   [/pages\/settings/, 'page-settings'],
   [/components\/scrobbling_settings/, 'page-settings'],
   [/pages\/(about|release_notes)/, 'page-about'],
+  [/pages\/remote/, 'page-remote'],
+  [/components\/remote_(host|control)/, 'page-remote'],
+  [/hooks\/remote_control/, 'page-remote'],
+  [/hooks\/(remote_host|remote_socket)/, 'context'],
+  [/utils\/remote_protocol/, 'context'],
 
   [/components\/(fs_player|player_bar|scrubber|slider|equalizer|visualizer|auto_mix_drawer|queue_list|sleep_timer)/, 'ui-player'],
   [/components\/(modal|cover_modal|update_modal|welcome_modal|scan_drawer|context_menu)/, 'ui-modals'],
@@ -88,7 +93,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/i/services': { target: 'http://127.0.0.1:8787', changeOrigin: false }
+      '/i/services': { target: 'http://127.0.0.1:8787', changeOrigin: false, ws: true }
     }
   },
   build: {

@@ -11,6 +11,14 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '9',
+    date: '2026-08-08',
+    notes: [
+      <>Added a <Link to="/i/remote">remote control functionality</Link></>,
+      'All icons have been changed to Material Design icons, which look a lot in line with the font being Google Sans Flex...'
+    ]
+  },
+  {
     version: '8',
     date: '2026-08-03',
     notes: [

@@ -7,7 +7,7 @@ function Svg({ size = 20, children }: IconProps & { children: React.ReactNode })
     <svg
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      viewBox="0 -960 960 960"
       fill="currentColor"
       aria-hidden="true"
     >
@@ -18,503 +18,230 @@ function Svg({ size = 20, children }: IconProps & { children: React.ReactNode })
 
 export const PlayIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path d="M8 5.14v13.72c0 .78.85 1.26 1.52.85l10.9-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14Z" />
+    <path d="M320-200v-560l440 280-440 280Z" />
   </Svg>
 );
 
 export const PauseIcon = (p: IconProps) => (
   <Svg {...p}>
-    <rect x="6" y="4.5" width="4" height="15" rx="1" />
-    <rect x="14" y="4.5" width="4" height="15" rx="1" />
+    <path d="M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Z" />
   </Svg>
 );
 
 export const PrevIcon = (p: IconProps) => (
   <Svg {...p}>
-    <rect x="5" y="5" width="2.4" height="14" rx="1" />
-    <path d="M19 6.2v11.6c0 .8-.9 1.27-1.55.8L9.6 12.8a1 1 0 0 1 0-1.6l7.85-5.8c.65-.47 1.55 0 1.55.8Z" />
+    <path d="M220-240v-480h80v480h-80Zm520 0L380-480l360-240v480Zm-80-240Zm0 90v-180l-136 90 136 90Z" />
   </Svg>
 );
 
 export const NextIcon = (p: IconProps) => (
   <Svg {...p}>
-    <rect x="16.6" y="5" width="2.4" height="14" rx="1" />
-    <path d="M5 6.2v11.6c0 .8.9 1.27 1.55.8l7.85-5.8a1 1 0 0 0 0-1.6L6.55 5.4C5.9 4.93 5 5.4 5 6.2Z" />
+    <path d="M660-240v-480h80v480h-80Zm-440 0v-480l360 240-360 240Zm80-240Zm0 90 136-90-136-90v180Z" />
   </Svg>
 );
 
 export const ShuffleIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M3 7h3.5c1.2 0 2.3.55 3.03 1.5L14 15.5A3.83 3.83 0 0 0 17.03 17H20M3 17h3.5c1.2 0 2.3-.55 3.03-1.5l.72-.93m3.03-3.89.72-.93A3.83 3.83 0 0 1 17.03 7H20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <path d="M18 4.5 21.5 7 18 9.5v-5ZM18 14.5 21.5 17 18 19.5v-5Z" />
+    <path d="M560-160v-80h104L537-367l57-57 126 126v-102h80v240H560Zm-344 0-56-56 504-504H560v-80h240v240h-80v-104L216-160Zm151-377L160-744l56-56 207 207-56 56Z" />
   </Svg>
 );
 
 export const RepeatIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M4 15v-4a4 4 0 0 1 4-4h9M20 9v4a4 4 0 0 1-4 4H7"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path d="M15.6 3.9 19.2 7l-3.6 3.1v-6.2ZM8.4 13.9 4.8 17l3.6 3.1v-6.2Z" />
+    <path d="M280-80 120-240l160-160 56 58-62 62h406v-160h80v240H274l62 62-56 58Zm-80-440v-240h486l-62-62 56-58 160 160-160 160-56-58 62-62H280v160h-80Z" />
   </Svg>
 );
 
 export const RepeatOneIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M4 15v-4a4 4 0 0 1 4-4h9M20 9v4a4 4 0 0 1-4 4H7"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path d="M15.6 3.9 19.2 7l-3.6 3.1v-6.2ZM8.4 13.9 4.8 17l3.6 3.1v-6.2Z" />
-    <path
-      d="M11 10.6 12.6 9.4v5.2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M460-360v-180h-60v-60h120v240h-60ZM280-80 120-240l160-160 56 58-62 62h406v-160h80v240H274l62 62-56 58Zm-80-440v-240h486l-62-62 56-58 160 160-160 160-56-58 62-62H280v160h-80Z" />
   </Svg>
 );
 
 export const PlusIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M12 5v14M5 12h14"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
+    <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
   </Svg>
 );
 
 export const SearchIcon = (p: IconProps) => (
   <Svg {...p}>
-    <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="2" />
-    <path d="m15.5 15.5 4.5 4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
   </Svg>
 );
 
 export const CloseIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M6 6l12 12M18 6L6 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
+    <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
   </Svg>
 );
 
 export const DragIcon = (p: IconProps) => (
   <Svg {...p}>
-    <circle cx="9" cy="6.5" r="1.4" />
-    <circle cx="15" cy="6.5" r="1.4" />
-    <circle cx="9" cy="12" r="1.4" />
-    <circle cx="15" cy="12" r="1.4" />
-    <circle cx="9" cy="17.5" r="1.4" />
-    <circle cx="15" cy="17.5" r="1.4" />
+    <path d="M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-560q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-560q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z" />
   </Svg>
 );
 
 export const BackIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M10.5 5.5 4 12l6.5 6.5M4.5 12H20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
   </Svg>
 );
 
 export const ChevronRightIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M9 5l7 7-7 7"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
   </Svg>
 );
 
 export const NoteIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path d="M9 3v10.55A4 4 0 1 0 11 17V7h8V3H9Z" />
+    <path d="M287-167q-47-47-47-113t47-113q47-47 113-47 23 0 42.5 5.5T480-418v-422h240v160H560v400q0 66-47 113t-113 47q-66 0-113-47Z" />
   </Svg>
 );
 
+const VOLUME_PATHS: Record<0 | 1 | 2 | 3, string> = {
+  0: 'M792-56 671-177q-25 16-53 27.5T560-131v-82q14-5 27.5-10t25.5-12L480-368v208L280-360H120v-240h128L56-792l56-56 736 736-56 56Zm-8-232-58-58q17-31 25.5-65t8.5-70q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 53-14.5 102T784-288ZM650-422l-90-90v-130q47 22 73.5 66t26.5 96q0 15-2.5 29.5T650-422ZM480-592 376-696l104-104v208Zm-80 238v-94l-72-72H200v80h114l86 86Zm-36-130Z',
+  1: 'M280-360v-240h160l200-200v640L440-360H280Zm80-80h114l86 86v-252l-86 86H360v80Zm100-40Z',
+  2: 'M200-360v-240h160l200-200v640L360-360H200Zm440 40v-322q45 21 72.5 65t27.5 97q0 53-27.5 96T640-320ZM480-606l-86 86H280v80h114l86 86v-252ZM380-480Z',
+  3: 'M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320ZM400-606l-86 86H200v80h114l86 86v-252ZM300-480Z'
+};
+
 export const VolumeIcon = ({ size = 20, level = 2 }: IconProps & { level?: 0 | 1 | 2 | 3 }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M4 9.3v5.4h4.1l5 4.1V5.2l-5 4.1H4Z"
-      fill="currentColor"
-    />
-    {level === 0 ? (
-      <path
-        d="m16.2 9.6 4 4M20.2 9.6l-4 4"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    ) : (
-      <>
-        {level >= 1 && (
-          <path
-            d="M15.8 9.4c.7.7 1 1.6 1 2.6s-.3 1.9-1 2.6"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-          />
-        )}
-        {level >= 2 && (
-          <path
-            d="M18 7.2a6.9 6.9 0 0 1 0 9.6"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-          />
-        )}
-        {level >= 3 && (
-          <path
-            d="M20.2 5a10 10 0 0 1 0 14"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-          />
-        )}
-      </>
-    )}
-  </svg>
+  <Svg size={size}>
+    <path d={VOLUME_PATHS[level]} />
+  </Svg>
 );
 
 export const CheckIcon = (p: IconProps) => (
   <Svg {...p}>
-    <circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-    <path
-      d="m7.5 12.3 3 3 6-6.2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
   </Svg>
 );
 
 export const ErrorIcon = (p: IconProps) => (
   <Svg {...p}>
-    <circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-    <path
-      d="m9 9 6 6M15 9l-6 6"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
+    <path d="M508.5-291.5Q520-303 520-320t-11.5-28.5Q497-360 480-360t-28.5 11.5Q440-337 440-320t11.5 28.5Q463-280 480-280t28.5-11.5ZM440-440h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
   </Svg>
 );
 
 export const WarningIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M12 3.6 21.3 19.8H2.7Z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />
-    <path d="M12 9.6v4.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    <circle cx="12" cy="16.8" r="1" />
+    <path d="m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm330.5-51.5Q520-263 520-280t-11.5-28.5Q497-320 480-320t-28.5 11.5Q440-297 440-280t11.5 28.5Q463-240 480-240t28.5-11.5ZM440-360h80v-200h-80v200Zm40-100Z" />
   </Svg>
 );
 
 export const InfoIcon = (p: IconProps) => (
   <Svg {...p}>
-    <circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-    <path d="M12 11v5.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    <circle cx="12" cy="7.8" r="1.05" />
+    <path d="M440-280h80v-240h-80v240Zm68.5-331.5Q520-623 520-640t-11.5-28.5Q497-680 480-680t-28.5 11.5Q440-657 440-640t11.5 28.5Q463-600 480-600t28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
   </Svg>
 );
 
 export const HomeIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M4 11.5 12 4l8 7.5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M6 10.5V20h5v-5.5h2V20h5v-9.5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinejoin="round"
-    />
+    <path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
   </Svg>
 );
 
 export const PersonIcon = (p: IconProps) => (
   <Svg {...p}>
-    <circle cx="12" cy="8" r="3.6" />
-    <path
-      d="M4.5 20c1-4 4-6 7.5-6s6.5 2 7.5 6"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
+    <path d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z" />
   </Svg>
 );
 
 export const DiscIcon = (p: IconProps) => (
   <Svg {...p}>
-    <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
-    <circle cx="12" cy="12" r="2.6" />
+    <path d="M480-300q75 0 127.5-52.5T660-480q0-75-52.5-127.5T480-660q-75 0-127.5 52.5T300-480q0 75 52.5 127.5T480-300Zm-28.5-151.5Q440-463 440-480t11.5-28.5Q463-520 480-520t28.5 11.5Q520-497 520-480t-11.5 28.5Q497-440 480-440t-28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
   </Svg>
 );
 
 export const QueueIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M4 6h11M4 12h11M4 18h7"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      fill="none"
-    />
-    <circle cx="19" cy="8" r="1.6" />
-    <path
-      d="M19 8V16.5a2.3 2.3 0 1 1-1.4-2.1"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      fill="none"
-      strokeLinecap="round"
-    />
+    <path d="M640-160q-50 0-85-35t-35-85q0-50 35-85t85-35q11 0 21 1.5t19 6.5v-328h200v80H760v360q0 50-35 85t-85 35ZM120-320v-80h320v80H120Zm0-160v-80h480v80H120Zm0-160v-80h480v80H120Z" />
   </Svg>
 );
 
 export const LyricsIcon = (p: IconProps) => (
   <Svg {...p}>
-    <g transform="rotate(45 12 12)">
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M10.5 0.5 H13.5 A3.5 3.5 0 0 1 17 4 V8 A3.5 3.5 0 0 1 13.5 11.5 H10.5 A3.5 3.5 0 0 1 7 8 V4 A3.5 3.5 0 0 1 10.5 0.5 Z M8.5 2.2 H15.5 V3.4 H8.5 Z M8.5 4.6 H15.5 V5.8 H8.5 Z M8.5 7 H15.5 V8.2 H8.5 Z"
-      />
-      <rect x="10.6" y="11" width="2.8" height="10.5" rx="1.4" />
-    </g>
+    <path d="M80-80v-720q0-33 23.5-56.5T160-880h440q33 0 56.5 23.5T680-800v17q-24 11-44 27t-36 36v-80H160v527l47-47h393v-160q16 20 36 36t44 27v97q0 33-23.5 56.5T600-240H240L80-80Zm160-320h160v-80H240v80Zm520-80q-50 0-85-35t-35-85q0-50 35-85t85-35q11 0 21 2t19 5v-207h160v80h-80v240q0 50-35 85t-85 35Zm-520-40h280v-80H240v80Zm0-120h280v-80H240v80Zm-80 320v-480 480Z" />
   </Svg>
 );
 
 export const SettingsIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M739-83.5q-7-2.5-13-8.5L522-296q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l85-85q6-6 13-8.5t15-2.5q8 0 15 2.5t13 8.5l204 204q6 6 8.5 13t2.5 15q0 8-2.5 15t-8.5 13l-85 85q-6 6-13 8.5T754-81q-8 0-15-2.5Zm15-92.5 29-29-147-147-29 29 147 147ZM189.5-83q-7.5-3-13.5-9l-84-84q-6-6-9-13.5T80-205q0-8 3-15t9-13l212-212h85l34-34-165-165h-57L80-765l113-113 121 121v57l165 165 116-116-43-43 56-56H495l-28-28 142-142 28 28v113l56-56 142 142q17 17 26 38.5t9 45.5q0 24-9 46t-26 39l-85-85-56 56-42-42-207 207v84L233-92q-6 6-13 9t-15 3q-8 0-15.5-3Zm15.5-93 170-170v-29h-29L176-205l29 29Zm0 0-29-29 15 14 14 15Zm549 0 29-29-29 29Z" />
   </Svg>
 );
 
 export const FolderIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path d="M3.5 6.5a1.5 1.5 0 0 1 1.5-1.5h4.4l2 2H19a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5v-10Z" />
+    <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640v400q0 33-23.5 56.5T800-160H160Zm0-80h640v-400H447l-80-80H160v480Zm0 0v-480 480Z" />
   </Svg>
 );
 
 export const TrashIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M5 7h14M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M6.5 7 7.3 19a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4L17.5 7"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path d="M10 10.5v6M14 10.5v6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
   </Svg>
 );
 
 export const RefreshIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M5 11a7 7 0 0 1 12-4.5M19 6v4h-4M19 13a7 7 0 0 1-12 4.5M5 18v-4h4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
   </Svg>
 );
 
 export const UploadIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M12 15V5M8 9l4-4 4 4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M5 16v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M440-320v-326L336-542l-56-58 200-200 200 200-56 58-104-104v326h-80ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
   </Svg>
 );
 
 export const DownloadIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M12 5v10M8 11l4 4 4-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M5 16v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
   </Svg>
 );
 
 export const ShareIcon = (p: IconProps) => (
   <Svg {...p}>
-    <circle cx="6" cy="12" r="2.6" />
-    <circle cx="17.5" cy="5.5" r="2.6" />
-    <circle cx="17.5" cy="18.5" r="2.6" />
-    <path
-      d="m8.4 10.8 6.6-4M8.4 13.2l6.6 4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
+    <path d="M680-80q-50 0-85-35t-35-85q0-6 3-28L282-392q-16 15-37 23.5t-45 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q24 0 45 8.5t37 23.5l281-164q-2-7-2.5-13.5T560-760q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-24 0-45-8.5T598-672L317-508q2 7 2.5 13.5t.5 14.5q0 8-.5 14.5T317-452l281 164q16-15 37-23.5t45-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Zm0-80q17 0 28.5-11.5T720-200q0-17-11.5-28.5T680-240q-17 0-28.5 11.5T640-200q0 17 11.5 28.5T680-160ZM200-440q17 0 28.5-11.5T240-480q0-17-11.5-28.5T200-520q-17 0-28.5 11.5T160-480q0 17 11.5 28.5T200-440Zm508.5-291.5Q720-743 720-760t-11.5-28.5Q697-800 680-800t-28.5 11.5Q640-777 640-760t11.5 28.5Q663-720 680-720t28.5-11.5ZM680-200ZM200-480Zm480-280Z" />
   </Svg>
 );
 
 export const KeyIcon = (p: IconProps) => (
   <Svg {...p}>
-    <circle cx="8" cy="14" r="3.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
-    <path
-      d="M10.3 11.7 18 4M15.5 6.5 18 9M18 4l2 2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M223.5-423.5Q200-447 200-480t23.5-56.5Q247-560 280-560t56.5 23.5Q360-513 360-480t-23.5 56.5Q313-400 280-400t-56.5-23.5ZM280-240q-100 0-170-70T40-480q0-100 70-170t170-70q67 0 121.5 33t86.5 87h352l120 120-180 180-80-60-80 60-85-60h-47q-32 54-86.5 87T280-240Zm0-80q56 0 98.5-34t56.5-86h125l58 41 82-61 71 55 75-75-40-40H435q-14-52-56.5-86T280-640q-66 0-113 47t-47 113q0 66 47 113t113 47Z" />
   </Svg>
 );
 
 export const PlayNextIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M3 6h9M3 12h9M3 18h5"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      fill="none"
-    />
-    <path d="M15 8.5v7l6-3.5-6-3.5Z" />
+    <path d="M120-320v-80h320v80H120Zm0-160v-80h480v80H120Zm0-160v-80h480v80H120Zm520 520v-320l240 160-240 160Z" />
   </Svg>
 );
 
 export const VisualizerIcon = (p: IconProps) => (
   <Svg {...p}>
-    <rect x="3.5" y="10" width="3" height="8" rx="1" />
-    <rect x="9" y="4.5" width="3" height="14.5" rx="1" />
-    <rect x="14.5" y="7.5" width="3" height="11.5" rx="1" />
-    <rect x="20" y="12" width="3" height="6.5" rx="1" />
+    <path d="M160-160v-320h160v320H160Zm240 0v-640h160v640H400Zm240 0v-440h160v440H640Z" />
   </Svg>
 );
 
 export const AutoMixIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M3 12h3.5l2.5-6 4 12 2.5-6H19"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path d="M18.2 9.2 21.5 12l-3.3 2.8v-5.6Z" />
+    <path d="M200-160v-280h-80v-80h240v80h-80v280h-80Zm0-440v-200h80v200h-80Zm160 0v-80h80v-120h80v120h80v80H360Zm80 440v-360h80v360h-80Zm240 0v-120h-80v-80h240v80h-80v120h-80Zm0-280v-360h80v360h-80Z" />
   </Svg>
 );
 
 export const FullscreenIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path
-      d="M9 4H5.5A1.5 1.5 0 0 0 4 5.5V9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M4 15v3.5A1.5 1.5 0 0 0 5.5 20H9"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M120-120v-200h80v120h120v80H120Zm520 0v-80h120v-120h80v200H640ZM120-640v-200h200v80H200v120h-80Zm640 0v-120H640v-80h200v200h-80Z" />
   </Svg>
 );
 
 export const MoonIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path d="M20.5 14.4A8.5 8.5 0 1 1 9.6 3.5a7 7 0 0 0 10.9 10.9Z" />
+    <path d="M600-640 480-760l120-120 120 120-120 120Zm200 120-80-80 80-80 80 80-80 80ZM483-80q-84 0-157.5-32t-128-86.5Q143-253 111-326.5T79-484q0-146 93-257.5T409-880q-18 99 11 193.5T520-521q71 71 165.5 100T879-410q-26 144-138 237T483-80Zm0-80q88 0 163-44t118-121q-86-8-163-43.5T463-465q-61-61-97-138t-43-163q-77 43-120.5 118.5T159-484q0 135 94.5 229.5T483-160Zm-20-305Z" />
   </Svg>
 );
 
@@ -545,21 +272,31 @@ export const LastfmWordmark = ({ height = 22 }: { height?: number }) => (
 
 export const ListIcon = (p: IconProps) => (
   <Svg {...p}>
-    <rect x="4" y="5.5" width="3" height="3" rx="1" />
-    <rect x="4" y="10.5" width="3" height="3" rx="1" />
-    <rect x="4" y="15.5" width="3" height="3" rx="1" />
-    <rect x="10" y="6" width="10" height="2" rx="1" />
-    <rect x="10" y="11" width="10" height="2" rx="1" />
-    <rect x="10" y="16" width="10" height="2" rx="1" />
+    <path d="M280-600v-80h560v80H280Zm0 160v-80h560v80H280Zm0 160v-80h560v80H280ZM160-600q-17 0-28.5-11.5T120-640q0-17 11.5-28.5T160-680q17 0 28.5 11.5T200-640q0 17-11.5 28.5T160-600Zm0 160q-17 0-28.5-11.5T120-480q0-17 11.5-28.5T160-520q17 0 28.5 11.5T200-480q0 17-11.5 28.5T160-440Zm0 160q-17 0-28.5-11.5T120-320q0-17 11.5-28.5T160-360q17 0 28.5 11.5T200-320q0 17-11.5 28.5T160-280Z" />
   </Svg>
 );
 
 export const GridIcon = (p: IconProps) => (
   <Svg {...p}>
-    <rect x="4" y="4" width="7" height="7" rx="1.5" />
-    <rect x="13" y="4" width="7" height="7" rx="1.5" />
-    <rect x="4" y="13" width="7" height="7" rx="1.5" />
-    <rect x="13" y="13" width="7" height="7" rx="1.5" />
+    <path d="M120-520v-320h320v320H120Zm0 400v-320h320v320H120Zm400-400v-320h320v320H520Zm0 400v-320h320v320H520ZM200-600h160v-160H200v160Zm400 0h160v-160H600v160Zm0 400h160v-160H600v160Zm-400 0h160v-160H200v160Zm400-400Zm0 240Zm-240 0Zm0-240Z" />
+  </Svg>
+);
+
+export const CopyIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z" />
+  </Svg>
+);
+
+export const LinkIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M440-280H280q-83 0-141.5-58.5T80-480q0-83 58.5-141.5T280-680h160v80H280q-50 0-85 35t-35 85q0 50 35 85t85 35h160v80ZM320-440v-80h320v80H320Zm200 160v-80h160q50 0 85-35t35-85q0-50-35-85t-85-35H520v-80h160q83 0 141.5 58.5T880-480q0 83-58.5 141.5T680-280H520Z" />
+  </Svg>
+);
+
+export const RemoteIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M360-40q-17 0-28.5-11.5T320-80v-480q0-17 11.5-28.5T360-600h240q17 0 28.5 11.5T640-560v480q0 17-11.5 28.5T600-40H360Zm120-350q21 0 35.5-14.5T530-440q0-21-14.5-35.5T480-490q-21 0-35.5 14.5T430-440q0 21 14.5 35.5T480-390ZM338-662l-56-56q40-40 91-61t107-21q56 0 107 21t91 61l-56 56q-29-29-65.5-43.5T480-720q-40 0-76.5 14.5T338-662ZM226-774l-58-58q63-61 143.5-94.5T480-960q88 0 168.5 33.5T790-830l-56 56q-50-52-116-79t-138-27q-72 0-138 27t-116 79Zm174 654h160v-400H400v400Zm0 0h160-160Z" />
   </Svg>
 );
 

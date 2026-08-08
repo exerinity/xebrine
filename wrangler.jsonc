@@ -16,6 +16,18 @@
       "simple": { "limit": 60, "period": 60 }
     }
   ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "REMOTE_SESSION", "class_name": "RemoteSession" },
+      { "name": "REMOTE_DIRECTORY", "class_name": "RemoteDirectory" }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["RemoteSession", "RemoteDirectory"]
+    }
+  ],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1,

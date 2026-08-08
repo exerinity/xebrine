@@ -12,7 +12,7 @@ import { buildSearchIndex, searchIndex } from '../utils/smart_search';
 
 export function SearchPage() {
   const { tracks, scanning } = useLibrary();
-  const { playNow } = usePlayer();
+  const { playNow, remoteLocked } = usePlayer();
   const [query, setQuery] = useState('');
   usePageTitle('Search');
 
@@ -31,11 +31,11 @@ export function SearchPage() {
         <h1 className="xe_page__title">Search</h1>
         {query.trim() !== '' && results.length > 0 && (
           <>
-            <button type="button" className="xe_btn" onClick={() => playNow(results, 0)}>
+            <button type="button" className="xe_btn" onClick={() => playNow(results, 0)} disabled={remoteLocked}>
               <PlayIcon size={14} />
               Play all
             </button>
-            <button type="button" className="xe_btn" onClick={shuffleResults}>
+            <button type="button" className="xe_btn" onClick={shuffleResults} disabled={remoteLocked}>
               <ShuffleIcon size={14} />
               Shuffle
             </button>

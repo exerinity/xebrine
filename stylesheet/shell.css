@@ -154,6 +154,41 @@
   padding: 1px 7px;
 }
 
+.xe_nav__link--remote-live {
+  color: var(--accent-text);
+  background: var(--accent-wash);
+  box-shadow: inset 0 0 0 1px var(--accent-soft), 0 0 12px -2px var(--accent-glow);
+}
+
+.xe_nav__link--remote-live svg {
+  filter: drop-shadow(0 0 5px var(--accent-glow));
+}
+
+.xe_nav__link--remote-waiting {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  animation: xe_remote-pulse 1.6s ease-in-out infinite;
+}
+
+.xe_nav__link--remote-waiting svg {
+  filter: drop-shadow(0 0 6px var(--accent-glow));
+}
+
+.xe_nav__link--remote-waiting .xe_nav__badge,
+.xe_nav__link--remote-waiting .xe_nav__dot {
+  background: var(--accent-bright);
+}
+
+@keyframes xe_remote-pulse {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 1px var(--accent-soft), 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: inset 0 0 0 1px var(--accent-bright), 0 0 16px -1px var(--accent-glow);
+  }
+}
+
 .xe_main {
   grid-area: xe_main;
   overflow: hidden;

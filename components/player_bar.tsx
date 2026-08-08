@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MAX_VOLUME, usePlayer } from '../context/player_context';
+import { MAX_VOLUME, REMOTE_LOCK_MESSAGE, usePlayer } from '../context/player_context';
 import { useSettings } from '../context/settings_context';
 import { ScrollingText } from './scrolling_text';
 import { Scrubber } from './scrubber';
@@ -58,7 +58,8 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
     autoMixEnabled,
     autoMixPhase,
     autoMixColor,
-    toggleAutoMix
+    toggleAutoMix,
+    remoteLocked
   } = usePlayer();
   const { settings, update } = useSettings();
   const lastfm = useLastfmSession();
@@ -228,6 +229,9 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
                 />
                 {loadError && <span className="xe_player-bar__error">{loadError}</span>}
               </>
+            )}
+            {!track && remoteLocked && (
+              <span className="xe_player-bar__error">{REMOTE_LOCK_MESSAGE}</span>
             )}
           </div>
         </div>

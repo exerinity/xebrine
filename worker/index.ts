@@ -7,8 +7,14 @@ import {
   scrobble,
   updateNowPlaying
 } from './lastfm';
+import { isValidPin, normalizePin } from '../utils/remote_protocol';
+import { encodePeer, peerFrom, PEER_HEADER } from './remote/device';
+
+export { RemoteDirectory } from './remote/directory';
+export { RemoteSession } from './remote/session';
 
 const PREFIX = '/i/services/lastfm';
+const REMOTE_PREFIX = '/i/services/remote';
 const MAX_BATCH = 50;
 
 function json(data: unknown, status = 200): Response {
@@ -77,8 +83,39 @@ function sessionKeyOf(body: Record<string, unknown>): string | null {
   return typeof sk === 'string' && sk.length > 0 ? sk : null;
 }
 
+async function routeRemote(request: Request, env: Env, path: string, url: URL): Promise<Response> {
+  if (request.headers.get('Upgrade') !== 'websocket') {
+    return json({ error: 'This endpoint only accepts WebSocket connections' }, 426);
+  }
+
+  const forward = (target: string): Request => {
+    const headers = new Headers(request.headers);
+    headers.set(PEER_HEADER, encodePeer(peerFrom(request, '')));
+    return new Request(`https://session/${target}`, { headers, method: 'GET' });
+  };
+
+  if (path === `${REMOTE_PREFIX}/host`) {
+    const stub = env.REMOTE_SESSION.get(env.REMOTE_SESSION.newUniqueId());
+    return stub.fetch(forward('host'));
+  }
+
+  if (path === `${REMOTE_PREFIX}/join`) {
+    const pin = normalizePin(url.searchParams.get('pin') ?? '');
+    if (!isValidPin(pin)) return json({ error: 'That PIN is not valid' }, 400);
+    const directory = env.REMOTE_DIRECTORY.get(env.REMOTE_DIRECTORY.idFromName('index'));
+    const session = await directory.lookup(pin);
+    if (!session) return json({ error: 'No session is waiting on that PIN' }, 404);
+    const stub = env.REMOTE_SESSION.get(env.REMOTE_SESSION.idFromString(session));
+    return stub.fetch(forward('join'));
+  }
+
+  return json({ error: 'Not found' }, 404);
+}
+
 async function route(request: Request, env: Env, url: URL): Promise<Response> {
   const path = url.pathname.replace(/\/+$/, '');
+
+  if (path.startsWith(REMOTE_PREFIX)) return routeRemote(request, env, path, url);
 
   if (path === `${PREFIX}/auth/start`) {
     return Response.redirect(authUrl(env, `${url.origin}${PREFIX}/auth/callback`), 302);

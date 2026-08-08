@@ -42,7 +42,7 @@ export type AutoMixColor = 'green' | 'orange' | 'red' | null;
 const FADE_CURVES = equalPowerFadeCurves(64);
 const MEDIA_LATENCY = 0.0;
 
-interface PlayerContextValue {
+export interface PlayerContextValue {
   queue: QueueItem[];
   position: number;
   current: QueueItem | null;
@@ -84,7 +84,11 @@ interface PlayerContextValue {
   setSleepTimerMinutes(minutes: number): void;
   togglePauseSleepTimer(): void;
   cancelSleepTimer(): void;
+  remoteLocked: boolean;
+  setRemoteLocked(locked: boolean): void;
 }
+
+export const REMOTE_LOCK_MESSAGE = 'Playback disabled during remote controlling';
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 
@@ -156,6 +160,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const fadeGainARef = useRef<GainNode | null>(null);
   const eqFiltersRef = useRef<BiquadFilterNode[] | null>(null);
   const eqPreampRef = useRef<GainNode | null>(null);
+
+  const [remoteLocked, setRemoteLockedState] = useState(false);
+  const remoteLockedRef = useRef(remoteLocked);
+  remoteLockedRef.current = remoteLocked;
+
+  function refuseWhenLocked(): boolean {
+    if (!remoteLockedRef.current) return false;
+    toast.warning(REMOTE_LOCK_MESSAGE);
+    return true;
+  }
 
   const [sleepTimerEndAt, setSleepTimerEndAt] = useState<number | null>(null);
   const [sleepTimerPausedRemaining, setSleepTimerPausedRemaining] = useState<number | null>(null);
@@ -777,21 +791,25 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [currentKey, nextKey, autoMixEnabled, current]);
 
   const playNow = useCallback((tracks: TrackMeta[], startIndex = 0) => {
+    if (refuseWhenLocked()) return;
     cancelCrossfade();
     autoplayRef.current = true;
     dispatch({ type: 'SET', items: makeItems(tracks), position: startIndex });
   }, []);
 
   const enqueueNext = useCallback((tracks: TrackMeta[]) => {
+    if (refuseWhenLocked()) return;
     dispatch({ type: 'ENQUEUE_NEXT', items: makeItems(tracks) });
   }, []);
 
   const enqueueEnd = useCallback((tracks: TrackMeta[]) => {
+    if (refuseWhenLocked()) return;
     dispatch({ type: 'ENQUEUE_END', items: makeItems(tracks) });
   }, []);
 
   const removeAt = useCallback(
     (index: number) => {
+      if (remoteLockedRef.current) return;
       if (index === stateRef.current.position) autoplayRef.current = !audio.paused;
       dispatch({ type: 'REMOVE', index });
     },
@@ -799,11 +817,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   );
 
   const move = useCallback((from: number, to: number) => {
+    if (remoteLockedRef.current) return;
     dispatch({ type: 'MOVE', from, to });
   }, []);
 
   const jumpTo = useCallback(
     (index: number) => {
+      if (refuseWhenLocked()) return;
       cancelCrossfade();
       if (index === stateRef.current.position) {
         audio.currentTime = 0;
@@ -818,6 +838,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   );
 
   const next = useCallback(() => {
+    if (remoteLockedRef.current) return;
     cancelCrossfade();
     const s = stateRef.current;
     autoplayRef.current = !audio.paused;
@@ -835,6 +856,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [audio]);
 
   const prev = useCallback(() => {
+    if (remoteLockedRef.current) return;
     cancelCrossfade();
     if (audio.currentTime > 3 || stateRef.current.position <= 0) {
       audio.currentTime = 0;
@@ -845,6 +867,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [audio]);
 
   const togglePlay = useCallback(() => {
+    if (refuseWhenLocked()) return;
     if (!stateRef.current.items[stateRef.current.position]) return;
     if (audio.paused) {
       audioCtxRef.current?.resume().catch(() => {});
@@ -857,6 +880,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const seek = useCallback(
     (time: number) => {
+      if (remoteLockedRef.current) return;
       cancelCrossfade();
       const target = clamp(time, 0, Number.isFinite(audio.duration) ? audio.duration : time);
       audio.currentTime = target;
@@ -866,6 +890,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   );
 
   const toggleShuffle = useCallback(() => {
+    if (remoteLockedRef.current) return;
     const s = stateRef.current;
     if (s.shuffled) {
       dispatch({ type: 'UNSHUFFLE' });
@@ -881,6 +906,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const jumbleQueue = useCallback(() => {
+    if (remoteLockedRef.current) return;
     cancelCrossfade();
     dispatch({ type: 'JUMBLE', items: jumble(stateRef.current.items) });
   }, []);
@@ -897,6 +923,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const cycleRepeat = useCallback(() => {
+    if (remoteLockedRef.current) return;
     setRepeatMode((mode) => (mode === 'off' ? 'all' : mode === 'all' ? 'one' : 'off'));
   }, []);
 
@@ -907,9 +934,23 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const clearOthers = useCallback(() => {
+    if (remoteLockedRef.current) return;
     cancelCrossfade();
     dispatch({ type: 'KEEP_CURRENT' });
   }, []);
+
+  const setRemoteLocked = useCallback(
+    (locked: boolean) => {
+      setRemoteLockedState(locked);
+      remoteLockedRef.current = locked;
+      if (!locked) return;
+      cancelCrossfade();
+      autoplayRef.current = false;
+      audio.pause();
+      dispatch({ type: 'CLEAR' });
+    },
+    [audio]
+  );
 
   const currentSleepTimerSeconds = () => {
     if (sleepTimerPausedRemainingRef.current !== null) return sleepTimerPausedRemainingRef.current;
@@ -1012,7 +1053,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       addSleepTimer,
       setSleepTimerMinutes,
       togglePauseSleepTimer,
-      cancelSleepTimer
+      cancelSleepTimer,
+      remoteLocked,
+      setRemoteLocked
     }),
     [
       state,
@@ -1052,7 +1095,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       addSleepTimer,
       setSleepTimerMinutes,
       togglePauseSleepTimer,
-      cancelSleepTimer
+      cancelSleepTimer,
+      remoteLocked,
+      setRemoteLocked
     ]
   );
 

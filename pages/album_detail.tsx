@@ -19,7 +19,7 @@ export function AlbumDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { tracks } = useLibrary();
-  const { playNow } = usePlayer();
+  const { playNow, remoteLocked } = usePlayer();
   const [coverOpen, setCoverOpen] = useState(false);
 
   const albums = useMemo(() => groupAlbums(tracks), [tracks]);
@@ -105,11 +105,11 @@ export function AlbumDetailPage() {
             {album.tracks.length === 1 ? '' : 's'} / {formatTime(total)} total
           </p>
           <div className="xe_album-hero__actions">
-            <button type="button" className="xe_btn xe_btn--accent" onClick={() => playNow(album.tracks, 0)}>
+            <button type="button" className="xe_btn xe_btn--accent" onClick={() => playNow(album.tracks, 0)} disabled={remoteLocked}>
               <PlayIcon size={14} />
               Play
             </button>
-            <button type="button" className="xe_btn" onClick={shuffle}>
+            <button type="button" className="xe_btn" onClick={shuffle} disabled={remoteLocked}>
               <ShuffleIcon size={14} />
               Shuffle
             </button>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { usePlayer } from '../context/player_context';
+import { useRemote } from '../context/remote_context';
 import { clamp } from '../utils/format';
 import {
   DiscIcon,
@@ -12,6 +13,7 @@ import {
   NoteIcon,
   PersonIcon,
   QueueIcon,
+  RemoteIcon,
   SearchIcon,
   SettingsIcon
 } from './icons';
@@ -25,6 +27,7 @@ export const NAV_LINKS = [
   { path: '/queue', label: 'Queue', icon: QueueIcon },
   { path: '/lyrics', label: 'Lyrics', icon: LyricsIcon },
   { path: '/i/lastfm', label: 'Last.fm', icon: LastfmMarkIcon },
+  { path: '/i/remote', label: 'Remote', icon: RemoteIcon },
   { path: '/settings', label: 'Settings', icon: SettingsIcon }
 ];
 
@@ -48,6 +51,10 @@ interface SidebarProps {
 
 export function Sidebar({ onOpenFullscreen }: SidebarProps) {
   const { queue, current } = usePlayer();
+  const remote = useRemote();
+  const remoteWaiting = remote.pending.length;
+  const remoteRunning = remote.phase === 'live' || remote.phase === 'connecting';
+  const remoteState = remoteWaiting > 0 ? 'waiting' : remoteRunning ? 'live' : '';
   const [navWidth, setNavWidth] = useState(loadWidth);
   const navWidthRef = useRef(navWidth);
   navWidthRef.current = navWidth;
@@ -110,8 +117,20 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
         <NavLink
           key={link.path}
           to={link.path}
-          className={({ isActive }) => `xe_nav__link${isActive ? ' xe_nav__link--active' : ''}`}
-          title={collapsed ? link.label : undefined}
+          className={({ isActive }) =>
+            `xe_nav__link${isActive ? ' xe_nav__link--active' : ''}${
+              link.path === '/i/remote' && remoteState ? ` xe_nav__link--remote-${remoteState}` : ''
+            }`
+          }
+          title={
+            link.path === '/i/remote' && remoteState
+              ? remoteWaiting > 0
+                ? `${remoteWaiting} device${remoteWaiting === 1 ? '' : 's'} waiting for approval`
+                : `Remote session running (${remote.controllers.length} connected)`
+              : collapsed
+                ? link.label
+                : undefined
+          }
         >
           <span className="xe_nav__link-content">
             <link.icon size={16} />
@@ -123,6 +142,15 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
               <span className="xe_nav__dot" />
             ) : (
               <span className="xe_nav__badge">{queue.length}</span>
+            ))}
+          {link.path === '/i/remote' &&
+            remoteState &&
+            (collapsed ? (
+              <span className="xe_nav__dot" />
+            ) : (
+              <span className="xe_nav__badge">
+                {remoteWaiting > 0 ? remoteWaiting : remote.controllers.length || '·'}
+              </span>
             ))}
         </NavLink>
       ))}

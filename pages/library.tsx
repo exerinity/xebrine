@@ -29,7 +29,7 @@ const SORT_OPTIONS: SortOption<LibrarySort>[] = [
 
 export function LibraryPage() {
   const { tracks, scanning, permissionNeeded, supported, addFolder, restoreAccess } = useLibrary();
-  const { playNow } = usePlayer();
+  const { playNow, remoteLocked } = usePlayer();
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<LibrarySort>('artist');
   const [deep, setDeep] = useState<DeepSearchCriteria>(EMPTY_DEEP_SEARCH);
@@ -129,11 +129,11 @@ export function LibraryPage() {
           Deep search{deepActive ? 'ing' : ''}
         </button>
         <SortSelect value={sort} onChange={(v) => setSort(v)} options={SORT_OPTIONS} />
-        <button type="button" className="xe_btn" onClick={() => playNow(visible, 0)} disabled={visible.length === 0}>
+        <button type="button" className="xe_btn" onClick={() => playNow(visible, 0)} disabled={visible.length === 0 || remoteLocked}>
           <PlayIcon size={14} />
           Play all
         </button>
-        <button type="button" className="xe_btn" onClick={shuffleAll} disabled={visible.length === 0}>
+        <button type="button" className="xe_btn" onClick={shuffleAll} disabled={visible.length === 0 || remoteLocked}>
           <ShuffleIcon size={14} />
           Shuffle all
         </button>

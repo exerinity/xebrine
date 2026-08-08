@@ -43,7 +43,7 @@ function pickRandom(tracks: TrackMeta[], excludeId?: string): TrackMeta | null {
 }
 
 function RandomSongCard({ track, onAnother }: { track: TrackMeta; onAnother(): void }) {
-  const { playNow, enqueueEnd } = usePlayer();
+  const { playNow, enqueueEnd, remoteLocked } = usePlayer();
   const { buildMenu } = useTrackMenu();
   const art = useAlbumArt(albumKey(track), track);
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
@@ -64,11 +64,11 @@ function RandomSongCard({ track, onAnother }: { track: TrackMeta; onAnother(): v
         <span className="xe_home-song-card__artist">{track.artist}</span>
       </div>
       <div className="xe_home-song-card__actions">
-        <button type="button" className="xe_btn xe_btn--accent" onClick={() => playNow([track], 0)}>
+        <button type="button" className="xe_btn xe_btn--accent" onClick={() => playNow([track], 0)} disabled={remoteLocked}>
           <PlayIcon size={14} />
           Play
         </button>
-        <button type="button" className="xe_btn" onClick={() => enqueueEnd([track])}>
+        <button type="button" className="xe_btn" onClick={() => enqueueEnd([track])} disabled={remoteLocked}>
           <PlusIcon size={14} />
           Enqueue
         </button>
@@ -91,7 +91,7 @@ function RandomSongCard({ track, onAnother }: { track: TrackMeta; onAnother(): v
 
 export function HomePage() {
   const { tracks, permissionNeeded, supported, addFolder, restoreAccess } = useLibrary();
-  const { playNow } = usePlayer();
+  const { playNow, remoteLocked } = usePlayer();
   const navigate = useNavigate();
 
   const [randomTrack, setRandomTrack] = useState<TrackMeta | null>(null);
@@ -146,7 +146,7 @@ export function HomePage() {
             type="button"
             className="xe_btn xe_btn--cta"
             onClick={shuffleAll}
-            disabled={tracks.length === 0}
+            disabled={tracks.length === 0 || remoteLocked}
           >
             <ShuffleIcon size={16} />
             Shuffle all music
@@ -155,7 +155,7 @@ export function HomePage() {
             type="button"
             className="xe_btn xe_btn--cta"
             onClick={() => playNow(tracks, 0)}
-            disabled={tracks.length === 0}
+            disabled={tracks.length === 0 || remoteLocked}
           >
             <PlayIcon size={16} />
             Play all music

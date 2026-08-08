@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePlayer } from '../context/player_context';
+import { REMOTE_LOCK_MESSAGE, usePlayer } from '../context/player_context';
 import { useTrackMenu } from '../hooks/track_menu';
 import { formatTime } from '../utils/format';
 import type { TrackMeta } from '../types';
@@ -19,7 +19,7 @@ interface MenuState {
 }
 
 export function TrackList({ tracks }: TrackListProps) {
-  const { current, isPlaying, playNow, enqueueNext, enqueueEnd } = usePlayer();
+  const { current, isPlaying, playNow, enqueueNext, enqueueEnd, remoteLocked } = usePlayer();
   const { buildMenu, goToArtist, goToAlbum } = useTrackMenu();
   const currentTrackId = current?.track.id;
   const [menu, setMenu] = useState<MenuState | null>(null);
@@ -80,7 +80,8 @@ export function TrackList({ tracks }: TrackListProps) {
               <button
                 type="button"
                 className="xe_mini-btn"
-                title="Play from here"
+                title={remoteLocked ? REMOTE_LOCK_MESSAGE : 'Play from here'}
+                disabled={remoteLocked}
                 onClick={() => playNow(tracks, i)}
               >
                 <PlayIcon size={13} />
@@ -88,7 +89,8 @@ export function TrackList({ tracks }: TrackListProps) {
               <button
                 type="button"
                 className="xe_mini-btn"
-                title="Play next"
+                title={remoteLocked ? REMOTE_LOCK_MESSAGE : 'Play next'}
+                disabled={remoteLocked}
                 onClick={() => enqueueNext([track])}
               >
                 <PlayNextIcon size={13} />
@@ -96,7 +98,8 @@ export function TrackList({ tracks }: TrackListProps) {
               <button
                 type="button"
                 className="xe_mini-btn"
-                title="Add to end of queue"
+                title={remoteLocked ? REMOTE_LOCK_MESSAGE : 'Add to end of queue'}
+                disabled={remoteLocked}
                 onClick={() => enqueueEnd([track])}
               >
                 <PlusIcon size={13} />

@@ -69,7 +69,7 @@ export function ArtistDetailPage() {
   const { artistName = '' } = useParams();
   const navigate = useNavigate();
   const { tracks } = useLibrary();
-  const { playNow } = usePlayer();
+  const { playNow, remoteLocked } = usePlayer();
   const scrollRef = useScrollRestoration();
   const [view, setView] = useState<AlbumsView>(loadView);
   const [sort, setSort] = useState<AlbumsSort>(loadSort);
@@ -143,11 +143,11 @@ export function ArtistDetailPage() {
           {artist.albumCount} album{artist.albumCount === 1 ? '' : 's'} / {artist.tracks.length}{' '}
           track{artist.tracks.length === 1 ? '' : 's'}
         </span>
-        <button type="button" className="xe_btn" onClick={() => playNow(artist.tracks, 0)}>
+        <button type="button" className="xe_btn" onClick={() => playNow(artist.tracks, 0)} disabled={remoteLocked}>
           <PlayIcon size={14} />
           Play all
         </button>
-        <button type="button" className="xe_btn" onClick={shuffle}>
+        <button type="button" className="xe_btn" onClick={shuffle} disabled={remoteLocked}>
           <ShuffleIcon size={14} />
           Shuffle
         </button>

@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { SettingsProvider } from './context/settings_context';
 import { LibraryProvider } from './context/library_context';
 import { PlayerProvider, usePlayer } from './context/player_context';
+import { RemoteProvider } from './context/remote_context';
 import { useSettings } from './context/settings_context';
 import { useMediaSession } from './hooks/media_session';
 import { useElectronBridge } from './hooks/electron_bridge';
@@ -28,6 +29,7 @@ import { SettingsPage } from './pages/settings';
 import { AboutPage } from './pages/about';
 import { ReleaseNotesPage } from './pages/release_notes';
 import { LastfmPage } from './pages/lastfm';
+import { RemotePage } from './pages/remote';
 import { Sidebar } from './components/sidebar';
 import { PlayerBar } from './components/player_bar';
 import { FullscreenPlayer } from './components/fs_player';
@@ -117,6 +119,7 @@ function Shell() {
           <Route path="/i/:section" element={<AboutPage />} />
           <Route path="/i/release_notes" element={<ReleaseNotesPage />} />
           <Route path="/i/lastfm" element={<LastfmPage />} />
+          <Route path="/i/remote" element={<RemotePage />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </main>
@@ -143,7 +146,9 @@ export default function App() {
     <SettingsProvider>
       <LibraryProvider>
         <PlayerProvider>
-          <Shell />
+          <RemoteProvider>
+            <Shell />
+          </RemoteProvider>
         </PlayerProvider>
       </LibraryProvider>
     </SettingsProvider>

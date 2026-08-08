@@ -33,7 +33,7 @@ function loadSort(): AlbumSort {
 }
 
 export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
-  const { playNow, enqueueEnd } = usePlayer();
+  const { playNow, enqueueEnd, remoteLocked } = usePlayer();
   const { settings } = useSettings();
   const art = useAlbumArt(album.key, album.tracks[0]);
   const navigate = useNavigate();
@@ -85,6 +85,7 @@ export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void
           <button
             type="button"
             className="xe_album-card__action"
+            disabled={remoteLocked}
             title="Shuffle album"
             onClick={(e) => {
               e.stopPropagation();
@@ -99,6 +100,7 @@ export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void
           <button
             type="button"
             className="xe_album-card__action"
+            disabled={remoteLocked}
             title="Enqueue"
             onClick={(e) => {
               e.stopPropagation();
@@ -110,6 +112,7 @@ export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void
           <button
             type="button"
             className="xe_album-card__play"
+            disabled={remoteLocked}
             title="Play album"
             onClick={(e) => {
               e.stopPropagation();
