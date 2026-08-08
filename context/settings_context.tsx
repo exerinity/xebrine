@@ -14,6 +14,7 @@ import type { ArtistPronunciation } from '../utils/pronunciation';
 import { isThemeId, type ThemeId } from '../utils/themes';
 import { isSearchEngineId, type SearchEngineId } from '../utils/search_engine';
 import { isPageKeyMode, type PageKeyMode } from '../utils/page_keys';
+import { isAutoPlayLevel, type AutoPlayLevel } from '../queue/auto_play';
 import {
   DEFAULT_SCROBBLE_IGNORE_RULES,
   normalizeScrobbleIgnoreRules,
@@ -29,6 +30,8 @@ export interface Settings {
   preventExit: boolean;
   ignoreRules: IgnoreRules;
   autoMixDuration: number;
+  autoPlay: boolean;
+  autoPlayLevel: AutoPlayLevel;
   eqEnabled: boolean;
   eqBands: number[];
   eqPreamp: number;
@@ -65,6 +68,8 @@ export const DEFAULT_SETTINGS: Settings = {
   preventExit: true,
   ignoreRules: DEFAULT_IGNORE_RULES,
   autoMixDuration: 15,
+  autoPlay: false,
+  autoPlayLevel: 1,
   eqEnabled: false,
   eqBands: [...EQ_FLAT],
   eqPreamp: EQ_PREAMP_DEFAULT,
@@ -102,6 +107,7 @@ function loadSettings(): Settings {
       searchEngine: isSearchEngineId(merged.searchEngine) ? merged.searchEngine : 'google',
       customSearchUrl: typeof merged.customSearchUrl === 'string' ? merged.customSearchUrl : '',
       pageKeyMode: isPageKeyMode(merged.pageKeyMode) ? merged.pageKeyMode : 'off',
+      autoPlayLevel: isAutoPlayLevel(merged.autoPlayLevel) ? merged.autoPlayLevel : 1,
       scrobbleMode: merged.scrobbleMode === 'lax' ? 'lax' : 'strict',
       scrobbleIgnoreRules: normalizeScrobbleIgnoreRules(merged.scrobbleIgnoreRules)
     };

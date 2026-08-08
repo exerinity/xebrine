@@ -11,6 +11,7 @@ import { toSlugParam } from '../utils/slug';
 import { displayArtist } from '../utils/groups';
 import {
   AutoMixIcon,
+  AutoPlayIcon,
   ChevronRightIcon,
   NextIcon,
   PauseIcon,
@@ -26,6 +27,7 @@ import {
 import { useLastfmSession } from '../hooks/lastfm_session';
 import { useScrobbleStatus } from '../hooks/scrobble_status';
 import { SCROBBLE_STATUS_LABEL } from '../utils/scrobble_status';
+import { AUTO_PLAY_LABELS } from '../queue/auto_play';
 import { ExplicitBadge } from './explicit_badge';
 import { ScanDrawer } from './scan_drawer';
 import { AutoMixDrawer } from './auto_mix_drawer';
@@ -326,6 +328,19 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
               </span>
             </button>
           )}
+          <button
+            type="button"
+            className={`xe_icon-btn${settings.autoPlay ? ' xe_icon-btn--active' : ''}`}
+            onClick={() => update({ autoPlay: !settings.autoPlay })}
+            title={
+              settings.autoPlay
+                ? `Auto play is on (${AUTO_PLAY_LABELS[settings.autoPlayLevel].toLowerCase()}) - click to turn off`
+                : 'Auto play is off - click to keep playing when the queue runs out'
+            }
+            aria-pressed={settings.autoPlay}
+          >
+            <AutoPlayIcon size={16} />
+          </button>
           <button
             type="button"
             className={`xe_icon-btn${visualizerOn ? ' xe_icon-btn--active' : ''}`}

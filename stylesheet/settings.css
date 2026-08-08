@@ -31,6 +31,11 @@
   margin: 6px 0 12px;
 }
 
+.xe_settings__hint strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
 .xe_settings__search-url {
   display: block;
   width: 100%;
@@ -69,6 +74,15 @@
   text-align: right;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
+}
+
+.xe_settings__slider-value--label {
+  flex: 0 0 106px;
+  width: 106px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .xe_settings__stops {

@@ -34,7 +34,7 @@ export function RemotePage() {
         <div className="xe_remote">
           {active === 'none' && (
             <div className="xe_remote__roles">
-              <p className="xe_remote__question">What are you doing on this device?</p>
+              <p className="xe_remote__question">What are you doing with this device?</p>
               <div className="xe_remote__role-grid">
                 <button
                   type="button"
@@ -42,7 +42,7 @@ export function RemotePage() {
                   onClick={() => setRole('playing')}
                 >
                   <NoteIcon size={26} />
-                  <strong>Playing</strong>
+                  <strong>Playing (host)</strong>
                   <span>
                     Get a PIN for other devices to connect
                   </span>
@@ -55,7 +55,7 @@ export function RemotePage() {
                   <QueueIcon size={26} />
                   <strong>Controlling</strong>
                   <span>
-                    Enter a PIN from another device to control it
+                    Enter a PIN from another device to control
                   </span>
                 </button>
               </div>

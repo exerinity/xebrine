@@ -14,6 +14,7 @@ import type { QueueItem, TrackMeta } from '../types';
 import { initialQueue, makeItems, queueReducer } from '../queue/reducer';
 import { intelligentShuffle, jumble } from '../queue/shuffle';
 import { getRecentIds, pushRecent } from '../queue/history';
+import { pickAutoPlayTrack } from '../queue/auto_play';
 import { readCoverArt } from '../management/metadata';
 import { useLibrary } from './library_context';
 import { useSettings } from './settings_context';
@@ -117,11 +118,17 @@ function loadAutoMix(): boolean {
 }
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
-  const { getFile } = useLibrary();
+  const { getFile, tracks: library } = useLibrary();
+  const libraryRef = useRef(library);
+  libraryRef.current = library;
   const getFileRef = useRef(getFile);
   getFileRef.current = getFile;
 
   const { settings } = useSettings();
+  const autoPlayRef = useRef(settings.autoPlay);
+  autoPlayRef.current = settings.autoPlay;
+  const autoPlayLevelRef = useRef(settings.autoPlayLevel);
+  autoPlayLevelRef.current = settings.autoPlayLevel;
   const autoMixDurationRef = useRef(settings.autoMixDuration);
   autoMixDurationRef.current = settings.autoMixDuration;
 
@@ -164,6 +171,24 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [remoteLocked, setRemoteLockedState] = useState(false);
   const remoteLockedRef = useRef(remoteLocked);
   remoteLockedRef.current = remoteLocked;
+
+  function autoPlayNext(): boolean {
+    if (!autoPlayRef.current || remoteLockedRef.current) return false;
+    const s = stateRef.current;
+    const finished = s.items[s.position]?.track;
+    if (!finished) return false;
+    const pick = pickAutoPlayTrack(
+      libraryRef.current,
+      finished,
+      autoPlayLevelRef.current,
+      getRecentIds()
+    );
+    if (!pick) return false;
+    autoplayRef.current = true;
+    dispatch({ type: 'ENQUEUE_END', items: makeItems([pick]) });
+    dispatch({ type: 'ADVANCE', delta: 1 });
+    return true;
+  }
 
   function refuseWhenLocked(): boolean {
     if (!remoteLockedRef.current) return false;
@@ -564,6 +589,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         } else {
           dispatch({ type: 'JUMP', index: 0 });
         }
+      } else if (autoPlayNext()) {
+        return;
       } else {
         setIsPlaying(false);
       }

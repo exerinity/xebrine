@@ -15,7 +15,8 @@ const RELEASES: Release[] = [
     date: '2026-08-08',
     notes: [
       <>Added a <Link to="/i/remote">remote control functionality</Link></>,
-      'All icons have been changed to Material Design icons, which look a lot in line with the font being Google Sans Flex...'
+      'All icons have been changed to Material Design icons, which look a lot in line with the font being Google Sans Flex...',
+      <>Added an <Link to="/settings/playback">auto play functionality</Link> which is pretty self-explanatory. Quick toggle in the player bar</>
     ]
   },
   {
