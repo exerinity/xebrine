@@ -1,9 +1,10 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 export interface ContextMenuItem {
   label: string;
   onSelect: () => void;
+  icon?: ReactNode;
   separatorBefore?: boolean;
   heading?: string;
 }
@@ -119,6 +120,7 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
             }}
           >
             {item.label}
+            {item.icon && <span className="xe_context-menu__icon">{item.icon}</span>}
           </button>
         </div>
       ))}

@@ -6,6 +6,7 @@ import { ScrollingText } from './scrolling_text';
 import { Scrubber } from './scrubber';
 import { Slider } from './slider';
 import { Visualizer } from './visualizer';
+import { ContextMenu, type ContextMenuItem } from './context_menu';
 import { toast } from '../utils/toast';
 import { toSlugParam } from '../utils/slug';
 import { displayArtist } from '../utils/groups';
@@ -13,6 +14,7 @@ import {
   AutoMixIcon,
   AutoPlayIcon,
   ChevronRightIcon,
+  ExternalLinkIcon,
   NextIcon,
   PauseIcon,
   PlayIcon,
@@ -73,6 +75,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
   const [collapsed, setCollapsed] = useState(false);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [nowEntering, setNowEntering] = useState(false);
+  const [scrobbleMenu, setScrobbleMenu] = useState<{ x: number; y: number } | null>(null);
 
   const track = current?.track ?? null;
   const hadTrackRef = useRef(Boolean(track));
@@ -166,6 +169,33 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
 
   const autoMixLabel = autoMixEnabled ? 'Enabled' : 'Disabled';
   const autoMixBusy = autoMixEnabled && (autoMixPhase === 'analyzing-current' || autoMixPhase === 'analyzing-next');
+  const scrobbleMenuItems: ContextMenuItem[] = lastfm
+    ? [
+        {
+          label: settings.scrobbleEnabled ? 'Disable scrobbling' : 'Enable scrobbling',
+          heading: 'Last.fm...',
+          onSelect: () => update({ scrobbleEnabled: !settings.scrobbleEnabled })
+        },
+        {
+          label: 'Go to Last.fm settings',
+          onSelect: () => {
+            if (fullscreenOpen) onToggleFullscreen?.();
+            navigate('/i/lastfm');
+          }
+        },
+        {
+          label: 'Open profile',
+          icon: <ExternalLinkIcon size={14} />,
+          onSelect: () => {
+            window.open(
+              `https://www.last.fm/user/${encodeURIComponent(lastfm.username)}`,
+              '_blank',
+              'noopener,noreferrer'
+            );
+          }
+        }
+      ]
+    : [];
 
   return (
     <>
@@ -315,6 +345,10 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
               type="button"
               className={`xe_scrobble-pill xe_scrobble-pill--${scrobbleStatus}`}
               onClick={() => update({ scrobbleEnabled: !settings.scrobbleEnabled })}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setScrobbleMenu({ x: e.clientX, y: e.clientY });
+              }}
               title={
                 settings.scrobbleEnabled
                   ? `Scrobbling to ${lastfm.username} - click to suspend`
@@ -381,6 +415,14 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
           </div>
         </div>
       </footer>
+      {scrobbleMenu && lastfm && (
+        <ContextMenu
+          x={scrobbleMenu.x}
+          y={scrobbleMenu.y}
+          items={scrobbleMenuItems}
+          onClose={() => setScrobbleMenu(null)}
+        />
+      )}
     </>
   );
 }

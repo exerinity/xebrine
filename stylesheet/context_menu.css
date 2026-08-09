@@ -19,7 +19,10 @@
 }
 
 .xe_context-menu__item {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
   padding: 8px 12px;
   border: none;
@@ -29,6 +32,12 @@
   font-size: 13px;
   text-align: left;
   cursor: pointer;
+}
+
+.xe_context-menu__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-left: 12px;
 }
 
 .xe_context-menu__item:hover {
