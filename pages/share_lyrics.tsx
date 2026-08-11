@@ -12,7 +12,10 @@ import {
   type CardStyle,
   type LogoMode
 } from '../utils/share_card';
+import { openSearch } from '../utils/search_engine';
+import { toast } from '../utils/toast';
 import type { Lyrics, StoredLyrics } from '../types';
+import { ContextMenu, type ContextMenuItem } from '../components/context_menu';
 import { BackIcon, DownloadIcon } from '../components/icons';
 
 const MAX_LINES = 7;
@@ -25,6 +28,12 @@ const LOGO_POSITIONS: { id: Exclude<LogoMode, 'none'>; label: string }[] = [
   { id: 'wordmark', label: 'Bottom' },
   { id: 'corner', label: 'Top right' }
 ];
+const HEADING_MAX = 25;
+
+function lineHeading(text: string): string {
+  const trimmed = text.trim() || '♪';
+  return trimmed.length > HEADING_MAX ? `${trimmed.slice(0, HEADING_MAX)}...` : trimmed;
+}
 
 export function ShareLyricsPage() {
   const { current, artworkUrl, audioRef } = usePlayer();
@@ -43,12 +52,14 @@ export function ShareLyricsPage() {
   const [bgMode, setBgMode] = useState<CardBackground>('solid');
   const [bgColor, setBgColor] = useState(accent.accent);
   const [textColor, setTextColor] = useState(pickTextColor(accent.accent));
+  const [menu, setMenu] = useState<{ x: number; y: number; index: number } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     setLyrics(null);
     setLoaded(false);
     setSelected([]);
+    setMenu(null);
     if (!track) return;
     let alive = true;
     void dbGet<StoredLyrics>('lyrics', track.id).then((stored) => {
@@ -144,6 +155,64 @@ export function ShareLyricsPage() {
     });
   };
 
+  const addLines = (indices: number[]) => {
+    setSelected((prev) => {
+      const next = [...prev];
+      for (const index of indices) {
+        if (next.length >= MAX_LINES) break;
+        if (!next.includes(index)) next.push(index);
+      }
+      return next;
+    });
+  };
+
+  const nearbyLineIndices = (index: number, direction: 'above' | 'below') => {
+    if (!lyrics) return [];
+    const candidates = lyrics.lines
+      .map((line, i) => (line.text.trim() ? i : -1))
+      .filter((i) => i >= 0);
+    const pos = candidates.indexOf(index);
+    if (pos === -1) return [];
+    if (direction === 'above') return candidates.slice(Math.max(0, pos - 6), pos + 1);
+    return candidates.slice(pos, pos + 7);
+  };
+
+  const copyLine = (text: string) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => toast.success('Copied the line'))
+      .catch(() => toast.error("Couldn't copy the line"));
+  };
+
+  const menuItems = (index: number): ContextMenuItem[] => {
+    const line = lyrics?.lines[index];
+    if (!line) return [];
+    return [
+      {
+        label: 'Add this line',
+        heading: lineHeading(line.text),
+        onSelect: () => addLines([index])
+      },
+      {
+        label: 'Add this line and 6 above',
+        onSelect: () => addLines(nearbyLineIndices(index, 'above'))
+      },
+      {
+        label: 'Add this line and 6 below',
+        onSelect: () => addLines(nearbyLineIndices(index, 'below'))
+      },
+      {
+        label: 'Copy this line',
+        separatorBefore: true,
+        onSelect: () => copyLine(line.text)
+      },
+      {
+        label: 'Search Google',
+        onSelect: () => openSearch(line.text, 'google', '')
+      }
+    ];
+  };
+
   const resetColors = () => {
     setBgColor(accent.accent);
     setTextColor(pickTextColor(accent.accent));
@@ -200,19 +269,34 @@ export function ShareLyricsPage() {
               {lyrics.lines.map((line, i) => {
                 if (!line.text) return null;
                 const isSelected = selected.includes(i);
+                const selectionFull = !isSelected && selected.length >= MAX_LINES;
                 return (
                   <button
                     key={i}
                     type="button"
-                    className={`xe_share-line${isSelected ? ' xe_share-line--selected' : ''}`}
+                    className={`xe_share-line${isSelected ? ' xe_share-line--selected' : ''}${
+                      selectionFull ? ' xe_share-line--disabled' : ''
+                    }`}
                     onClick={() => toggleLine(i)}
-                    disabled={!isSelected && selected.length >= MAX_LINES}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      setMenu({ x: e.clientX, y: e.clientY, index: i });
+                    }}
+                    aria-disabled={selectionFull}
                   >
                     {line.text}
                   </button>
                 );
               })}
             </div>
+            {menu && (
+              <ContextMenu
+                x={menu.x}
+                y={menu.y}
+                items={menuItems(menu.index)}
+                onClose={() => setMenu(null)}
+              />
+            )}
           </div>
 
           <div className="xe_share__side">

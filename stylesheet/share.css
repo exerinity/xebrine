@@ -52,9 +52,13 @@
   transition: color 120ms ease, background 120ms ease;
 }
 
-.xe_share-line:hover:not(:disabled) {
+.xe_share-line:hover:not(.xe_share-line--disabled) {
   color: var(--text);
   background: var(--panel-2);
+}
+
+.xe_share-line--disabled {
+  opacity: 0.55;
 }
 
 .xe_share-line--selected {
@@ -64,7 +68,7 @@
   box-shadow: inset 2px 0 0 var(--accent-bright);
 }
 
-.xe_share-line--selected:hover:not(:disabled) {
+.xe_share-line--selected:hover {
   background: var(--accent-soft);
 }
 
