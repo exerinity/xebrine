@@ -5,7 +5,7 @@ import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { TrackList } from '../components/track_list';
 import { TrackListSkeleton } from '../components/skeletons';
-import { SortSelect, type SortOption } from '../components/sort_select';
+import { SortSelect, type SortDirection, type SortOption } from '../components/sort_select';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { usePageTitle } from '../hooks/page_title';
 import { FolderIcon, KeyIcon, PlayIcon, SearchIcon, ShuffleIcon } from '../components/icons';
@@ -17,13 +17,12 @@ import {
   type DeepSearchCriteria
 } from '../components/deep_search';
 
-type LibrarySort = 'artist' | 'album' | 'title' | 'title-desc' | 'duration';
+type LibrarySort = 'artist' | 'album' | 'title' | 'duration';
 
 const SORT_OPTIONS: SortOption<LibrarySort>[] = [
   { value: 'artist', label: 'Artist' },
   { value: 'album', label: 'Album' },
-  { value: 'title', label: 'Title (A - Z)' },
-  { value: 'title-desc', label: 'Title (Z - A)' },
+  { value: 'title', label: 'Title' },
   { value: 'duration', label: 'Duration' }
 ];
 
@@ -32,6 +31,7 @@ export function LibraryPage() {
   const { playNow, remoteLocked } = usePlayer();
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<LibrarySort>('artist');
+  const [direction, setDirection] = useState<SortDirection>('asc');
   const [deep, setDeep] = useState<DeepSearchCriteria>(EMPTY_DEEP_SEARCH);
   const [deepOpen, setDeepOpen] = useState(false);
   const deepActive = isDeepSearchActive(deep);
@@ -39,36 +39,36 @@ export function LibraryPage() {
 
   const sorted = useMemo(() => {
     const copy = [...tracks];
+    const factor = direction === 'asc' ? 1 : -1;
     switch (sort) {
       case 'artist':
         copy.sort(
           (a, b) =>
-            a.artist.localeCompare(b.artist) ||
-            a.album.localeCompare(b.album) ||
-            (a.trackNo ?? 0) - (b.trackNo ?? 0) ||
-            a.title.localeCompare(b.title)
+            factor *
+            (a.artist.localeCompare(b.artist) ||
+              a.album.localeCompare(b.album) ||
+              (a.trackNo ?? 0) - (b.trackNo ?? 0) ||
+              a.title.localeCompare(b.title))
         );
         break;
       case 'album':
         copy.sort(
           (a, b) =>
-            a.album.localeCompare(b.album) ||
-            (a.trackNo ?? 0) - (b.trackNo ?? 0) ||
-            a.title.localeCompare(b.title)
+            factor *
+            (a.album.localeCompare(b.album) ||
+              (a.trackNo ?? 0) - (b.trackNo ?? 0) ||
+              a.title.localeCompare(b.title))
         );
         break;
       case 'title':
-        copy.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case 'title-desc':
-        copy.sort((a, b) => b.title.localeCompare(a.title));
+        copy.sort((a, b) => factor * a.title.localeCompare(b.title));
         break;
       case 'duration':
-        copy.sort((a, b) => a.duration - b.duration);
+        copy.sort((a, b) => factor * (a.duration - b.duration || a.title.localeCompare(b.title)));
         break;
     }
     return copy;
-  }, [tracks, sort]);
+  }, [tracks, sort, direction]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -128,7 +128,13 @@ export function LibraryPage() {
           <SearchIcon size={14} />
           Deep search{deepActive ? 'ing' : ''}
         </button>
-        <SortSelect value={sort} onChange={(v) => setSort(v)} options={SORT_OPTIONS} />
+        <SortSelect
+          value={sort}
+          onChange={(value) => setSort(value)}
+          options={SORT_OPTIONS}
+          direction={direction}
+          onDirectionChange={setDirection}
+        />
         <button type="button" className="xe_btn" onClick={() => playNow(visible, 0)} disabled={visible.length === 0 || remoteLocked}>
           <PlayIcon size={14} />
           Play all
