@@ -1,6 +1,6 @@
 export type SearchEngineId =
   | 'google'
-  | 'bing'
+  | 'ddg'
   | 'yahoo'
   | 'kagi'
   | 'startpage'
@@ -22,7 +22,7 @@ export const QUERY_TOKEN = '%s';
 
 export const SEARCH_ENGINES: { id: SearchEngineId; label: string; template: string }[] = [
   { id: 'google', label: 'Google', template: `https://www.google.com/search?q=${QUERY_TOKEN}` },
-  { id: 'bing', label: 'Bing', template: `https://www.bing.com/search?q=${QUERY_TOKEN}` },
+  { id: 'ddg', label: 'DuckDuckGo', template: `https://duckduckgo.com/?q=${QUERY_TOKEN}` },
   { id: 'yahoo', label: 'Yahoo', template: `https://search.yahoo.com/search?p=${QUERY_TOKEN}` },
   { id: 'kagi', label: 'Kagi', template: `https://kagi.com/search?q=${QUERY_TOKEN}` },
   {
