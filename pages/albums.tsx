@@ -10,26 +10,38 @@ import { getRecentIds } from '../queue/history';
 import { useAlbumArt } from '../hooks/album_art';
 import { LogoIcon, PlayIcon, PlusIcon, SearchIcon, ShuffleIcon } from '../components/icons';
 import { ContextMenu, type ContextMenuItem } from '../components/context_menu';
-import { SortSelect, type SortOption } from '../components/sort_select';
+import { SortSelect, type SortDirection, type SortOption } from '../components/sort_select';
 import { toSlugParam } from '../utils/slug';
 import { useScrollRestoration } from '../hooks/scroll_restoration';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { usePageTitle } from '../hooks/page_title';
 
-type AlbumSort = 'artist' | 'title' | 'title-desc' | 'tracks';
+type AlbumSort = 'artist' | 'title' | 'tracks';
 
 const SORT_OPTIONS: SortOption<AlbumSort>[] = [
   { value: 'artist', label: 'Artist' },
-  { value: 'title', label: 'Title (A-Z)' },
-  { value: 'title-desc', label: 'Title (Z-A)' },
+  { value: 'title', label: 'Title' },
   { value: 'tracks', label: 'Tracks' }
 ];
 
 const SORT_KEY = 'xebrine.albumsSort';
 
-function loadSort(): AlbumSort {
+function loadSort(): { sort: AlbumSort; direction: SortDirection } {
   const raw = localStorage.getItem(SORT_KEY);
-  return SORT_OPTIONS.some((o) => o.value === raw) ? (raw as AlbumSort) : 'artist';
+  if (raw === 'title-desc') {
+    try {
+      localStorage.setItem(SORT_KEY, 'title');
+      localStorage.setItem(`${SORT_KEY}.direction`, 'desc');
+    } catch {
+      null;
+    }
+    return { sort: 'title', direction: 'desc' };
+  }
+  return {
+    sort: SORT_OPTIONS.some((o) => o.value === raw) ? (raw as AlbumSort) : 'artist',
+    direction:
+      localStorage.getItem(`${SORT_KEY}.direction`) === 'desc' || raw === 'tracks' ? 'desc' : 'asc'
+  };
 }
 
 export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
@@ -149,14 +161,23 @@ export function AlbumsPage() {
   const { tracks } = useLibrary();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<AlbumSort>(loadSort);
+  const [{ sort, direction }, setSortState] = useState(loadSort);
   const scrollRef = useScrollRestoration();
   usePageTitle('Albums');
 
   const changeSort = (value: AlbumSort) => {
-    setSort(value);
+    setSortState((current) => ({ ...current, sort: value }));
     try {
       localStorage.setItem(SORT_KEY, value);
+    } catch {
+      null;
+    }
+  };
+
+  const changeDirection = (value: SortDirection) => {
+    setSortState((current) => ({ ...current, direction: value }));
+    try {
+      localStorage.setItem(`${SORT_KEY}.direction`, value);
     } catch {
       null;
     }
@@ -170,27 +191,26 @@ export function AlbumsPage() {
       ? albums.filter((a) => a.album.toLowerCase().includes(q) || a.artist.toLowerCase().includes(q))
       : albums;
     const copy = [...filtered];
+    const factor = direction === 'asc' ? 1 : -1;
     switch (sort) {
       case 'artist':
         copy.sort(
           (a, b) =>
-            a.artist.localeCompare(b.artist) ||
-            (a.year ?? 0) - (b.year ?? 0) ||
-            a.album.localeCompare(b.album)
+            factor *
+            (a.artist.localeCompare(b.artist) ||
+              (a.year ?? 0) - (b.year ?? 0) ||
+              a.album.localeCompare(b.album))
         );
         break;
       case 'title':
-        copy.sort((a, b) => a.album.localeCompare(b.album));
-        break;
-      case 'title-desc':
-        copy.sort((a, b) => b.album.localeCompare(a.album));
+        copy.sort((a, b) => factor * a.album.localeCompare(b.album));
         break;
       case 'tracks':
-        copy.sort((a, b) => b.tracks.length - a.tracks.length || a.album.localeCompare(b.album));
+        copy.sort((a, b) => factor * (a.tracks.length - b.tracks.length || a.album.localeCompare(b.album)));
         break;
     }
     return copy;
-  }, [albums, query, sort]);
+  }, [albums, query, sort, direction]);
 
   const { visible: paged, hasMore, sentinelRef } = useInfiniteScroll(visible);
 
@@ -208,7 +228,13 @@ export function AlbumsPage() {
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
-        <SortSelect value={sort} onChange={changeSort} options={SORT_OPTIONS} />
+        <SortSelect
+          value={sort}
+          onChange={changeSort}
+          options={SORT_OPTIONS}
+          direction={direction}
+          onDirectionChange={changeDirection}
+        />
         <span className="xe_page__meta">{albums.length} albums</span>
       </div>
       {visible.length === 0 ? (
