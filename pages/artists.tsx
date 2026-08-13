@@ -9,26 +9,38 @@ import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { toSlugParam } from '../utils/slug';
 import { toast } from '../utils/toast';
-import { SortSelect, type SortOption } from '../components/sort_select';
+import { SortSelect, type SortDirection, type SortOption } from '../components/sort_select';
 import { ContextMenu, type ContextMenuItem } from '../components/context_menu';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { usePageTitle } from '../hooks/page_title';
 import { SearchIcon } from '../components/icons';
 
-type ArtistSort = 'name' | 'name-desc' | 'albums' | 'tracks';
+type ArtistSort = 'name' | 'albums' | 'tracks';
 
 const SORT_OPTIONS: SortOption<ArtistSort>[] = [
-  { value: 'name', label: 'Name (A - Z)' },
-  { value: 'name-desc', label: 'Name (Z - A)' },
+  { value: 'name', label: 'Name' },
   { value: 'albums', label: 'Albums' },
   { value: 'tracks', label: 'Tracks' }
 ];
 
 const SORT_KEY = 'xebrine.artistsSort';
 
-function loadSort(): ArtistSort {
+function loadSort(): { sort: ArtistSort; direction: SortDirection } {
   const raw = localStorage.getItem(SORT_KEY);
-  return SORT_OPTIONS.some((o) => o.value === raw) ? (raw as ArtistSort) : 'name';
+  if (raw === 'name-desc') {
+    try {
+      localStorage.setItem(SORT_KEY, 'name');
+      localStorage.setItem(`${SORT_KEY}.direction`, 'desc');
+    } catch {
+      null;
+    }
+    return { sort: 'name', direction: 'desc' };
+  }
+  return {
+    sort: SORT_OPTIONS.some((o) => o.value === raw) ? (raw as ArtistSort) : 'name',
+    direction:
+      localStorage.getItem(`${SORT_KEY}.direction`) === 'desc' || raw === 'tracks' ? 'desc' : 'asc'
+  };
 }
 
 export function ArtistsPage() {
@@ -37,7 +49,7 @@ export function ArtistsPage() {
   const { settings } = useSettings();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<ArtistSort>(loadSort);
+  const [{ sort, direction }, setSortState] = useState(loadSort);
   const [menu, setMenu] = useState<{ x: number; y: number; artist: ArtistGroup } | null>(null);
   usePageTitle('Artists');
 
@@ -77,9 +89,18 @@ export function ArtistsPage() {
   ];
 
   const changeSort = (value: ArtistSort) => {
-    setSort(value);
+    setSortState((current) => ({ ...current, sort: value }));
     try {
       localStorage.setItem(SORT_KEY, value);
+    } catch {
+      null;
+    }
+  };
+
+  const changeDirection = (value: SortDirection) => {
+    setSortState((current) => ({ ...current, direction: value }));
+    try {
+      localStorage.setItem(`${SORT_KEY}.direction`, value);
     } catch {
       null;
     }
@@ -91,22 +112,20 @@ export function ArtistsPage() {
     const q = query.trim().toLowerCase();
     const filtered = q ? artists.filter((a) => a.name.toLowerCase().includes(q)) : artists;
     const copy = [...filtered];
+    const factor = direction === 'asc' ? 1 : -1;
     switch (sort) {
       case 'name':
-        copy.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'name-desc':
-        copy.sort((a, b) => b.name.localeCompare(a.name));
+        copy.sort((a, b) => factor * a.name.localeCompare(b.name));
         break;
       case 'albums':
-        copy.sort((a, b) => b.albumCount - a.albumCount || a.name.localeCompare(b.name));
+        copy.sort((a, b) => factor * (a.albumCount - b.albumCount || a.name.localeCompare(b.name)));
         break;
       case 'tracks':
-        copy.sort((a, b) => b.tracks.length - a.tracks.length || a.name.localeCompare(b.name));
+        copy.sort((a, b) => factor * (a.tracks.length - b.tracks.length || a.name.localeCompare(b.name)));
         break;
     }
     return copy;
-  }, [artists, query, sort]);
+  }, [artists, query, sort, direction]);
 
   const { visible: paged, hasMore, sentinelRef } = useInfiniteScroll(visible);
 
@@ -124,7 +143,13 @@ export function ArtistsPage() {
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
-        <SortSelect value={sort} onChange={changeSort} options={SORT_OPTIONS} />
+        <SortSelect
+          value={sort}
+          onChange={changeSort}
+          options={SORT_OPTIONS}
+          direction={direction}
+          onDirectionChange={changeDirection}
+        />
         <span className="xe_page__meta">{artists.length} artists</span>
       </div>
       {visible.length === 0 ? (
