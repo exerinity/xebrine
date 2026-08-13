@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MAX_VOLUME, REMOTE_LOCK_MESSAGE, usePlayer } from '../context/player_context';
 import { useSettings } from '../context/settings_context';
@@ -76,8 +76,12 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [nowEntering, setNowEntering] = useState(false);
   const [scrobbleMenu, setScrobbleMenu] = useState<{ x: number; y: number } | null>(null);
+  const scrubberSlotRef = useRef<HTMLDivElement | null>(null);
+  const previousScrubberRectRef = useRef<DOMRect | null>(null);
 
   const track = current?.track ?? null;
+  const playerAtTop = settings.playerBarPosition === 'top';
+  const compact = settings.playerBarLayout === 'compact';
   const hadTrackRef = useRef(Boolean(track));
   const volumeLevel = volume <= 0 ? 0 : volume < 0.34 ? 1 : volume < 0.67 ? 2 : 3;
   const boosted = volume > 1;
@@ -103,6 +107,23 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
     if (hasTrack && !hadTrackRef.current) setNowEntering(true);
     hadTrackRef.current = hasTrack;
   }, [track]);
+
+  useLayoutEffect(() => {
+    const slot = scrubberSlotRef.current;
+    if (!slot) return;
+    const next = slot.getBoundingClientRect();
+    const previous = previousScrubberRectRef.current;
+    previousScrubberRectRef.current = next;
+    if (!previous || settings.reducedMotion) return;
+
+    slot.animate(
+      [
+        { transform: `translateY(${previous.top - next.top}px)`, opacity: 0.72 },
+        { transform: 'translateY(0)', opacity: 1 }
+      ],
+      { duration: 260, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' }
+    );
+  }, [settings.playerBarSliderPosition, settings.reducedMotion]);
 
   const copyField = (field: 'title' | 'artist' | 'album', value: string) => {
     navigator.clipboard
@@ -196,12 +217,19 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
         }
       ]
     : [];
+  const scrubber = (
+    <div key="scrubber" ref={scrubberSlotRef} className="xe_player-bar__scrubber-slot">
+      <Scrubber />
+    </div>
+  );
 
   return (
     <>
       <button
         type="button"
-        className={`xe_player-handle${collapsed ? ' xe_player-handle--collapsed' : ''}`}
+        className={`xe_player-handle${collapsed ? ' xe_player-handle--collapsed' : ''}${
+          playerAtTop ? ' xe_player-handle--top' : ''
+        }`}
         onClick={() => setCollapsed((value) => !value)}
         title={collapsed ? 'Show the player' : 'Hide the player'}
         aria-label={collapsed ? 'Show the player' : 'Hide the player'}
@@ -211,7 +239,11 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
           <ChevronRightIcon size={14} />
         </span>
       </button>
-      <footer className={`xe_player-bar${collapsed ? ' xe_player-bar--collapsed' : ''}`}>
+      <footer
+        className={`xe_player-bar${collapsed ? ' xe_player-bar--collapsed' : ''}${
+          playerAtTop ? ' xe_player-bar--top' : ''
+        }${compact ? ' xe_player-bar--compact' : ''}`}
+      >
         {visualizerOn && <Visualizer analyser={analyser} />}
         <ScanDrawer />
         <div
@@ -254,7 +286,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
                 />
                 <ScrollingText
                   text={track.album}
-                  className="xe_player-bar__subtitle"
+                  className="xe_player-bar__subtitle xe_player-bar__album"
                   title={fieldTooltip('album', track.album)}
                   onClick={() => handleFieldClick('album', track.album)}
                   onContextMenu={(e) => handleFieldContextMenu(e, 'album', track.album)}
@@ -269,6 +301,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
         </div>
 
         <div className="xe_player-bar__center">
+          {settings.playerBarSliderPosition === 'above' && scrubber}
           <div className="xe_player-bar__controls">
             <span className="xe_player-bar__percent" aria-hidden="true" title="Percent elapsed">
               {elapsedLabel}
@@ -316,7 +349,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
               {remainingLabel}
             </span>
           </div>
-          <Scrubber />
+          {settings.playerBarSliderPosition === 'below' && scrubber}
         </div>
 
         <div className="xe_player-bar__volume">
