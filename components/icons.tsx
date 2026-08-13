@@ -94,6 +94,18 @@ export const ChevronRightIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const SortAscendingIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
+  </Svg>
+);
+
+export const SortDescendingIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
+  </Svg>
+);
+
 export const NoteIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M287-167q-47-47-47-113t47-113q47-47 113-47 23 0 42.5 5.5T480-418v-422h240v160H560v400q0 66-47 113t-113 47q-66 0-113-47Z" />
