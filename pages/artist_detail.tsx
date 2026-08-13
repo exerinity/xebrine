@@ -11,7 +11,7 @@ import { slugify, toSlugParam } from '../utils/slug';
 import { useAlbumArt } from '../hooks/album_art';
 import { useScrollRestoration } from '../hooks/scroll_restoration';
 import { usePageTitle } from '../hooks/page_title';
-import { SortSelect, type SortOption } from '../components/sort_select';
+import { SortSelect, type SortDirection, type SortOption } from '../components/sort_select';
 import { AlbumCard } from './albums';
 
 type AlbumsView = 'list' | 'grid';
@@ -21,20 +21,32 @@ function loadView(): AlbumsView {
   return localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'list';
 }
 
-type AlbumsSort = 'year' | 'title' | 'title-desc' | 'tracks';
+type AlbumsSort = 'year' | 'title' | 'tracks';
 
 const SORT_OPTIONS: SortOption<AlbumsSort>[] = [
   { value: 'year', label: 'Year' },
-  { value: 'title', label: 'Title (A - Z)' },
-  { value: 'title-desc', label: 'Title (Z - A)' },
+  { value: 'title', label: 'Title' },
   { value: 'tracks', label: 'Tracks' }
 ];
 
 const SORT_KEY = 'xebrine.artistAlbumsSort';
 
-function loadSort(): AlbumsSort {
+function loadSort(): { sort: AlbumsSort; direction: SortDirection } {
   const raw = localStorage.getItem(SORT_KEY);
-  return SORT_OPTIONS.some((o) => o.value === raw) ? (raw as AlbumsSort) : 'year';
+  if (raw === 'title-desc') {
+    try {
+      localStorage.setItem(SORT_KEY, 'title');
+      localStorage.setItem(`${SORT_KEY}.direction`, 'desc');
+    } catch {
+      null;
+    }
+    return { sort: 'title', direction: 'desc' };
+  }
+  return {
+    sort: SORT_OPTIONS.some((o) => o.value === raw) ? (raw as AlbumsSort) : 'year',
+    direction:
+      localStorage.getItem(`${SORT_KEY}.direction`) === 'desc' || raw === 'tracks' ? 'desc' : 'asc'
+  };
 }
 
 function AlbumSection({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
@@ -72,7 +84,7 @@ export function ArtistDetailPage() {
   const { playNow, remoteLocked } = usePlayer();
   const scrollRef = useScrollRestoration();
   const [view, setView] = useState<AlbumsView>(loadView);
-  const [sort, setSort] = useState<AlbumsSort>(loadSort);
+  const [{ sort, direction }, setSortState] = useState(loadSort);
 
   const changeView = (value: AlbumsView) => {
     setView(value);
@@ -84,9 +96,18 @@ export function ArtistDetailPage() {
   };
 
   const changeSort = (value: AlbumsSort) => {
-    setSort(value);
+    setSortState((current) => ({ ...current, sort: value }));
     try {
       localStorage.setItem(SORT_KEY, value);
+    } catch {
+      null;
+    }
+  };
+
+  const changeDirection = (value: SortDirection) => {
+    setSortState((current) => ({ ...current, direction: value }));
+    try {
+      localStorage.setItem(`${SORT_KEY}.direction`, value);
     } catch {
       null;
     }
@@ -114,15 +135,14 @@ export function ArtistDetailPage() {
   }
 
   const albums = groupAlbums(artist.tracks).sort((a, b) => {
+    const factor = direction === 'asc' ? 1 : -1;
     switch (sort) {
       case 'title':
-        return a.album.localeCompare(b.album);
-      case 'title-desc':
-        return b.album.localeCompare(a.album);
+        return factor * a.album.localeCompare(b.album);
       case 'tracks':
-        return b.tracks.length - a.tracks.length || a.album.localeCompare(b.album);
+        return factor * (a.tracks.length - b.tracks.length || a.album.localeCompare(b.album));
       default:
-        return (a.year ?? 0) - (b.year ?? 0) || a.album.localeCompare(b.album);
+        return factor * ((a.year ?? 0) - (b.year ?? 0) || a.album.localeCompare(b.album));
     }
   });
   const shuffle = () =>
@@ -151,7 +171,13 @@ export function ArtistDetailPage() {
           <ShuffleIcon size={14} />
           Shuffle
         </button>
-        <SortSelect value={sort} onChange={changeSort} options={SORT_OPTIONS} />
+        <SortSelect
+          value={sort}
+          onChange={changeSort}
+          options={SORT_OPTIONS}
+          direction={direction}
+          onDirectionChange={changeDirection}
+        />
         <div className="xe_view-toggle">
           <button
             type="button"
