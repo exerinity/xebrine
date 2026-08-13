@@ -11,6 +11,18 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '10',
+    date: '2026-08-13',
+    notes: [
+      <>New settings category: <Link to="/settings/appearance">appearance</Link></>,
+      <>The player bar can <Link to="/settings/appearance">now be customized</Link> by making it compact,
+      where the slider goes, and whether its hoisted to the top or bottom of your screen</>,
+      'Lyric files can now be dropped into the lyrics page to apply them',
+      'Artists, albums, and library now can be sorted by ascending/descending',
+      'Toasts have been improved: they are now color-coded per type, and have a countdown bar to dismissal'
+    ],
+  },
+  {
     version: '9',
     date: '2026-08-08',
     notes: [
