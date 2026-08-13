@@ -23,6 +23,9 @@ import {
 } from '../utils/scrobble_rules';
 
 export type PlayerBarClickAction = 'copy' | 'open';
+export type PlayerBarPosition = 'top' | 'bottom';
+export type PlayerBarSliderPosition = 'above' | 'below';
+export type PlayerBarLayout = 'compact' | 'comfortable';
 
 export interface Settings {
   lrclibMode: LrclibMode;
@@ -37,6 +40,9 @@ export interface Settings {
   eqPreamp: number;
   eqIntensity: number;
   playerBarClickAction: PlayerBarClickAction;
+  playerBarPosition: PlayerBarPosition;
+  playerBarSliderPosition: PlayerBarSliderPosition;
+  playerBarLayout: PlayerBarLayout;
   fsBlur: number;
   fsSaturate: number;
   fsKenBurns: boolean;
@@ -75,6 +81,9 @@ export const DEFAULT_SETTINGS: Settings = {
   eqPreamp: EQ_PREAMP_DEFAULT,
   eqIntensity: EQ_INTENSITY_DEFAULT,
   playerBarClickAction: 'open',
+  playerBarPosition: 'bottom',
+  playerBarSliderPosition: 'below',
+  playerBarLayout: 'comfortable',
   fsBlur: 56,
   fsSaturate: 1.35,
   fsKenBurns: false,
@@ -107,6 +116,9 @@ function loadSettings(): Settings {
       searchEngine: isSearchEngineId(merged.searchEngine) ? merged.searchEngine : 'google',
       customSearchUrl: typeof merged.customSearchUrl === 'string' ? merged.customSearchUrl : '',
       pageKeyMode: isPageKeyMode(merged.pageKeyMode) ? merged.pageKeyMode : 'off',
+      playerBarPosition: merged.playerBarPosition === 'top' ? 'top' : 'bottom',
+      playerBarSliderPosition: merged.playerBarSliderPosition === 'above' ? 'above' : 'below',
+      playerBarLayout: merged.playerBarLayout === 'compact' ? 'compact' : 'comfortable',
       autoPlayLevel: isAutoPlayLevel(merged.autoPlayLevel) ? merged.autoPlayLevel : 1,
       scrobbleMode: merged.scrobbleMode === 'lax' ? 'lax' : 'strict',
       scrobbleIgnoreRules: normalizeScrobbleIgnoreRules(merged.scrobbleIgnoreRules)
