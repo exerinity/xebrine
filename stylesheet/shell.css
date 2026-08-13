@@ -15,6 +15,17 @@
     --accent-wash 600ms ease;
 }
 
+.xe_app--player-top {
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    'player player'
+    'xe_nav xe_main';
+}
+
+.xe_app--player-compact {
+  --player-height: 64px;
+}
+
 .xe_nav {
   grid-area: xe_nav;
   position: relative;
