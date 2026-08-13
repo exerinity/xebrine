@@ -20,6 +20,7 @@ type Status = 'idle' | 'waiting' | 'loading' | 'notfound' | 'error' | 'badfile';
 const AUTO_SEARCH_DELAY_MS = 2000;
 const NUDGE_SECONDS = 5;
 const HEADING_MAX = 25;
+const ACCEPTED_LYRICS_FILE = /\.(lrc|srt|vtt)$/i;
 
 const STATUS_TEXT: Record<Exclude<Status, 'idle'>, string> = {
   waiting: 'Holding off search for a moment...',
@@ -41,9 +42,16 @@ function lineHeading(text: string): string {
 interface LyricsPanelProps {
   showToolbar?: boolean;
   variant?: 'page' | 'fullscreen';
+  droppedFile?: File | null;
+  onDroppedFileHandled?(): void;
 }
 
-export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPanelProps) {
+export function LyricsPanel({
+  showToolbar = true,
+  variant = 'page',
+  droppedFile = null,
+  onDroppedFileHandled
+}: LyricsPanelProps) {
   const { current, seek, audioRef } = usePlayer();
   const { settings } = useSettings();
   const navigate = useNavigate();
@@ -172,8 +180,19 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
     userScrollUntil.current = Date.now() + 4000;
   };
 
-  const importFile = async (file: File) => {
+  const preferUserLyrics = useCallback(() => {
+    requestAbortRef.current?.abort();
+    requestAbortRef.current = null;
+    setStatus('idle');
+  }, []);
+
+  const importFile = useCallback(async (file: File) => {
+    if (!ACCEPTED_LYRICS_FILE.test(file.name)) {
+      toast.error("That's not an accepted lyrics file type");
+      return;
+    }
     if (!track) return;
+    preferUserLyrics();
     const parsed = parseLyricsFile(file.name, await file.text());
     if (!parsed) {
       setStatus('badfile');
@@ -182,10 +201,16 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
     setLyrics(parsed);
     setStatus('idle');
     await dbPut('lyrics', { trackId: track.id, lyrics: parsed } satisfies StoredLyrics);
-  };
+  }, [track, preferUserLyrics]);
+
+  useEffect(() => {
+    if (!droppedFile) return;
+    void importFile(droppedFile).finally(onDroppedFileHandled);
+  }, [droppedFile, importFile, onDroppedFileHandled]);
 
   const applyPaste = async () => {
     if (!track) return;
+    preferUserLyrics();
     const parsed = parseLyricsFile('', pasteText);
     if (!parsed) {
       setStatus('badfile');
@@ -303,7 +328,7 @@ export function LyricsPanel({ showToolbar = true, variant = 'page' }: LyricsPane
       <input
         ref={fileInputRef}
         type="file"
-        accept=".lrc,.srt,.vtt,text/plain"
+        accept=".lrc,.srt,.vtt"
         hidden
         onChange={(e) => {
           const file = e.target.files?.[0];
