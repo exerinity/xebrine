@@ -54,12 +54,13 @@ import {
   type SearchEngineId
 } from '../utils/search_engine';
 
-type SectionId = 'preferences' | 'library' | 'playback' | 'a11y' | 'toys' | 'share';
+type SectionId = 'preferences' | 'appearance' | 'library' | 'playback' | 'a11y' | 'toys' | 'share';
 
 const SEARCH_PREVIEW = '4x4=12 by deadmau5';
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'preferences', label: 'Main preferences' },
+  { id: 'appearance', label: 'Appearance' },
   { id: 'library', label: 'Library settings' },
   { id: 'playback', label: 'Playback settings' },
   { id: 'a11y', label: 'Accessibility' },
@@ -322,35 +323,6 @@ export function SettingsPage() {
               </section>
 
               <section className="xe_settings__section">
-                <h2>Theme</h2>
-                <div className="xe_settings__chip-row">
-                  {THEMES.map((themeOption) => {
-                    const active = settings.theme === themeOption.id;
-                    return (
-                      <button
-                        key={themeOption.id}
-                        type="button"
-                        className={`xe_theme-swatch${active ? ' xe_theme-swatch--active' : ''}${
-                          themeOption.id === 'adaptive' ? ' xe_theme-swatch--adaptive' : ''
-                        }`}
-                        aria-pressed={active}
-                        onClick={() => update({ theme: themeOption.id })}
-                      >
-                        <span
-                          className="xe_theme-swatch__dot"
-                          style={{
-                            background: `linear-gradient(135deg, ${themeOption.swatch[0]} 50%, ${themeOption.swatch[1]} 50%)`,
-                            borderColor: themeOption.swatch[2]
-                          }}
-                        />
-                        {themeOption.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-
-              <section className="xe_settings__section">
                 <h2>Context menu search engine/source</h2>
                 <select
                   className="xe_sort-select"
@@ -482,15 +454,112 @@ export function SettingsPage() {
                 </p>
               </section>
 
+            </>
+          )}
+
+          {active === 'appearance' && (
+            <>
+              <section className="xe_settings__section">
+                <h2>Theme</h2>
+                <div className="xe_settings__chip-row">
+                  {THEMES.map((themeOption) => {
+                    const activeTheme = settings.theme === themeOption.id;
+                    return (
+                      <button
+                        key={themeOption.id}
+                        type="button"
+                        className={`xe_theme-swatch${activeTheme ? ' xe_theme-swatch--active' : ''}${
+                          themeOption.id === 'adaptive' ? ' xe_theme-swatch--adaptive' : ''
+                        }`}
+                        aria-pressed={activeTheme}
+                        onClick={() => update({ theme: themeOption.id })}
+                      >
+                        <span
+                          className="xe_theme-swatch__dot"
+                          style={{
+                            background: `linear-gradient(135deg, ${themeOption.swatch[0]} 50%, ${themeOption.swatch[1]} 50%)`,
+                            borderColor: themeOption.swatch[2]
+                          }}
+                        />
+                        {themeOption.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>Player bar position</h2>
+                <label className="xe_settings__radio">
+                  <input
+                    type="radio"
+                    name="player-bar-position"
+                    checked={settings.playerBarPosition === 'bottom'}
+                    onChange={() => update({ playerBarPosition: 'bottom' })}
+                  />
+                  <span>Bottom</span>
+                </label>
+                <label className="xe_settings__radio">
+                  <input
+                    type="radio"
+                    name="player-bar-position"
+                    checked={settings.playerBarPosition === 'top'}
+                    onChange={() => update({ playerBarPosition: 'top' })}
+                  />
+                  <span>Top</span>
+                </label>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>The slider should go...</h2>
+                <label className="xe_settings__radio">
+                  <input
+                    type="radio"
+                    name="player-bar-slider-position"
+                    checked={settings.playerBarSliderPosition === 'above'}
+                    onChange={() => update({ playerBarSliderPosition: 'above' })}
+                  />
+                  <span>Above the controls</span>
+                </label>
+                <label className="xe_settings__radio">
+                  <input
+                    type="radio"
+                    name="player-bar-slider-position"
+                    checked={settings.playerBarSliderPosition === 'below'}
+                    onChange={() => update({ playerBarSliderPosition: 'below' })}
+                  />
+                  <span>Below the controls</span>
+                </label>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>Player bar layout</h2>
+                <label className="xe_settings__radio">
+                  <input
+                    type="radio"
+                    name="player-bar-layout"
+                    checked={settings.playerBarLayout === 'comfortable'}
+                    onChange={() => update({ playerBarLayout: 'comfortable' })}
+                  />
+                  <span>Comfortable</span>
+                </label>
+                <label className="xe_settings__radio">
+                  <input
+                    type="radio"
+                    name="player-bar-layout"
+                    checked={settings.playerBarLayout === 'compact'}
+                    onChange={() => update({ playerBarLayout: 'compact' })}
+                  />
+                  <span>Compact</span>
+                </label>
+              </section>
+
               <section className="xe_settings__section">
                 <h2>Fullscreen player background</h2>
-                <p className="xe_settings__hint">
-                  Right-click a slider to reset it to default
-                </p>
+                <p className="xe_settings__hint">Right-click a slider to reset it to default</p>
                 <div className="xe_settings__chip-row">
                   {FS_BG_PRESETS.map((preset) => {
-                    const activePreset =
-                      settings.fsBlur === preset.blur && settings.fsSaturate === preset.saturate;
+                    const activePreset = settings.fsBlur === preset.blur && settings.fsSaturate === preset.saturate;
                     return (
                       <button
                         key={preset.label}
@@ -506,60 +575,26 @@ export function SettingsPage() {
                 </div>
                 <h2>Blur</h2>
                 <div className="xe_settings__slider-row">
-                  <Slider
-                    value={settings.fsBlur}
-                    min={0}
-                    max={120}
-                    wheelStep={1}
-                    resetTo={56}
-                    onChange={(v) => update({ fsBlur: Math.round(v) })}
-                    ariaLabel="Fullscreen player background blur"
-                  />
+                  <Slider value={settings.fsBlur} min={0} max={120} wheelStep={1} resetTo={56} onChange={(v) => update({ fsBlur: Math.round(v) })} ariaLabel="Fullscreen player background blur" />
                   <span className="xe_settings__slider-value">{settings.fsBlur}px</span>
                 </div>
                 <h2>Saturation</h2>
                 <div className="xe_settings__slider-row">
-                  <Slider
-                    value={settings.fsSaturate}
-                    min={0}
-                    max={3}
-                    wheelStep={0.05}
-                    resetTo={1.35}
-                    onChange={(v) => update({ fsSaturate: Math.round(v * 100) / 100 })}
-                    ariaLabel="Fullscreen player background saturation"
-                  />
+                  <Slider value={settings.fsSaturate} min={0} max={3} wheelStep={0.05} resetTo={1.35} onChange={(v) => update({ fsSaturate: Math.round(v * 100) / 100 })} ariaLabel="Fullscreen player background saturation" />
                   <span className="xe_settings__slider-value">{settings.fsSaturate.toFixed(2)}x</span>
                 </div>
                 <h2>Ken Burns</h2>
                 <label className="xe_settings__radio">
-                  <input
-                    type="checkbox"
-                    checked={settings.fsKenBurns}
-                    onChange={(e) => update({ fsKenBurns: e.target.checked })}
-                  />
+                  <input type="checkbox" checked={settings.fsKenBurns} onChange={(e) => update({ fsKenBurns: e.target.checked })} />
                   <span>Slowly zoom and pan the background</span>
                 </label>
                 {settings.fsKenBurns && (
                   <div className="xe_settings__slider-row">
-                    <Slider
-                      value={settings.fsKenBurnsIntensity}
-                      min={KEN_BURNS_MIN_INTENSITY}
-                      max={KEN_BURNS_MAX_INTENSITY}
-                      wheelStep={0.1}
-                      resetTo={KEN_BURNS_DEFAULT_INTENSITY}
-                      onChange={(v) => update({ fsKenBurnsIntensity: Math.round(v * 10) / 10 })}
-                      ariaLabel="Ken Burns speed"
-                    />
-                    <span className="xe_settings__slider-value">
-                      {settings.fsKenBurnsIntensity.toFixed(1)}x
-                    </span>
+                    <Slider value={settings.fsKenBurnsIntensity} min={KEN_BURNS_MIN_INTENSITY} max={KEN_BURNS_MAX_INTENSITY} wheelStep={0.1} resetTo={KEN_BURNS_DEFAULT_INTENSITY} onChange={(v) => update({ fsKenBurnsIntensity: Math.round(v * 10) / 10 })} ariaLabel="Ken Burns speed" />
+                    <span className="xe_settings__slider-value">{settings.fsKenBurnsIntensity.toFixed(1)}x</span>
                   </div>
                 )}
-                <p className="xe_settings__hint">
-                  {settings.reducedMotion
-                    ? 'Reduced motion is on...'
-                    : 'Higher is faster'}
-                </p>
+                <p className="xe_settings__hint">{settings.reducedMotion ? 'Reduced motion is on...' : 'Higher is faster'}</p>
               </section>
             </>
           )}
