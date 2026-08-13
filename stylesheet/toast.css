@@ -11,6 +11,7 @@
 }
 
 .xe_toast {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -21,6 +22,7 @@
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
   color: var(--text);
   pointer-events: auto;
+  overflow: hidden;
   animation: toast-in 200ms ease;
 }
 
@@ -74,7 +76,34 @@
   color: var(--text);
 }
 
+.xe_toast__timeout {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.8;
+  transform-origin: left;
+  animation: xe_toast-timeout var(--toast-duration) linear forwards;
+}
+
+.xe_toast--paused .xe_toast__timeout {
+  animation-play-state: paused;
+}
+
+@keyframes xe_toast-timeout {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
 .xe_toast--success {
+  background: color-mix(in srgb, #35d08a 22%, var(--panel));
+  border-color: color-mix(in srgb, #35d08a 55%, var(--border));
   color: #35d08a;
 }
 
@@ -83,6 +112,8 @@
 }
 
 .xe_toast--error {
+  background: color-mix(in srgb, var(--danger) 22%, var(--panel));
+  border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
   color: var(--danger);
 }
 
@@ -91,6 +122,8 @@
 }
 
 .xe_toast--warning {
+  background: color-mix(in srgb, #e0b32e 22%, var(--panel));
+  border-color: color-mix(in srgb, #e0b32e 55%, var(--border));
   color: #e0b32e;
 }
 
@@ -99,7 +132,9 @@
 }
 
 .xe_toast--info {
-  color: var(--accent-text);
+  background: color-mix(in srgb, #4da3ff 22%, var(--panel));
+  border-color: color-mix(in srgb, #4da3ff 55%, var(--border));
+  color: #4da3ff;
 }
 
 .xe_toast--info .xe_toast__message {
