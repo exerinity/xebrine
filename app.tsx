@@ -97,7 +97,12 @@ function Shell() {
   }, [fullscreenOpen, current]);
 
   return (
-    <div className="xe_app" style={accentStyle}>
+    <div
+      className={`xe_app${settings.playerBarPosition === 'top' ? ' xe_app--player-top' : ''}${
+        settings.playerBarLayout === 'compact' ? ' xe_app--player-compact' : ''
+      }`}
+      style={accentStyle}
+    >
       <Sidebar onOpenFullscreen={() => setFullscreenOpen(true)} />
       <main className="xe_main">
         <Routes>
