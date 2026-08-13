@@ -52,6 +52,33 @@
   border-color: var(--accent-bright);
 }
 
+.xe_sort-control {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.xe_sort-direction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  padding: 0;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+}
+
+.xe_sort-direction:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.xe_sort-direction:focus-visible {
+  outline: none;
+  border-color: var(--accent-bright);
+}
+
 .xe_btn {
   display: inline-flex;
   align-items: center;
