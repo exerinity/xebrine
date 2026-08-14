@@ -25,7 +25,7 @@ const CHUNK_RULES: [RegExp, string][] = [
   [/utils\/remote_protocol/, 'context'],
 
   [/components\/(fs_player|player_bar|scrubber|slider|equalizer|visualizer|auto_mix_drawer|queue_list|sleep_timer)/, 'ui-player'],
-  [/components\/(modal|cover_modal|update_modal|welcome_modal|scan_drawer|context_menu)/, 'ui-modals'],
+  [/components\/(modal|cover_modal|update_modal|scan_drawer|context_menu)/, 'ui-modals'],
   [/components\/(track_list|sort_select|skeletons|explicit_badge)/, 'ui-tracklist'],
   [/components\/lyrics/, 'ui-lyrics'],
   [/components\/(sidebar|icons|toast_container|spinner|scrolling_text)/, 'ui-shell'],
