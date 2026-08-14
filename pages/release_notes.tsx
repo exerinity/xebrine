@@ -14,6 +14,12 @@ const RELEASES: Release[] = [
     version: '10',
     date: '2026-08-13',
     notes: [
+      <>
+        Added a setup wizard instead of a bland modal for first run{' '}
+        <Link to="/i/flow/setup" onClick={() => localStorage.removeItem('hai')}>
+          (trigger)
+        </Link>
+      </>,
       <>New settings category: <Link to="/settings/appearance">appearance</Link></>,
       <>The player bar can <Link to="/settings/appearance">now be customized</Link> by making it compact,
       where the slider goes, and whether its hoisted to the top or bottom of your screen</>,
