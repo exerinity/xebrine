@@ -93,6 +93,7 @@ export function HomePage() {
   const { tracks, permissionNeeded, supported, addFolder, restoreAccess } = useLibrary();
   const { playNow, remoteLocked } = usePlayer();
   const navigate = useNavigate();
+  const needsSetup = !localStorage.getItem('hai');
 
   const [randomTrack, setRandomTrack] = useState<TrackMeta | null>(null);
   useEffect(() => {
@@ -129,6 +130,19 @@ export function HomePage() {
       <div className="xe_home-greeting">
         <h1 className="xe_page__title">{getGreeting()}</h1>
       </div>
+
+      {needsSetup && (
+        <div className="xe_banner xe_home-setup-banner">
+          <span>Welcome to Xebrine! Would you like to go through a setup flow?</span>
+          <button
+            type="button"
+            className="xe_btn xe_btn--accent"
+            onClick={() => navigate('/i/flow/setup')}
+          >
+            Start setup
+          </button>
+        </div>
+      )}
 
       {permissionNeeded && (
         <div className="xe_banner">
