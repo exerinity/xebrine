@@ -1,4 +1,12 @@
-import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+  type ReactNode
+} from 'react';
 import { CloseIcon, LogoIcon } from './icons';
 import { clamp } from '../utils/format';
 
@@ -10,6 +18,7 @@ interface ModalProps {
 }
 
 export function Modal({ title = 'Xebrine', fullscreen = false, onClose, children }: ModalProps) {
+  const titleId = useId();
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const posRef = useRef(pos);
   posRef.current = pos;
@@ -24,7 +33,7 @@ export function Modal({ title = 'Xebrine', fullscreen = false, onClose, children
   }, [onClose]);
 
   const startDrag = (e: PointerEvent<HTMLDivElement>) => {
-    if (fullscreen || e.button !== 0) return;
+    if (fullscreen || e.button !== 0 || (e.target as HTMLElement).closest('button')) return;
     e.preventDefault();
     const startX = e.clientX;
     const startY = e.clientY;
@@ -61,13 +70,19 @@ export function Modal({ title = 'Xebrine', fullscreen = false, onClose, children
         className={`xe_modal${fullscreen ? ' xe_modal--fullscreen' : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
-        style={fullscreen ? undefined : { transform: `translate(${pos.x}px, ${pos.y}px)` }}
+        aria-labelledby={titleId}
+        style={
+          fullscreen
+            ? undefined
+            : ({ '--xe-modal-x': `${pos.x}px`, '--xe-modal-y': `${pos.y}px` } as CSSProperties)
+        }
         onClick={(e) => e.stopPropagation()}
       >
         <div className="xe_modal__header" onPointerDown={startDrag}>
-          <h2 className="xe_modal__title">
-            <LogoIcon size={14} />
+          <h2 id={titleId} className="xe_modal__title">
+            <span className="xe_modal__title-icon">
+              <LogoIcon size={14} />
+            </span>
             <span className="xe_modal__title-text">{title}</span>
           </h2>
           <button type="button" className="xe_icon-btn" onClick={onClose} title="Close">
