@@ -62,26 +62,59 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(3, 0, 3, 0.6);
-  backdrop-filter: blur(6px);
-  animation: cover-modal-in 160ms ease;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 38%, var(--accent-wash), transparent 34%),
+    color-mix(in srgb, var(--bg) 10%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(0.82);
+  backdrop-filter: blur(16px) saturate(0.82);
+  animation: xe_modal-overlay-in 220ms ease-out;
 }
 
 .xe_modal-overlay--opaque {
   background: var(--bg);
+  -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 
 .xe_modal {
+  --xe-modal-x: 0px;
+  --xe-modal-y: 0px;
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   width: min(90vw, 480px);
   max-height: 80vh;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--panel);
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--accent-bright) 34%, var(--border));
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--panel-2) 38%, transparent), transparent 52%),
+    color-mix(in srgb, var(--panel) 96%, var(--accent) 4%);
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, 0.58),
+    0 8px 28px rgba(0, 0, 0, 0.28),
+    0 0 0 1px color-mix(in srgb, var(--text) 4%, transparent) inset;
   overflow: hidden;
+  transform: translate(var(--xe-modal-x), var(--xe-modal-y));
+  transform-origin: 50% 42%;
+  animation: xe_modal-in 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.xe_modal::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: -80px;
+  left: 12%;
+  width: 76%;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--accent-glow);
+  opacity: 0.2;
+  filter: blur(36px);
+  pointer-events: none;
 }
 
 .xe_modal--fullscreen {
@@ -90,15 +123,21 @@
   max-height: none;
   border-radius: 0;
   border: none;
+  transform: none;
+  animation: xe_modal-fullscreen-in 220ms ease-out;
 }
 
 .xe_modal__header {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 8px 10px 8px 14px;
-  border-bottom: 1px solid var(--border);
+  min-height: 52px;
+  padding: 8px 10px 8px 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  background: color-mix(in srgb, var(--panel-2) 32%, transparent);
   cursor: move;
 }
 
@@ -107,43 +146,101 @@
 }
 
 .xe_modal__header .xe_icon-btn {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  color: var(--text-dim);
+}
+
+.xe_modal__header .xe_icon-btn:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 9%, transparent);
 }
 
 .xe_modal__title {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 9px;
+  min-width: 0;
   margin: 0;
   font-size: 15px;
-  line-height: 1;
+  font-weight: 650;
+  line-height: 1.25;
   white-space: nowrap;
 }
 
-.xe_modal__title svg {
+.xe_modal__title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  border: 1px solid color-mix(in srgb, var(--accent-bright) 32%, transparent);
+  border-radius: 8px;
+  background: var(--accent-soft);
   color: var(--accent-text);
-  transform: translateY(5px);
 }
 
 .xe_modal__title-text {
-  transform: translateY(5px);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .xe_modal__body {
-  padding: 16px;
+  position: relative;
+  z-index: 1;
+  padding: 20px;
   overflow: auto;
 }
 
 .xe_modal__actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  padding-top: 14px;
+  gap: 10px;
+  padding-top: 20px;
 }
 
-.xe_update-modal__text,
-.xe_welcome-modal__text {
+@keyframes xe_modal-overlay-in {
+  from {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0) saturate(1);
+    backdrop-filter: blur(0) saturate(1);
+  }
+  to {
+    opacity: 1;
+    -webkit-backdrop-filter: blur(16px) saturate(0.82);
+    backdrop-filter: blur(16px) saturate(0.82);
+  }
+}
+
+@keyframes xe_modal-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate(var(--xe-modal-x), calc(var(--xe-modal-y) + 18px)) scale(0.95);
+  }
+  58% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(var(--xe-modal-x), var(--xe-modal-y)) scale(1);
+  }
+}
+
+@keyframes xe_modal-fullscreen-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.xe_update-modal__text {
   margin: 0;
 }
 
