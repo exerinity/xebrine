@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { SettingsProvider } from './context/settings_context';
+import { SetupFlowProvider } from './context/setup_flow_context';
 import { LibraryProvider } from './context/library_context';
 import { PlayerProvider, usePlayer } from './context/player_context';
 import { RemoteProvider } from './context/remote_context';
@@ -30,12 +31,13 @@ import { AboutPage } from './pages/about';
 import { ReleaseNotesPage } from './pages/release_notes';
 import { LastfmPage } from './pages/lastfm';
 import { RemotePage } from './pages/remote';
+import { SetupFlowPage } from './pages/setup_flow';
 import { Sidebar } from './components/sidebar';
 import { PlayerBar } from './components/player_bar';
 import { FullscreenPlayer } from './components/fs_player';
 import { ToastContainer } from './components/toast_container';
 import { UpdateModal } from './components/update_modal';
-import { WelcomeModal } from './components/welcome_modal';
+import { SetupLeaveModal } from './components/setup_leave_modal';
 
 function MediaBridge() {
   useMediaSession();
@@ -121,6 +123,7 @@ function Shell() {
           <Route path="/settings/scrobbling" element={<Navigate to="/i/lastfm" replace />} />
           <Route path="/settings/:section" element={<SettingsPage />} />
           <Route path="/i" element={<Navigate to="/i/info" replace />} />
+          <Route path="/i/flow/setup" element={<SetupFlowPage />} />
           <Route path="/i/:section" element={<AboutPage />} />
           <Route path="/i/release_notes" element={<ReleaseNotesPage />} />
           <Route path="/i/lastfm" element={<LastfmPage />} />
@@ -141,21 +144,23 @@ function Shell() {
       />
       <ToastContainer />
       <UpdateModal />
-      <WelcomeModal />
     </div>
   );
 }
 
 export default function App() {
   return (
-    <SettingsProvider>
-      <LibraryProvider>
-        <PlayerProvider>
-          <RemoteProvider>
-            <Shell />
-          </RemoteProvider>
-        </PlayerProvider>
-      </LibraryProvider>
-    </SettingsProvider>
+    <SetupFlowProvider>
+      <SettingsProvider>
+        <LibraryProvider>
+          <PlayerProvider>
+            <RemoteProvider>
+              <Shell />
+            </RemoteProvider>
+          </PlayerProvider>
+        </LibraryProvider>
+      </SettingsProvider>
+      <SetupLeaveModal />
+    </SetupFlowProvider>
   );
 }
