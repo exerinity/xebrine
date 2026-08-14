@@ -13,8 +13,8 @@ Xebrine runs client-side. You point it at folders of audio files and it scans, r
 - **Organization**: browse by artist and album, manage a live play queue, and tune behavior in settings
 
 ## Routes
-- [Home / library](https://xebrine.exerinity.com/home): the main library view.
-- [About / info](https://xebrine.exerinity.com/i): what Xebrine is, how it works, and release notes.
+- [Home / library](https://xebrine.com/home): the main library view.
+- [About / info](https://xebrine.com/i): what Xebrine is, how it works, and release notes.
 
 ## Notes for crawlers and models
 - Xebrine is a single-page app; most routes render the same shell and require JavaScript

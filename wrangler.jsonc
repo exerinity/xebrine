@@ -2,7 +2,7 @@
   "name": "xebrine",
   "main": "worker/index.ts",
   "compatibility_date": "2026-07-29",
-  "routes": [{ "pattern": "xebrine.exerinity.com", "custom_domain": true }],
+  "routes": [{ "pattern": "xebrine.com", "custom_domain": true }],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
