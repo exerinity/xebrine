@@ -9,7 +9,7 @@ fn outlined_glyph(font: &FontRef, size_px: f32) -> OutlinedGlyph {
     font.outline_glyph(glyph).expect("font has no outline for glyph")
 }
 
-pub fn render_glyph(font: &FontRef, target_box: u32) -> RgbaImage {
+pub fn render_glyph(font: &FontRef, target_box: u32, color: Rgba<u8>) -> RgbaImage {
     let probe = outlined_glyph(font, 1000.0);
     let bounds = probe.px_bounds();
     let scale = target_box as f32 / bounds.width().max(bounds.height());
@@ -20,8 +20,8 @@ pub fn render_glyph(font: &FontRef, target_box: u32) -> RgbaImage {
     let h = bounds.height().ceil().max(1.0) as u32;
     let mut img = RgbaImage::new(w, h);
     glyph.draw(|x, y, coverage| {
-        let alpha = (coverage * 255.0).round().clamp(0.0, 255.0) as u8;
-        img.put_pixel(x, y, Rgba([255, 255, 255, alpha]));
+        let alpha = (coverage * color[3] as f32).round().clamp(0.0, 255.0) as u8;
+        img.put_pixel(x, y, Rgba([color[0], color[1], color[2], alpha]));
     });
     img
 }

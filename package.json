@@ -11,7 +11,9 @@
     "preview": "vite preview",
     "deploy": "npm run build && wrangler deploy",
     "icons": "cargo run --quiet --release --manifest-path tools/icon-gen/Cargo.toml",
-    "icons:transparent": "cargo run --quiet --release --manifest-path tools/icon-gen/Cargo.toml -- --transparent"
+    "icons:transparent": "cargo run --quiet --release --manifest-path tools/icon-gen/Cargo.toml -- --transparent",
+    "icons:blank": "cargo run --quiet --release --manifest-path tools/icon-gen/Cargo.toml -- --blank-background",
+    "icons:white": "cargo run --quiet --release --manifest-path tools/icon-gen/Cargo.toml -- --white-background"
   },
   "dependencies": {
     "mespeak": "^2.0.2",
