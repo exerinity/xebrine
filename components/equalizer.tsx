@@ -10,26 +10,26 @@ import {
   EQ_PREAMP_MAX,
   EQ_PREAMP_DEFAULT,
   EQ_INTENSITY_DEFAULT,
-  eqPeakGainDb,
-  formatDb,
-  matchPreset,
-  formatBandFreq,
-  normalizeBands,
-  normalizeIntensity,
-  normalizePreamp,
-  suggestedPreamp
+  eq_peak_gain_db,
+  format_db,
+  match_preset,
+  format_band_frequency,
+  normalize_bands,
+  normalize_intensity,
+  normalize_preamp,
+  suggested_preamp
 } from '../audio/eq';
 
 export function Equalizer() {
   const { settings, update } = useSettings();
-  const bands = normalizeBands(settings.eqBands);
-  const preamp = normalizePreamp(settings.eqPreamp);
-  const intensity = normalizeIntensity(settings.eqIntensity);
-  const preset = matchPreset(bands);
+  const bands = normalize_bands(settings.eqBands);
+  const preamp = normalize_preamp(settings.eqPreamp);
+  const intensity = normalize_intensity(settings.eqIntensity);
+  const preset = match_preset(bands);
 
-  const peak = eqPeakGainDb(bands, intensity);
+  const peak = eq_peak_gain_db(bands, intensity);
   const headroom = peak + preamp;
-  const suggested = suggestedPreamp(bands, intensity);
+  const suggested = suggested_preamp(bands, intensity);
   const hot = headroom > 0.05;
 
   const setBand = (index: number, value: number) => {
@@ -43,7 +43,7 @@ export function Equalizer() {
       update({ eqBands: [...EQ_FLAT], eqPreamp: EQ_PREAMP_DEFAULT });
     } else if (EQ_PRESETS[name]) {
       const next = [...EQ_PRESETS[name]];
-      update({ eqBands: next, eqPreamp: suggestedPreamp(next, intensity), eqEnabled: true });
+      update({ eqBands: next, eqPreamp: suggested_preamp(next, intensity), eqEnabled: true });
     }
   };
 
@@ -103,7 +103,7 @@ export function Equalizer() {
               onChange={(v) => update({ eqPreamp: Math.round(v * 2) / 2 })}
               ariaLabel="Equalizer preamp"
             />
-            <span className="xe_settings__slider-value">{formatDb(preamp)} dB</span>
+            <span className="xe_settings__slider-value">{format_db(preamp)} dB</span>
           </div>
         </div>
         <div className="xe_eq__level">
@@ -125,7 +125,7 @@ export function Equalizer() {
 
       <div className="xe_eq__headroom">
         <span className={`xe_eq__headroom-value${hot ? ' xe_eq__headroom-value--hot' : ''}`}>
-          Peak output {formatDb(headroom)} dB
+          Peak output {format_db(headroom)} dB
         </span>
         <button
           type="button"
@@ -149,10 +149,10 @@ export function Equalizer() {
               step={1}
               value={bands[i]}
               onChange={(e) => setBand(i, Number(e.target.value))}
-              aria-label={`${formatBandFreq(freq)} Hz band gain`}
+              aria-label={`${format_band_frequency(freq)} Hz band gain`}
               title={`${freq} Hz`}
             />
-            <span className="xe_eq__freq">{formatBandFreq(freq)}</span>
+            <span className="xe_eq__freq">{format_band_frequency(freq)}</span>
           </div>
         ))}
       </div>
