@@ -1,15 +1,15 @@
-import { analyzeSamples } from './bpm_dsp';
+import { analyze_samples } from './dsp';
 
 interface AnalyzeRequest {
   id: number;
   mono: Float32Array;
-  sampleRate: number;
+  sample_rate: number;
 }
 
-self.onmessage = (e: MessageEvent<AnalyzeRequest>) => {
-  const { id, mono, sampleRate } = e.data;
+self.onmessage = (event: MessageEvent<AnalyzeRequest>) => {
+  const { id, mono, sample_rate } = event.data;
   try {
-    const { bpm, confidence, beats } = analyzeSamples(mono, sampleRate);
+    const { bpm, confidence, beats } = analyze_samples(mono, sample_rate);
     (self as unknown as Worker).postMessage({ id, ok: true, bpm, confidence, beats });
   } catch (err) {
     (self as unknown as Worker).postMessage({
