@@ -5,9 +5,9 @@ import {
   EQ_FLAT,
   EQ_INTENSITY_DEFAULT,
   EQ_PREAMP_DEFAULT,
-  normalizeBands,
-  normalizeIntensity,
-  normalizePreamp
+  normalize_bands,
+  normalize_intensity,
+  normalize_preamp
 } from '../audio/eq';
 import { KEN_BURNS_DEFAULT_INTENSITY } from '../hooks/ken_burns';
 import type { ArtistPronunciation } from '../utils/pronunciation';
@@ -108,9 +108,9 @@ function loadSettings(): Settings {
     const merged = raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS;
     return {
       ...merged,
-      eqBands: normalizeBands(merged.eqBands),
-      eqPreamp: normalizePreamp(merged.eqPreamp),
-      eqIntensity: normalizeIntensity(merged.eqIntensity),
+      eqBands: normalize_bands(merged.eqBands),
+      eqPreamp: normalize_preamp(merged.eqPreamp),
+      eqIntensity: normalize_intensity(merged.eqIntensity),
       ignoreRules: normalizeIgnoreRules(merged.ignoreRules),
       theme: isThemeId(merged.theme) ? merged.theme : 'adaptive',
       searchEngine: isSearchEngineId(merged.searchEngine) ? merged.searchEngine : 'google',
