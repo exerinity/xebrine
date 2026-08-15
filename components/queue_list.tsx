@@ -19,7 +19,7 @@ interface MenuState {
 }
 
 export function QueueList({ query = '' }: { query?: string }) {
-  const { queue, position, isPlaying, jumpTo, removeAt, move, enqueueEnd } = usePlayer();
+  const { queue, position, isPlaying, jumpTo, removeAt, removeAbove, removeBelow, move, enqueueEnd } = usePlayer();
   const { listRef, dragging, handleProps, itemStyle } = useDragReorder(move);
   const navigate = useNavigate();
   const [menu, setMenu] = useState<MenuState | null>(null);
@@ -65,6 +65,8 @@ export function QueueList({ query = '' }: { query?: string }) {
     items.push(
       { label: 'Play now', heading: 'Queue...', onSelect: () => jumpTo(m.index) },
       { label: 'Remove', onSelect: () => removeAt(m.index) },
+      { label: 'Remove all tracks above', onSelect: () => removeAbove(m.index) },
+      { label: 'Remove all tracks below', onSelect: () => removeBelow(m.index) },
       { label: 'Go to album', heading: 'Navigation...', onSelect: () => goToAlbum(m.track) },
       { label: 'Go to artist', onSelect: () => goToArtist(m.track) },
       { label: 'Re-add', separatorBefore: true, onSelect: () => enqueueEnd([m.track]) }

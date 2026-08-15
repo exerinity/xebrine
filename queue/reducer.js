@@ -12,6 +12,8 @@
  *   | { type: 'ENQUEUE_NEXT', items: import('../types').QueueItem[] }
  *   | { type: 'ENQUEUE_END', items: import('../types').QueueItem[] }
  *   | { type: 'REMOVE', index: number }
+ *   | { type: 'REMOVE_ABOVE', index: number }
+ *   | { type: 'REMOVE_BELOW', index: number }
  *   | { type: 'MOVE', from: number, to: number }
  *   | { type: 'JUMP', index: number }
  *   | { type: 'ADVANCE', delta: number }
@@ -69,6 +71,26 @@ export function queueReducer(state, action) {
       if (action.index < position) position--;
       if (position >= items.length) position = items.length - 1;
       return { ...state, items, position };
+    }
+
+    case 'REMOVE_ABOVE': {
+      const index = Math.max(0, Math.min(action.index, state.items.length));
+      const items = state.items.slice(index);
+      return {
+        ...state,
+        items,
+        position: items.length === 0 ? -1 : Math.max(0, state.position - index)
+      };
+    }
+
+    case 'REMOVE_BELOW': {
+      const index = Math.max(-1, Math.min(action.index, state.items.length - 1));
+      const items = state.items.slice(0, index + 1);
+      return {
+        ...state,
+        items,
+        position: items.length === 0 ? -1 : Math.min(state.position, items.length - 1)
+      };
     }
 
     case 'MOVE': {

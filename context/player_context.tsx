@@ -61,6 +61,8 @@ export interface PlayerContextValue {
   enqueueNext(tracks: TrackMeta[]): void;
   enqueueEnd(tracks: TrackMeta[]): void;
   removeAt(index: number): void;
+  removeAbove(index: number): void;
+  removeBelow(index: number): void;
   move(from: number, to: number): void;
   jumpTo(index: number): void;
   next(): void;
@@ -843,6 +845,24 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     [audio]
   );
 
+  const removeAbove = useCallback(
+    (index: number) => {
+      if (remoteLockedRef.current || index <= 0) return;
+      if (stateRef.current.position < index) autoplayRef.current = !audio.paused;
+      dispatch({ type: 'REMOVE_ABOVE', index });
+    },
+    [audio]
+  );
+
+  const removeBelow = useCallback(
+    (index: number) => {
+      if (remoteLockedRef.current || index >= stateRef.current.items.length - 1) return;
+      if (stateRef.current.position > index) autoplayRef.current = !audio.paused;
+      dispatch({ type: 'REMOVE_BELOW', index });
+    },
+    [audio]
+  );
+
   const move = useCallback((from: number, to: number) => {
     if (remoteLockedRef.current) return;
     dispatch({ type: 'MOVE', from, to });
@@ -1057,6 +1077,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       enqueueNext,
       enqueueEnd,
       removeAt,
+      removeAbove,
+      removeBelow,
       move,
       jumpTo,
       next,
@@ -1099,6 +1121,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       enqueueNext,
       enqueueEnd,
       removeAt,
+      removeAbove,
+      removeBelow,
       move,
       jumpTo,
       next,
