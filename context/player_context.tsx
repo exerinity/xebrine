@@ -20,27 +20,27 @@ import { useLibrary } from './library_context';
 import { useSettings } from './settings_context';
 import { clamp } from '../utils/format';
 import {
-  analyzeTrack,
-  classifyBpmDiff,
-  planCrossfade,
-  equalPowerFadeCurves,
+  analyze_track,
+  classify_bpm_diff,
+  plan_crossfade,
+  equal_power_fade_curves,
   type TrackAnalysis
 } from '../audio/bpm';
 import { toast } from '../utils/toast';
 import {
   EQ_BANDS,
   EQ_Q,
-  dbToGain,
-  normalizeBands,
-  normalizeIntensity,
-  normalizePreamp
+  db_to_gain,
+  normalize_bands,
+  normalize_intensity,
+  normalize_preamp
 } from '../audio/eq';
 
 export type RepeatMode = 'off' | 'all' | 'one';
 export type AutoMixPhase = 'idle' | 'analyzing-current' | 'analyzing-next' | 'mixing' | 'switching';
 export type AutoMixColor = 'green' | 'orange' | 'red' | null;
 
-const FADE_CURVES = equalPowerFadeCurves(64);
+const FADE_CURVES = equal_power_fade_curves(64);
 const MEDIA_LATENCY = 0.0;
 
 export interface PlayerContextValue {
@@ -428,7 +428,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       const lead = 0.06;
       const startWhen = ctx.currentTime + lead;
       const outgoingPosAtStart = audio.currentTime + lead - MEDIA_LATENCY;
-      const plan = planCrossfade(
+      const plan = plan_crossfade(
         mix.outgoing,
         mix.incoming,
         outgoingPosAtStart,
@@ -438,19 +438,19 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
       const source = ctx.createBufferSource();
       source.buffer = audioBuffer;
-      source.playbackRate.value = plan.playbackRate;
+      source.playbackRate.value = plan.playback_rate;
       source.connect(mixFadeGain);
       mixSourceRef.current = source;
       mixStartCtxTimeRef.current = startWhen;
-      mixStartOffsetRef.current = plan.incomingOffset;
-      mixRateRef.current = plan.playbackRate;
-      source.start(startWhen, plan.incomingOffset);
+      mixStartOffsetRef.current = plan.incoming_offset;
+      mixRateRef.current = plan.playback_rate;
+      source.start(startWhen, plan.incoming_offset);
 
       const fadeGainA = fadeGainARef.current!;
       fadeGainA.gain.cancelScheduledValues(startWhen);
-      fadeGainA.gain.setValueCurveAtTime(FADE_CURVES.fadeOut, startWhen, plan.fadeSeconds);
+      fadeGainA.gain.setValueCurveAtTime(FADE_CURVES.fade_out, startWhen, plan.fade_seconds);
       mixFadeGain.gain.cancelScheduledValues(startWhen);
-      mixFadeGain.gain.setValueCurveAtTime(FADE_CURVES.fadeIn, startWhen, plan.fadeSeconds);
+      mixFadeGain.gain.setValueCurveAtTime(FADE_CURVES.fade_in, startWhen, plan.fade_seconds);
     } catch (err) {
       console.error('Auto mix crossfade failed', err);
       crossfadeActiveRef.current = false;
@@ -658,9 +658,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [sleepTimerEndAt, audio]);
 
   useEffect(() => {
-    const bands = normalizeBands(settings.eqBands);
-    const intensity = normalizeIntensity(settings.eqIntensity);
-    const preampDb = normalizePreamp(settings.eqPreamp);
+    const bands = normalize_bands(settings.eqBands);
+    const intensity = normalize_intensity(settings.eqIntensity);
+    const preampDb = normalize_preamp(settings.eqPreamp);
     const active = settings.eqEnabled && (bands.some((v) => v !== 0) || preampDb !== 0);
     if (!active && !eqFiltersRef.current) return;
     ensureAudioGraph();
@@ -671,7 +671,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       filter.gain.setTargetAtTime(target, ctx.currentTime, 0.02);
     });
     eqPreampRef.current!.gain.setTargetAtTime(
-      active ? dbToGain(preampDb) : 1,
+      active ? db_to_gain(preampDb) : 1,
       ctx.currentTime,
       0.02
     );
@@ -783,15 +783,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       try {
         setAutoMixPhase('analyzing-current');
         const curFile = await getFileRef.current(current.track);
-        const curAnalysis = await analyzeTrack(current.track.id, curFile);
+        const curAnalysis = await analyze_track(current.track.id, curFile);
         if (cancelled) return;
 
         setAutoMixPhase('analyzing-next');
         const nextFile = await getFileRef.current(nextItem.track);
-        const nextAnalysis = await analyzeTrack(nextItem.track.id, nextFile);
+        const nextAnalysis = await analyze_track(nextItem.track.id, nextFile);
         if (cancelled) return;
 
-        const status = classifyBpmDiff(curAnalysis.bpm, nextAnalysis.bpm);
+        const status = classify_bpm_diff(curAnalysis.bpm, nextAnalysis.bpm);
         pendingMixRef.current = {
           key: nextItem.key,
           outgoing: curAnalysis,
