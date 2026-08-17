@@ -8,6 +8,18 @@
   margin: 0 0 12px;
 }
 
+.xe_settings__category-heading {
+  margin: 34px 0 0;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--accent-text);
+  font-size: 18px;
+}
+
+.xe_split__head + .xe_settings__category-heading {
+  margin-top: 0;
+}
+
 .xe_settings__radio {
   display: flex;
   gap: 10px;

@@ -54,7 +54,7 @@ import {
   type SearchEngineId
 } from '../utils/search_engine';
 
-type SectionId = 'preferences' | 'appearance' | 'library' | 'playback' | 'a11y' | 'toys' | 'share';
+type SectionId = 'all' | 'preferences' | 'appearance' | 'library' | 'playback' | 'a11y' | 'toys' | 'share';
 
 const SEARCH_PREVIEW = '4x4=12 by deadmau5';
 
@@ -65,7 +65,8 @@ const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'playback', label: 'Playback settings' },
   { id: 'a11y', label: 'Accessibility' },
   { id: 'toys', label: 'Toys' },
-  { id: 'share', label: 'Share settings' }
+  { id: 'share', label: 'Share settings' },
+  { id: 'all', label: 'All settings' },
 ];
 
 const TOAST_VARIANTS: ToastVariant[] = ['success', 'error', 'info', 'warning'];
@@ -123,8 +124,13 @@ export function SettingsPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { section: sectionParam } = useParams<{ section: string }>();
-  const active = (SECTIONS.find((s) => s.id === sectionParam)?.id ?? SECTIONS[0].id) as SectionId;
+  const active =
+    sectionParam === 'settings'
+      ? 'all'
+      : ((SECTIONS.find((s) => s.id === sectionParam)?.id ?? SECTIONS[1].id) as SectionId);
   const section = SECTIONS.find((s) => s.id === active) ?? SECTIONS[0];
+  const showCategoryHeading = (id: SectionId) =>
+    active === 'all' ? <h2 className="xe_settings__category-heading">{SECTIONS.find((s) => s.id === id)?.label}</h2> : null;
   usePageTitle('Settings');
 
   const folderSongCounts = useMemo(() => {
@@ -281,7 +287,7 @@ export function SettingsPage() {
               type="button"
               className={`xe_split__item${s.id === active ? ' xe_split__item--active' : ''}`}
               aria-current={s.id === active}
-              onClick={() => navigate(`/settings/${s.id}`)}
+              onClick={() => navigate(s.id === 'all' ? '/settings/settings' : `/settings/${s.id}`)}
             >
               <span>{s.label}</span>
               <ChevronRightIcon size={16} />
@@ -294,8 +300,9 @@ export function SettingsPage() {
             <h2 className="xe_split__title">{section.label}</h2>
           </header>
 
-          {active === 'preferences' && (
+          {(active === 'all' || active === 'preferences') && (
             <>
+              {showCategoryHeading('preferences')}
               <section className="xe_settings__section">
                 <h2>LRCLIB configuration</h2>
                 <label className="xe_settings__radio">
@@ -409,9 +416,8 @@ export function SettingsPage() {
                     <button
                       key={mode}
                       type="button"
-                      className={`xe_settings__stop${
-                        settings.pageKeyMode === mode ? ' xe_settings__stop--active' : ''
-                      }`}
+                      className={`xe_settings__stop${settings.pageKeyMode === mode ? ' xe_settings__stop--active' : ''
+                        }`}
                       aria-pressed={settings.pageKeyMode === mode}
                       onClick={() => update({ pageKeyMode: mode })}
                     >
@@ -457,8 +463,9 @@ export function SettingsPage() {
             </>
           )}
 
-          {active === 'appearance' && (
+          {(active === 'all' || active === 'appearance') && (
             <>
+              {showCategoryHeading('appearance')}
               <section className="xe_settings__section">
                 <h2>Theme</h2>
                 <div className="xe_settings__chip-row">
@@ -468,9 +475,8 @@ export function SettingsPage() {
                       <button
                         key={themeOption.id}
                         type="button"
-                        className={`xe_theme-swatch${activeTheme ? ' xe_theme-swatch--active' : ''}${
-                          themeOption.id === 'adaptive' ? ' xe_theme-swatch--adaptive' : ''
-                        }`}
+                        className={`xe_theme-swatch${activeTheme ? ' xe_theme-swatch--active' : ''}${themeOption.id === 'adaptive' ? ' xe_theme-swatch--adaptive' : ''
+                          }`}
                         aria-pressed={activeTheme}
                         onClick={() => update({ theme: themeOption.id })}
                       >
@@ -599,8 +605,9 @@ export function SettingsPage() {
             </>
           )}
 
-          {active === 'library' && (
+          {(active === 'all' || active === 'library') && (
             <>
+              {showCategoryHeading('library')}
               <section className="xe_settings__section">
                 <h2>Ignore tracks that lack...</h2>
                 <label className="xe_settings__radio">
@@ -687,11 +694,10 @@ export function SettingsPage() {
                     <span className="xe_settings__slider-value">
                       {formatBytes(settings.ignoreRules.maxSizeBytes)}
                       <span
-                        className={`xe_settings__quip${
-                          settings.ignoreRules.maxSizeBytes > SIZE_QUIP_THRESHOLD_BYTES
+                        className={`xe_settings__quip${settings.ignoreRules.maxSizeBytes > SIZE_QUIP_THRESHOLD_BYTES
                             ? ' xe_settings__quip--shown'
                             : ''
-                        }`}
+                          }`}
                       >
                         {' '}
                         - <i title="Do you really have files this large?" style={{ cursor: 'help' }}>(wtf?)</i>
@@ -739,11 +745,10 @@ export function SettingsPage() {
                         </button>
                         <button
                           type="button"
-                          className={`xe_btn xe_settings__folder-remove${
-                            confirmRemoveId === folder.id
+                          className={`xe_btn xe_settings__folder-remove${confirmRemoveId === folder.id
                               ? ' xe_settings__folder-remove--armed'
                               : ''
-                          }`}
+                            }`}
                           onClick={() => requestRemoveFolder(folder.id)}
                           aria-label={
                             confirmRemoveId === folder.id
@@ -777,8 +782,9 @@ export function SettingsPage() {
             </>
           )}
 
-          {active === 'playback' && (
+          {(active === 'all' || active === 'playback') && (
             <>
+              {showCategoryHeading('playback')}
               <section className="xe_settings__section">
                 <h2>Auto play</h2>
                 <label className="xe_settings__radio">
@@ -884,8 +890,9 @@ export function SettingsPage() {
             </>
           )}
 
-          {active === 'a11y' && (
+          {(active === 'all' || active === 'a11y') && (
             <>
+              {showCategoryHeading('a11y')}
               <section className="xe_settings__section">
                 <h2>Motion</h2>
                 <label className="xe_settings__radio">
@@ -974,8 +981,9 @@ export function SettingsPage() {
             </>
           )}
 
-          {active === 'toys' && (
+          {(active === 'all' || active === 'toys') && (
             <>
+              {showCategoryHeading('toys')}
               <section className="xe_settings__section">
                 <h2>Create a toast notification</h2>
                 <input
@@ -1053,8 +1061,9 @@ export function SettingsPage() {
             </>
           )}
 
-          {active === 'share' && (
+          {(active === 'all' || active === 'share') && (
             <>
+              {showCategoryHeading('share')}
               {incomingCount > 0 && (
                 <div className="xe_banner xe_banner--info">
                   <span>
