@@ -32,7 +32,7 @@ const RELEASES: Release[] = [
     version: '9',
     date: '2026-08-08',
     notes: [
-      <>Added a <Link to="/i/remote">remote control functionality</Link></>,
+      <>Added a <Link to="/remote">remote control functionality</Link></>,
       'All icons have been changed to Material Design icons, which look a lot in line with the font being Google Sans Flex...',
       <>Added an <Link to="/settings/playback">auto play functionality</Link> which is pretty self-explanatory. Quick toggle in the player bar</>
     ]
@@ -41,7 +41,7 @@ const RELEASES: Release[] = [
     version: '8',
     date: '2026-08-03',
     notes: [
-      <>Added <Link to="/i/lastfm">Last.fm scrobbling!!!!!!!!!11111111111</Link> You can connect your account,
+      <>Added <Link to="/lastfm">Last.fm scrobbling!!!!!!!!!11111111111</Link> You can connect your account,
       manage how hard it should look for scrobble targets,
       and it even has an offline queue to bulk-scrobble previous offline listens,
       Still a lot to do, but give it a spin!</>,
