@@ -7,7 +7,7 @@ import { toast } from '../utils/toast';
 import { CheckIcon, CloseIcon, CopyIcon, LinkIcon, RefreshIcon, WarningIcon } from './icons';
 
 export function connectUrl(pin: string): string {
-  return `${window.location.origin}/i/remote?connect=${pin}`;
+  return `${window.location.origin}/remote?connect=${pin}`;
 }
 
 function copy(text: string, label: string): void {
