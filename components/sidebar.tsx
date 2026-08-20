@@ -19,7 +19,7 @@ import {
 } from './icons';
 
 export const NAV_LINKS = [
-  { path: '/home', label: 'Home', icon: HomeIcon },
+  { path: '/', label: 'Home', icon: HomeIcon },
   { path: '/search', label: 'Search', icon: SearchIcon },
   { path: '/library', label: 'Library', icon: NoteIcon },
   { path: '/artists', label: 'Artists', icon: PersonIcon },
