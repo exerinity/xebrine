@@ -5,7 +5,6 @@ Made as a non-replacing spiritual successor to [Voxity](https://github.com/exeri
 
 > [!IMPORTANT]
 > Xebrine, unlike Voxity, is written in TypeScript and uses React for the UI. Voxity is entirely vanilla JavaScript and more of an "ugly utilitarian" app. However, because Xebrine needs the File System Access API, this will only work on Chromium browsers on desktop and Android; and hence will not work on iPhone, Mozilla Firefox, and basically anywhere not Chromium.
-
 > Further, Voxity is *decently lightweight* for what it does; **Xebrine is not a lightweight player at all - it is heavy.** If you're conscious about RAM usage, you probably shouldn't use this.
 
 ![](https://i.exerinity.com/xeb2.png)
