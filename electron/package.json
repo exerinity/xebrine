@@ -1,0 +1,73 @@
+{
+  "name": "xebrine-desktop",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Minimalist desktop shell for Xebrine",
+  "author": "exerinity <me@exerinity.com>",
+  "homepage": "https://xebrine.com",
+  "license": "UNLICENSED",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "icons": "node scripts/gen-icons.mjs",
+    "dist": "npm run icons && electron-builder",
+    "dist:linux": "npm run icons && electron-builder --linux",
+    "dist:win": "npm run icons && electron-builder --win"
+  },
+  "dependencies": {
+    "mpris-service": "^2.1.2"
+  },
+  "devDependencies": {
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.exerinity.xebrine",
+    "productName": "Xebrine",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "mpris.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../public/app/media/icon-512-transparent.png",
+        "to": "icon-512-transparent.png"
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "executableName": "xebrine",
+      "category": "AudioVideo",
+      "icon": "build/icon.png",
+      "desktop": {
+        "entry": {
+          "Name": "Xebrine",
+          "Comment": "Plays music",
+          "Categories": "AudioVideo;Audio;Player;",
+          "StartupWMClass": "xebrine"
+        }
+      }
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Xebrine"
+    }
+  }
+}
