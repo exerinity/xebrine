@@ -26,8 +26,8 @@ export const NAV_LINKS = [
   { path: '/albums', label: 'Albums', icon: DiscIcon },
   { path: '/queue', label: 'Queue', icon: QueueIcon },
   { path: '/lyrics', label: 'Lyrics', icon: LyricsIcon },
-  { path: '/i/lastfm', label: 'Last.fm', icon: LastfmMarkIcon },
-  { path: '/i/remote', label: 'Remote', icon: RemoteIcon },
+  { path: '/lastfm', label: 'Last.fm', icon: LastfmMarkIcon },
+  { path: '/remote', label: 'Remote', icon: RemoteIcon },
   { path: '/settings', label: 'Settings', icon: SettingsIcon }
 ];
 
@@ -119,11 +119,11 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
           to={link.path}
           className={({ isActive }) =>
             `xe_nav__link${isActive ? ' xe_nav__link--active' : ''}${
-              link.path === '/i/remote' && remoteState ? ` xe_nav__link--remote-${remoteState}` : ''
+              link.path === '/remote' && remoteState ? ` xe_nav__link--remote-${remoteState}` : ''
             }`
           }
           title={
-            link.path === '/i/remote' && remoteState
+            link.path === '/remote' && remoteState
               ? remoteWaiting > 0
                 ? `${remoteWaiting} device${remoteWaiting === 1 ? '' : 's'} waiting for approval`
                 : `Remote session running (${remote.controllers.length} connected)`
@@ -143,7 +143,7 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
             ) : (
               <span className="xe_nav__badge">{queue.length}</span>
             ))}
-          {link.path === '/i/remote' &&
+          {link.path === '/remote' &&
             remoteState &&
             (collapsed ? (
               <span className="xe_nav__dot" />
