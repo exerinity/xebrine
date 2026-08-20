@@ -4,7 +4,7 @@ import { toast } from '../utils/toast';
 
 const RemoteContext = createContext<RemoteHost | null>(null);
 
-export const REMOTE_PATH = '/i/remote';
+export const REMOTE_PATH = '/remote';
 
 export function RemoteProvider({ children }: { children: ReactNode }) {
   const host = useRemoteHost();
