@@ -142,7 +142,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
     if (field === 'artist') {
       navigate(`/artists/${artistSlug}`);
     } else {
-      navigate(`/artists/${artistSlug}/${toSlugParam(track.album)}`, { state: { from: `/artists/${artistSlug}` } });
+      navigate(`/albums/${toSlugParam(track.album)}`, { state: { from: `/artists/${artistSlug}` } });
     }
   };
 
@@ -201,7 +201,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
           label: 'Go to Last.fm settings',
           onSelect: () => {
             if (fullscreenOpen) onToggleFullscreen?.();
-            navigate('/i/lastfm');
+            navigate('/lastfm');
           }
         },
         {
