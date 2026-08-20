@@ -113,7 +113,7 @@ function Shell() {
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/artists" element={<ArtistsPage />} />
           <Route path="/artists/:artistName" element={<ArtistDetailPage />} />
-          <Route path="/albums/:albumName" element={<AlbumDetailPage />} />
+          <Route path="/albums/:artistName/:albumName" element={<AlbumDetailPage />} />
           <Route path="/albums" element={<AlbumsPage />} />
           <Route path="/queue" element={<QueuePage />} />
           <Route path="/lyrics" element={<LyricsPage />} />
