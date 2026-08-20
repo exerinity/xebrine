@@ -208,7 +208,7 @@ export function HomePage() {
                       album={album}
                       onOpen={() =>
                         navigate(`/albums/${toSlugParam(album.album)}`, {
-                          state: { from: '/home' }
+                          state: { from: '/' }
                         })
                       }
                     />
