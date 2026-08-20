@@ -15,7 +15,7 @@ import { usePageTitle } from '../hooks/page_title';
 import { toast } from '../utils/toast';
 
 export function AlbumDetailPage() {
-  const { albumName = '' } = useParams();
+  const { artistName = '', albumName = '' } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { tracks } = useLibrary();
@@ -23,9 +23,13 @@ export function AlbumDetailPage() {
   const [coverOpen, setCoverOpen] = useState(false);
 
   const albums = useMemo(() => groupAlbums(tracks), [tracks]);
+  const artistSlug = artistName.toLowerCase().replace(/^by:/, '');
   const album = useMemo(
-    () => albums.find((a) => slugify(a.album) === albumName.toLowerCase()),
-    [albums, albumName]
+    () =>
+      albums.find(
+        (a) => slugify(a.artist) === artistSlug && slugify(a.album) === albumName.toLowerCase()
+      ),
+    [albums, artistSlug, albumName]
   );
 
   usePageTitle(album ? [album.album, 'Albums'] : 'Albums');
