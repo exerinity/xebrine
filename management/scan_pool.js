@@ -28,8 +28,14 @@ class ParseWorker {
     };
   }
 
-  parse(handle) {
+  async parse(source) {
     const id = this.nextId++;
+    let file;
+    try {
+      file = await source.getFile();
+    } catch {
+      return { tags: fallbackTags(source.name), warning: 'unreadable' };
+    }
     return new Promise((resolve) => {
       let settled = false;
       const done = (r) => {
@@ -43,9 +49,9 @@ class ParseWorker {
         this.pending = null;
         this.worker.terminate();
         this.spawn();
-        done({ tags: fallbackTags(handle.name), warning: 'unreadable' });
+        done({ tags: fallbackTags(source.name), warning: 'unreadable' });
       }, TASK_TIMEOUT_MS);
-      this.worker.postMessage({ id, handle });
+      this.worker.postMessage({ id, file, name: source.name });
     });
   }
 
@@ -55,22 +61,22 @@ class ParseWorker {
 }
 
 /**
- * @param {FileSystemFileHandle[]} handles
+ * @param {{ name: string, getFile: () => Promise<File> }[]} sources
  * @param {(index: number, parsed: ParsedTags) => void} onResult
  * @param {AbortSignal} [signal]
  */
-export async function parseTagsBatch(handles, onResult, signal) {
-  if (handles.length === 0) return;
+export async function parseTagsBatch(sources, onResult, signal) {
+  if (sources.length === 0) return;
   const workers = Array.from(
-    { length: Math.min(POOL_SIZE, handles.length) },
+    { length: Math.min(POOL_SIZE, sources.length) },
     () => new ParseWorker()
   );
   let cursor = 0;
   const lane = async (w) => {
     while (!signal?.aborted) {
       const index = cursor++;
-      if (index >= handles.length) break;
-      onResult(index, await w.parse(handles[index]));
+      if (index >= sources.length) break;
+      onResult(index, await w.parse(sources[index]));
     }
   };
   try {

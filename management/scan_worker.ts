@@ -2,16 +2,16 @@ import { fallbackTags, readTrackTags } from './metadata';
 
 interface ParseRequest {
   id: number;
-  handle: FileSystemFileHandle;
+  file: File;
+  name: string;
 }
 
 self.onmessage = async (e: MessageEvent<ParseRequest>) => {
-  const { id, handle } = e.data;
+  const { id, file, name } = e.data;
   const post = (msg: object) => (self as unknown as Worker).postMessage(msg);
   try {
-    const file = await handle.getFile();
     post({ id, tags: await readTrackTags(file) });
   } catch {
-    post({ id, tags: fallbackTags(handle.name), warning: 'unreadable' });
+    post({ id, tags: fallbackTags(name), warning: 'unreadable' });
   }
 };

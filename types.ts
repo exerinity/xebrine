@@ -1,8 +1,16 @@
-export interface FolderRecord {
+export interface BrowserFolderRecord {
   id: string;
   name: string;
   handle: FileSystemDirectoryHandle;
 }
+
+export interface ElectronFolderRecord {
+  id: string;
+  name: string;
+  electronId: string;
+}
+
+export type FolderRecord = BrowserFolderRecord | ElectronFolderRecord;
 
 export interface TrackMeta {
   id: string;

@@ -5,6 +5,25 @@
 /** @typedef {'playing' | 'paused' | 'stopped'} ElectronStatus */
 
 /**
+ * @typedef {Object} ElectronFolder
+ * @property {string} id
+ * @property {string} name
+ */
+
+/**
+ * @typedef {Object} ElectronDirectoryEntry
+ * @property {string} name
+ * @property {'file' | 'directory'} kind
+ * @property {number} size
+ */
+
+/**
+ * @typedef {Object} ElectronFile
+ * @property {ArrayBuffer} data
+ * @property {number} lastModified
+ */
+
+/**
  * @typedef {Object} ElectronPlaybackState
  * @property {string | null} trackId
  * @property {string} title
@@ -24,6 +43,11 @@
  * @typedef {Object} ElectronBridge
  * @property {string} platform
  * @property {{ electron: string, chrome: string }} versions
+ * @property {() => Promise<ElectronFolder | null>} pickDirectory
+ * @property {(folderId: string, path: string[]) => Promise<ElectronDirectoryEntry[]>} listDirectory
+ * @property {(folderId: string, path: string[]) => Promise<ElectronFile>} readFile
+ * @property {(folderId: string) => Promise<boolean>} hasDirectory
+ * @property {(folderId: string) => Promise<void>} forgetDirectory
  * @property {(state: ElectronPlaybackState) => void} updateState
  * @property {(trackId: string | null, dataUrl: string | null) => void} setArtwork
  * @property {(handler: (control: ElectronControl, payload?: number | boolean | string) => void) => void} onControl

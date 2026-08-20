@@ -20,6 +20,7 @@ import {
 import { readCoverArt } from '../management/metadata';
 import { shouldIgnoreTrack } from '../utils/ignore_rules';
 import { toast } from '../utils/toast';
+import { electron } from '../utils/electron';
 import { useSettings } from './settings_context';
 
 const COVER_SCAN_CONCURRENCY = 3;
@@ -62,7 +63,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   const [scanning, setScanning] = useState<ScanProgress | null>(null);
   const [scanReport, setScanReport] = useState<ScanReport | null>(null);
   const [permissionNeeded, setPermissionNeeded] = useState(false);
-  const supported = typeof window.showDirectoryPicker === 'function';
+  const supported = electron !== null || typeof window.showDirectoryPicker === 'function';
 
   const visibleTracks = useMemo(
     () => tracks.filter((t) => !shouldIgnoreTrack(t, settings.ignoreRules)),
@@ -84,7 +85,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       setFolders(storedFolders);
       setTracks(storedTracks);
       for (const folder of storedFolders) {
-        if (!(await hasReadPermission(folder.handle))) {
+        if (!(await hasReadPermission(folder))) {
           if (!cancelled) setPermissionNeeded(true);
           break;
         }
@@ -103,7 +104,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
         const folder = foldersRef.current.find((f) => f.id === track.folderId);
         if (!folder) continue;
         try {
-          if (!(await hasReadPermission(folder.handle))) continue;
+          if (!(await hasReadPermission(folder))) continue;
           const file = await getTrackFile(track, folder);
           const cover = await readCoverArt(file);
           const hasCoverArt = cover !== null;
@@ -195,16 +196,32 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addFolder = useCallback(async () => {
-    let handle: FileSystemDirectoryHandle;
+    let folder: FolderRecord | null = null;
+    let electronId: string | null = null;
     try {
-      handle = await window.showDirectoryPicker({ id: 'xebrine-music', mode: 'read' });
-    } catch {
+      if (electron) {
+        const selected = await electron.pickDirectory();
+        if (!selected) return;
+        electronId = selected.id;
+        folder = {
+          id: crypto.randomUUID(),
+          name: selected.name,
+          electronId: selected.id
+        };
+      } else {
+        const handle = await window.showDirectoryPicker({ id: 'xebrine-music', mode: 'read' });
+        folder = { id: crypto.randomUUID(), name: handle.name, handle };
+      }
+      const selectedFolder = folder;
+      await dbPut('folders', selectedFolder);
+      setFolders((prev) => [...prev, selectedFolder]);
+      await runScan(selectedFolder);
+    } catch (err) {
+      if (electronId) void electron?.forgetDirectory(electronId);
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      toast.error(`Couldn't add that folder: ${err instanceof Error ? err.message : 'unknown error'}`);
       return;
     }
-    const folder: FolderRecord = { id: crypto.randomUUID(), name: handle.name, handle };
-    await dbPut('folders', folder);
-    setFolders((prev) => [...prev, folder]);
-    await runScan(folder);
   }, [runScan]);
 
   const removeFolder = useCallback(async (folderId: string) => {
@@ -217,13 +234,15 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     );
     setFolders((prev) => prev.filter((f) => f.id !== folderId));
     setTracks((prev) => prev.filter((t) => t.folderId !== folderId));
+    const folder = foldersRef.current.find((item) => item.id === folderId);
+    if (folder && 'electronId' in folder) void electron?.forgetDirectory(folder.electronId);
   }, []);
 
   const rescanFolder = useCallback(
     async (folderId: string) => {
       const folder = foldersRef.current.find((f) => f.id === folderId);
       if (!folder) return;
-      if (!(await hasReadPermission(folder.handle)) && !(await requestReadPermission(folder.handle))) {
+      if (!(await hasReadPermission(folder)) && !(await requestReadPermission(folder))) {
         return;
       }
       await runScan(folder);
@@ -234,8 +253,8 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   const restoreAccess = useCallback(async () => {
     let allGranted = true;
     for (const folder of foldersRef.current) {
-      if (!(await hasReadPermission(folder.handle))) {
-        if (!(await requestReadPermission(folder.handle))) allGranted = false;
+      if (!(await hasReadPermission(folder))) {
+        if (!(await requestReadPermission(folder))) allGranted = false;
       }
     }
     setPermissionNeeded(!allGranted);
@@ -244,7 +263,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   const getFile = useCallback(async (track: TrackMeta): Promise<File> => {
     const folder = foldersRef.current.find((f) => f.id === track.folderId);
     if (!folder) throw new Error(`Folder for track ${track.id} was removed`);
-    if (!(await hasReadPermission(folder.handle))) {
+    if (!(await hasReadPermission(folder))) {
       setPermissionNeeded(true);
       throw new Error('Folder access needs to be restored');
     }

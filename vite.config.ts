@@ -57,7 +57,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['app/media/icon-192.png', 'app/media/icon-512.png'],
+      includeAssets: [
+        'app/media/icon-192-transparent.png',
+        'app/media/icon-512-transparent.png'
+      ],
       manifest: {
         name: 'Xebrine',
         id: 'com.exerinity.xebrine',
@@ -68,9 +71,22 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/',
         icons: [
-          { src: 'app/media/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'app/media/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'app/media/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          {
+            src: 'app/media/icon-192-transparent.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'app/media/icon-512-transparent.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: 'app/media/icon-512-transparent.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
+          }
         ]
       },
       workbox: {
