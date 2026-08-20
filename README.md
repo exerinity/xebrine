@@ -10,7 +10,7 @@ Made as a non-replacing spiritual successor to [Voxity](https://github.com/exeri
 > [!CAUTION]
 Xebrine is super super early and probably won't work as expected. Known issues include scanning never starts or can choke, rudimental Last.fm handling, janky album rendering, and the player bar isn't very responsive on smaller screens. **Use with caution.**
 
-> [!NOTICE]
+> [!NOTE]
 If you saw the languages chart, you probably noticed Rust, and preemptively: this is not a Tauri music player. This is a web music player. That Rust is the icon generator script
 
 ![](https://i.exerinity.com/xeb2.png)
