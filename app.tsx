@@ -108,8 +108,7 @@ function Shell() {
       <Sidebar onOpenFullscreen={() => setFullscreenOpen(true)} />
       <main className="xe_main">
         <Routes>
-          <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/artists" element={<ArtistsPage />} />
@@ -128,7 +127,7 @@ function Shell() {
           <Route path="/i/release_notes" element={<ReleaseNotesPage />} />
           <Route path="/lastfm" element={<LastfmPage />} />
           <Route path="/remote" element={<RemotePage />} />
-          <Route path="*" element={<Navigate to="/home" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <FullscreenPlayer open={fullscreenOpen} onClose={() => setFullscreenOpen(false)} />
