@@ -204,7 +204,7 @@ export function ArtistDetailPage() {
               key={album.key}
               album={album}
               onOpen={() =>
-                navigate(`/artists/${toSlugParam(artist.name)}/${toSlugParam(album.album)}`, {
+                navigate(`/albums/${toSlugParam(album.album)}`, {
                   state: { from: `/artists/${toSlugParam(artist.name)}` }
                 })
               }
@@ -217,7 +217,7 @@ export function ArtistDetailPage() {
                 key={album.key}
                 album={album}
                 onOpen={() =>
-                  navigate(`/artists/${toSlugParam(artist.name)}/${toSlugParam(album.album)}`, {
+                  navigate(`/albums/${toSlugParam(album.album)}`, {
                     state: { from: `/artists/${toSlugParam(artist.name)}` }
                   })
                 }
