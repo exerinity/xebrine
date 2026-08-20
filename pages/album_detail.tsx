@@ -15,7 +15,7 @@ import { usePageTitle } from '../hooks/page_title';
 import { toast } from '../utils/toast';
 
 export function AlbumDetailPage() {
-  const { artistName = '', albumName = '' } = useParams();
+  const { albumName = '' } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { tracks } = useLibrary();
@@ -24,20 +24,16 @@ export function AlbumDetailPage() {
 
   const albums = useMemo(() => groupAlbums(tracks), [tracks]);
   const album = useMemo(
-    () =>
-      albums.find(
-        (a) =>
-          slugify(a.artist) === artistName.toLowerCase() && slugify(a.album) === albumName.toLowerCase()
-      ),
-    [albums, artistName, albumName]
+    () => albums.find((a) => slugify(a.album) === albumName.toLowerCase()),
+    [albums, albumName]
   );
 
   usePageTitle(album ? [album.album, 'Albums'] : 'Albums');
 
   const art = useAlbumArt(album?.key ?? '', album?.tracks[0]);
   const cameFrom = (location.state as { from?: string } | null)?.from;
-  const backTarget = cameFrom ?? `/artists/${toSlugParam(album?.artist ?? artistName)}`;
-  const backLabel = cameFrom === '/albums' ? 'Albums' : album?.artist || artistName || 'Back';
+  const backTarget = cameFrom ?? (album ? `/artists/${toSlugParam(album.artist)}` : '/albums');
+  const backLabel = cameFrom === '/albums' ? 'Albums' : album?.artist || 'Back';
 
   if (!album) {
     return (
@@ -92,7 +88,6 @@ export function AlbumDetailPage() {
             </button>
           </h1>
           <p className="xe_album-hero__meta">
-            by{' '}
             <button
               type="button"
               className="xe_album-hero__artist-btn"
