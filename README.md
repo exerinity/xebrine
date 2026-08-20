@@ -13,8 +13,8 @@ Made as a non-replacing spiritual successor to [Voxity](https://github.com/exeri
 For a full list, see https://xebrine.com/i/info
 - Folder scanning via the File System Access API into IndexedDB and sorted properly
 - Three different search types: a simple filter, a more natural algorithmical search, and a "Deep search" to find songs based on morsels of metadata
-- [Last.fm scrobbling](https://xebrine.com/i/lastfm)
-- [A remote control](https://xebrine.com/i/remote)
+- [Last.fm scrobbling](https://xebrine.com/lastfm)
+- [A remote control](https://xebrine.com/remote)
 - Online lyric searching and displaying, with click-to-jump lines from [LRCLIB](https://lrclib.net)
 - A Spotify-inspired lyrics canvas creator, where you can generate images like:
 ![](https://i.exerinity.com/Calvin%20Harris%20-%20My%20Way%20lyrics.png)
