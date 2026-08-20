@@ -142,7 +142,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
     if (field === 'artist') {
       navigate(`/artists/${artistSlug}`);
     } else {
-      navigate(`/albums/${toSlugParam(track.album)}`, { state: { from: `/artists/${artistSlug}` } });
+      navigate(`/albums/by:${artistSlug}/${toSlugParam(track.album)}`, { state: { from: `/artists/${artistSlug}` } });
     }
   };
 
