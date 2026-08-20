@@ -144,11 +144,12 @@
   color: var(--text-dim);
   overflow: hidden;
   flex-shrink: 0;
-  transition: filter 120ms ease;
+  transition: filter 120ms ease, transform 120ms ease;
 }
 
 .xe_album-hero__art:hover:not(:disabled) {
   filter: brightness(1.1);
+  transform: scale(1.03);
 }
 
 .xe_album-hero__art img {
