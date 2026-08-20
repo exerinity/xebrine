@@ -37,7 +37,7 @@ export function SetupFlowPage() {
     setNavigationGuard(step < STEPS.length - 1);
   }, [setNavigationGuard, step]);
 
-  if (localStorage.getItem(SETUP_KEY)) return <Navigate to="/home" replace />;
+  if (localStorage.getItem(SETUP_KEY)) return <Navigate to="/" replace />;
 
   const connect = async () => {
     setConnecting(true);
@@ -60,7 +60,7 @@ export function SetupFlowPage() {
       null;
     }
     if (play && tracks.length > 0) playNow(tracks, 0);
-    navigate('/home', { replace: true });
+    navigate('/', { replace: true });
   };
 
   return (
