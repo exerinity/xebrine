@@ -114,20 +114,20 @@ function Shell() {
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/artists" element={<ArtistsPage />} />
           <Route path="/artists/:artistName" element={<ArtistDetailPage />} />
-          <Route path="/artists/:artistName/:albumName" element={<AlbumDetailPage />} />
+          <Route path="/albums/:albumName" element={<AlbumDetailPage />} />
           <Route path="/albums" element={<AlbumsPage />} />
           <Route path="/queue" element={<QueuePage />} />
           <Route path="/lyrics" element={<LyricsPage />} />
           <Route path="/lyrics/share" element={<ShareLyricsPage />} />
           <Route path="/settings" element={<Navigate to="/settings/preferences" replace />} />
-          <Route path="/settings/scrobbling" element={<Navigate to="/i/lastfm" replace />} />
+          <Route path="/settings/scrobbling" element={<Navigate to="/lastfm" replace />} />
           <Route path="/settings/:section" element={<SettingsPage />} />
           <Route path="/i" element={<Navigate to="/i/info" replace />} />
           <Route path="/i/flow/setup" element={<SetupFlowPage />} />
           <Route path="/i/:section" element={<AboutPage />} />
           <Route path="/i/release_notes" element={<ReleaseNotesPage />} />
-          <Route path="/i/lastfm" element={<LastfmPage />} />
-          <Route path="/i/remote" element={<RemotePage />} />
+          <Route path="/lastfm" element={<LastfmPage />} />
+          <Route path="/remote" element={<RemotePage />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </main>
