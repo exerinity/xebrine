@@ -207,7 +207,7 @@ export function HomePage() {
                     <AlbumCard
                       album={album}
                       onOpen={() =>
-                        navigate(`/artists/${toSlugParam(album.artist)}/${toSlugParam(album.album)}`, {
+                        navigate(`/albums/${toSlugParam(album.album)}`, {
                           state: { from: '/home' }
                         })
                       }
