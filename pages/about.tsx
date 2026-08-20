@@ -408,10 +408,10 @@ export function AboutPage() {
                     : lyrics
                   </li>
                   <li>
-                    <a href="https://fonts.google.com/specimen/Google+Sans+Flex" target="_blank" rel="noopener noreferrer">
+                    <a href="https://fonts.google.com/specimen/Instrument+Sans" target="_blank" rel="noopener noreferrer">
                       Google
                     </a>
-                    : Google Sans Flex font
+                    : Instrument Sans font
                   </li>
                   <li>
                     <a href="https://voxity.dev" target="_blank" rel="noopener noreferrer">

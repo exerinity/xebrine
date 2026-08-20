@@ -534,7 +534,7 @@
 
 .xe_player-bar__subtitle {
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .xe_player-bar__album {
@@ -908,8 +908,7 @@ button.xe_scrubber__time:hover {
 .xe_fullscreen-player__title {
   margin: 0;
   font-size: clamp(30px, 4.4vh, 56px);
-  line-height: 1;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .xe_fullscreen-player__artist {

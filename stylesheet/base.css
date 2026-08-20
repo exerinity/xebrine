@@ -76,7 +76,7 @@ body,
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Google Sans Flex', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   overflow: hidden;
   user-select: none;

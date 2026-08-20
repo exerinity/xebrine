@@ -120,6 +120,7 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  font-weight: 500;
 }
 
 .xe_nav__link-content svg {
