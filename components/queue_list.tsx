@@ -42,7 +42,7 @@ export function QueueList({ query = '' }: { query?: string }) {
   const goToArtist = (track: TrackMeta) => navigate(`/artists/${toSlugParam(displayArtist(track))}`);
   const goToAlbum = (track: TrackMeta) => {
     const albumArtist = displayArtist(track);
-    navigate(`/albums/${toSlugParam(track.album)}`, {
+    navigate(`/albums/by:${toSlugParam(albumArtist)}/${toSlugParam(track.album)}`, {
       state: { from: `/artists/${toSlugParam(albumArtist)}` }
     });
   };
