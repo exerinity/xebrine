@@ -67,7 +67,7 @@ const RELEASES: Release[] = [
     version: '6',
     date: '2026-07-22',
     notes: [
-      <>Added <Link to="/home">home page</Link> and a sleep timer</>
+      <>Added <Link to="/">home page</Link> and a sleep timer</>
     ]
   },
   {
