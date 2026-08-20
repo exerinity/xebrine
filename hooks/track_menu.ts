@@ -24,7 +24,7 @@ export function useTrackMenu() {
 
   const goToAlbum = (track: TrackMeta) => {
     const albumArtist = displayArtist(track);
-    navigate(`/albums/${toSlugParam(track.album)}`, {
+    navigate(`/albums/by:${toSlugParam(albumArtist)}/${toSlugParam(track.album)}`, {
       state: { from: `/artists/${toSlugParam(albumArtist)}` }
     });
   };
