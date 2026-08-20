@@ -249,7 +249,7 @@ export function AlbumsPage() {
                 key={a.key}
                 album={a}
                 onOpen={() =>
-                  navigate(`/albums/${toSlugParam(a.album)}`, {
+                  navigate(`/albums/by:${toSlugParam(a.artist)}/${toSlugParam(a.album)}`, {
                     state: { from: '/albums' }
                   })
                 }
