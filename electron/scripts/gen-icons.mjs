@@ -8,9 +8,10 @@ const transparentSource = join(
   shell,
   '..',
   'public',
-  'app',
-  'media',
-  'icon-512-transparent.png'
+  'i',
+  'xebrine',
+  'icon',
+  'xebrine_512_transparent.png'
 );
 const out = join(shell, 'build');
 
