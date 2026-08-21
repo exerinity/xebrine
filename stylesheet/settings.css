@@ -6,6 +6,7 @@
 .xe_settings__section h2 {
   font-size: 15px;
   margin: 0 0 12px;
+  font-weight: 500;
 }
 
 .xe_settings__category-heading {
@@ -85,7 +86,7 @@
   min-width: 34px;
   text-align: right;
   color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
+  
 }
 
 .xe_settings__slider-value--label {
@@ -206,7 +207,7 @@
 
 .xe_eq__headroom-value {
   color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
+  
 }
 
 .xe_eq__headroom-value--hot {
@@ -240,7 +241,7 @@
 .xe_eq__gain {
   font-size: 11px;
   color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
+  
 }
 
 .xe_eq__freq {
