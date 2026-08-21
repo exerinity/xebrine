@@ -143,8 +143,8 @@
 }
 
 .xe_modal {
-  --xe-modal-x: 0px;
-  --xe-modal-y: 0px;
+  --xe_modal-x: 0px;
+  --xe_modal-y: 0px;
   position: relative;
   isolation: isolate;
   display: flex;
@@ -161,7 +161,7 @@
     0 8px 28px rgba(0, 0, 0, 0.28),
     0 0 0 1px color-mix(in srgb, var(--text) 4%, transparent) inset;
   overflow: hidden;
-  transform: translate(var(--xe-modal-x), var(--xe-modal-y));
+  transform: translate(var(--xe_modal-x), var(--xe_modal-y));
   transform-origin: 50% 42%;
   animation: xe_modal-in 300ms cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
@@ -283,7 +283,7 @@
   from {
     opacity: 0;
     filter: blur(8px);
-    transform: translate(var(--xe-modal-x), calc(var(--xe-modal-y) + 18px)) scale(0.95);
+    transform: translate(var(--xe_modal-x), calc(var(--xe_modal-y) + 18px)) scale(0.95);
   }
   58% {
     opacity: 1;
@@ -292,7 +292,7 @@
   to {
     opacity: 1;
     filter: blur(0);
-    transform: translate(var(--xe-modal-x), var(--xe-modal-y)) scale(1);
+    transform: translate(var(--xe_modal-x), var(--xe_modal-y)) scale(1);
   }
 }
 
