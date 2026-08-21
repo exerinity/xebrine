@@ -13,7 +13,6 @@
   padding: 12px 20px;
   border-radius: 14px;
   font-size: 15px;
-  font-weight: 600;
 }
 
 .xe_home-section {
@@ -22,7 +21,7 @@
 
 .xe_home-section__title {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 500;
   margin: 0 0 12px;
 }
 
