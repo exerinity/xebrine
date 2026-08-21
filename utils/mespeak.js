@@ -13,7 +13,7 @@ function loadMeSpeak() {
     meSpeakPromise = import('mespeak').then((mod) => {
       const meSpeak = mod.default ?? mod;
       meSpeak.loadConfig('/app/mespeak/mespeak_config.json');
-      meSpeak.loadVoice('/app/mespeak/en-us.json');
+      meSpeak.loadVoice('/app/mespeak/en_us.json');
       resolvedMeSpeak = meSpeak;
       return meSpeak;
     });
