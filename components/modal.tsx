@@ -7,30 +7,65 @@ import {
   type PointerEvent,
   type ReactNode
 } from 'react';
+import { createPortal } from 'react-dom';
 import { CloseIcon, LogoIcon } from './icons';
 import { clamp } from '../utils/format';
 
 interface ModalProps {
   title?: string;
   fullscreen?: boolean;
+  wide?: boolean;
   onClose(): void;
   children: ReactNode;
 }
 
-export function Modal({ title = 'Xebrine', fullscreen = false, onClose, children }: ModalProps) {
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+export function Modal({ title = 'Xebrine', fullscreen = false, wide = false, onClose, children }: ModalProps) {
   const titleId = useId();
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const posRef = useRef(pos);
+  const onCloseRef = useRef(onClose);
   posRef.current = pos;
+  onCloseRef.current = onClose;
   const modalRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    const modal = modalRef.current;
+    const restoreFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    if (modal && !modal.contains(document.activeElement)) {
+      (modal.querySelector<HTMLElement>(FOCUSABLE) ?? modal).focus();
+    }
+
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') {
+        onCloseRef.current();
+        return;
+      }
+      if (event.key !== 'Tab' || !modal) return;
+      const focusable = Array.from(modal.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (focusable.length === 0) {
+        event.preventDefault();
+        modal.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      if (restoreFocus?.isConnected) restoreFocus.focus();
+    };
+  }, []);
 
   const startDrag = (e: PointerEvent<HTMLDivElement>) => {
     if (fullscreen || e.button !== 0 || (e.target as HTMLElement).closest('button')) return;
@@ -60,17 +95,18 @@ export function Modal({ title = 'Xebrine', fullscreen = false, onClose, children
     window.addEventListener('pointerup', onUp);
   };
 
-  return (
+  return createPortal(
     <div
       className={`xe_modal-overlay${fullscreen ? ' xe_modal-overlay--opaque' : ''}`}
       onClick={onClose}
     >
       <div
         ref={modalRef}
-        className={`xe_modal${fullscreen ? ' xe_modal--fullscreen' : ''}`}
+        className={`xe_modal${fullscreen ? ' xe_modal--fullscreen' : ''}${wide ? ' xe_modal--wide' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
         style={
           fullscreen
             ? undefined
@@ -91,6 +127,7 @@ export function Modal({ title = 'Xebrine', fullscreen = false, onClose, children
         </div>
         <div className="xe_modal__body">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
