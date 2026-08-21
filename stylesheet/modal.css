@@ -192,6 +192,11 @@
   animation: xe_modal-fullscreen-in 220ms ease-out;
 }
 
+.xe_modal--wide {
+  width: min(94vw, 880px);
+  max-height: 88vh;
+}
+
 .xe_modal__header {
   position: relative;
   z-index: 1;
