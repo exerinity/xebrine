@@ -74,7 +74,7 @@
   font-size: clamp(30px, 8vw, 46px);
   font-weight: 700;
   letter-spacing: 0.08em;
-  font-variant-numeric: tabular-nums;
+  
   color: var(--accent-text);
   user-select: text;
 }
@@ -242,7 +242,7 @@
   font-size: 26px;
   font-weight: 700;
   letter-spacing: 0.1em;
-  font-variant-numeric: tabular-nums;
+  
   text-align: center;
   padding: 12px;
 }
@@ -293,7 +293,7 @@
 
 .xe_remote__time {
   color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
+  
   font-size: 13px;
   flex-shrink: 0;
   min-width: 42px;
