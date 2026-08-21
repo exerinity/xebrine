@@ -323,7 +323,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-variant-numeric: tabular-nums;
+  
 }
 
 .xe_scan-drawer__head {
@@ -413,7 +413,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-variant-numeric: tabular-nums;
+  
 }
 
 .xe_scan-drawer__eta {
@@ -529,7 +529,7 @@
 }
 
 .xe_player-bar__title {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .xe_player-bar__subtitle {
@@ -587,8 +587,7 @@
 
 .xe_player-bar__percent {
   color: var(--text-dim);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
+  font-size: 13px;
   min-width: 28px;
   text-align: center;
 }
@@ -611,7 +610,7 @@
 .xe_scrubber__time {
   color: var(--text-dim);
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  
   min-width: 46px;
   text-align: right;
 }
@@ -685,7 +684,7 @@ button.xe_scrubber__time:hover {
   color: var(--text-dim);
   font-size: 11px;
   line-height: 1;
-  font-variant-numeric: tabular-nums;
+  
   white-space: nowrap;
   transition: color 120ms ease;
   z-index: 30;
@@ -901,7 +900,7 @@ button.xe_scrubber__time:hover {
   gap: 8px;
   color: var(--accent-text);
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  
   padding-bottom: 8px;
 }
 
@@ -1027,7 +1026,7 @@ button.xe_scrubber__time:hover {
   flex-shrink: 0;
   color: var(--text-dim);
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  
 }
 
 .xe_fullscreen-player__queue .xe_empty-note {
