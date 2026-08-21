@@ -100,8 +100,8 @@ function Shell() {
 
   return (
     <div
-      className={`xe_app${settings.playerBarPosition === 'top' ? ' xe_app--player-top' : ''}${
-        settings.playerBarLayout === 'compact' ? ' xe_app--player-compact' : ''
+      className={`xe_xebrine${settings.playerBarPosition === 'top' ? ' xe_xebrine--player-top' : ''}${
+        settings.playerBarLayout === 'compact' ? ' xe_xebrine--player-compact' : ''
       }`}
       style={accentStyle}
     >
