@@ -1,4 +1,4 @@
-.xe_app {
+.xe_xebrine {
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: 1fr auto;
@@ -15,14 +15,14 @@
     --accent-wash 600ms ease;
 }
 
-.xe_app--player-top {
+.xe_xebrine--player-top {
   grid-template-rows: auto 1fr;
   grid-template-areas:
     'player player'
     'xe_nav xe_main';
 }
 
-.xe_app--player-compact {
+.xe_xebrine--player-compact {
   --player-height: 64px;
 }
 
