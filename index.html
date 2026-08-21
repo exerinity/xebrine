@@ -11,8 +11,8 @@
   <meta name="author" content="exerinity.com" />
   <meta name="color-scheme" content="dark" />
   <link rel="canonical" href="https://xebrine.com/" />
-  <link rel="icon" type="image/png" href="/app/media/icon-192-transparent.png" />
-  <link rel="apple-touch-icon" href="/app/media/icon-192.png" />
+  <link rel="icon" type="image/png" href="/i/xebrine/icon/xebrine_192_transparent.png" />
+  <link rel="apple-touch-icon" href="/i/xebrine/icon/xebrine_192.png" />
 
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://xebrine.com/" />
@@ -20,13 +20,13 @@
   <meta property="og:title" content="Xebrine" />
   <meta property="og:description"
     content="Xebrine is a heavy-duty desktop-focused web music player for power users and music hoarders" />
-  <meta property="og:image" content="/app/media/icon-192.png" />
+  <meta property="og:image" content="/i/xebrine/icon/xebrine_192.png" />
 
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Xebrine" />
   <meta name="twitter:description"
     content="Xebrine is a heavy-duty desktop-focused web music player for power users and music hoarders" />
-  <meta name="twitter:image" content="/app/media/icon-192.png" />
+  <meta name="twitter:image" content="/i/xebrine/icon/xebrine_192.png" />
 
   <title>Xebrine</title>
 
@@ -36,11 +36,11 @@
       transition: opacity 560ms ease;
     }
 
-    html.xe-ready #xebrine {
+    html.xebrine_initialized #xebrine {
       opacity: 1;
     }
 
-    #xebrine-splash {
+    #xebrine_splash {
       position: fixed;
       inset: 0;
       z-index: 9999;
@@ -52,19 +52,19 @@
       transition: opacity 560ms ease;
     }
 
-    html.xe-ready #xebrine-splash {
+    html.xebrine_initialized #xebrine_splash {
       opacity: 0;
       pointer-events: none;
     }
 
-    #xebrine-splash svg {
+    #xebrine_splash svg {
       width: 88px;
       height: 88px;
       color: #9b82f3;
-      animation: xe-splash-pulse 1.6s ease-in-out infinite;
+      animation: xe_splash-pulse 1.6s ease-in-out infinite;
     }
 
-    @keyframes xe-splash-pulse {
+    @keyframes xe_splash-pulse {
       0%, 100% {
         opacity: 0.5;
         transform: scale(0.97);
@@ -76,7 +76,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      #xebrine-splash svg {
+      #xebrine_splash svg {
         animation: none;
       }
     }
@@ -85,7 +85,7 @@
 
 <body>
   <div id="xebrine"></div>
-  <div id="xebrine-splash" aria-hidden="true">
+  <div id="xebrine_splash" aria-hidden="true">
     <svg viewBox="70 260 563 545" fill="currentColor" aria-hidden="true">
       <path
         d="M86 413c26 -8 54 -12 84 -12s58 4 85 12v318h-169v-131h150v-56c-20 -4 -42 -6 -66 -6c-29 0 -57 4 -84 12v-137zM617 552c-27 -8 -56 -12 -85 -12c-30 0 -58 4 -84 12v-137c26 -8 54 -12 84 -12c29 0 58 4 85 12v137zM447 415c-27 -8 -55 -12 -84 -12c-23 0 -44 2 -66 6v384h-19v-515c27 -8 56 -12 85 -12c30 0 58 4 84 12v137z" />
@@ -93,7 +93,7 @@
   </div>
   <noscript> <!-- even more styling and detail for something nobody will see -->
     <style>
-      #xebrine-splash {
+      #xebrine_splash {
         display: none !important;
       }
 
@@ -187,7 +187,7 @@
             <path
               d="M86 413c26 -8 54 -12 84 -12s58 4 85 12v318h-169v-131h150v-56c-20 -4 -42 -6 -66 -6c-29 0 -57 4 -84 12v-137zM617 552c-27 -8 -56 -12 -85 -12c-30 0 -58 4 -84 12v-137c26 -8 54 -12 84 -12c29 0 58 4 85 12v137zM447 415c-27 -8 -55 -12 -84 -12c-23 0 -44 2 -66 6v384h-19v-515c27 -8 56 -12 85 -12c30 0 58 4 84 12v137z" />
           </svg>
-          <span>xebrine</span>
+          <span>Xebrine</span>
         </div>
         <h2>JavaScript is not available / disabled</h2>
         <p>Xebrine requires JavaScript to function. Please enable
