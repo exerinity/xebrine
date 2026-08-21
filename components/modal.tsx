@@ -74,7 +74,7 @@ export function Modal({ title = 'Xebrine', fullscreen = false, onClose, children
         style={
           fullscreen
             ? undefined
-            : ({ '--xe-modal-x': `${pos.x}px`, '--xe-modal-y': `${pos.y}px` } as CSSProperties)
+            : ({ '--xe_modal-x': `${pos.x}px`, '--xe_modal-y': `${pos.y}px` } as CSSProperties)
         }
         onClick={(e) => e.stopPropagation()}
       >
