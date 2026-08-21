@@ -65,7 +65,7 @@
 .xe_track-table__cell--dur {
   color: var(--text-dim);
   text-align: right;
-  font-variant-numeric: tabular-nums;
+  
 }
 
 .xe_track-table__cell--actions {
