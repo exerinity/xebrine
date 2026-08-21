@@ -22,7 +22,7 @@ const DIMENSIONS: Record<CardStyle, [number, number]> = {
   square: [1080, 1080]
 };
 
-const FONT = '"Instrument Sans", system-ui, sans-serif';
+const FONT = 'Inter, system-ui, sans-serif';
 const LOGO_VIEWBOX = { x: 70, y: 260, w: 563, h: 545 };
 const LOGO_PATH =
   'M86 413c26 -8 54 -12 84 -12s58 4 85 12v318h-169v-131h150v-56c-20 -4 -42 -6 -66 -6c-29 0 -57 4 -84 12v-137zM617 552c-27 -8 -56 -12 -85 -12c-30 0 -58 4 -84 12v-137c26 -8 54 -12 84 -12c29 0 58 4 85 12v137zM447 415c-27 -8 -55 -12 -84 -12c-23 0 -44 2 -66 6v384h-19v-515c27 -8 56 -12 85 -12c30 0 58 4 84 12v137z';
