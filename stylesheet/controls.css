@@ -237,14 +237,14 @@
 }
 
 .xe_automix-pill--busy {
-  animation: xe-automix-pulse 900ms ease-in-out infinite;
+  animation: xe_automix-pulse 900ms ease-in-out infinite;
 }
 
 .xe_automix-pill--mixing {
-  animation: xe-automix-pulse 500ms ease-in-out infinite;
+  animation: xe_automix-pulse 500ms ease-in-out infinite;
 }
 
-@keyframes xe-automix-pulse {
+@keyframes xe_automix-pulse {
   0%, 100% { opacity: 0.55; }
   50% { opacity: 1; }
 }
@@ -288,7 +288,7 @@
 .xe_scrobble-pill--sending {
   color: var(--text);
   border-color: var(--accent-bright);
-  animation: xe-automix-pulse 700ms ease-in-out infinite;
+  animation: xe_automix-pulse 700ms ease-in-out infinite;
 }
 
 .xe_scrobble-pill--scrobbled {
