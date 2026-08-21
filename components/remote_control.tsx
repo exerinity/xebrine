@@ -33,12 +33,12 @@ function PinEntry({ onSubmit }: { onSubmit(pin: string): void }) {
         if (isValidPin(pin)) onSubmit(pin);
       }}
     >
-      <label className="xe_remote__pin-label" htmlFor="xe-remote-pin">
+      <label className="xe_remote__pin-label" htmlFor="xe_remote-pin">
         Enter PIN
       </label>
       <input
         ref={inputRef}
-        id="xe-remote-pin"
+        id="xe_remote-pin"
         className="xe_search-input xe_remote__pin-input"
         type="text"
         inputMode="numeric"
