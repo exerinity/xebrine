@@ -36,8 +36,8 @@
     ],
     "extraResources": [
       {
-        "from": "../public/app/media/icon-512-transparent.png",
-        "to": "icon-512-transparent.png"
+        "from": "../public/i/xebrine/icon/xebrine_512_transparent.png",
+        "to": "xebrine_512_transparent.png"
       }
     ],
     "linux": {
