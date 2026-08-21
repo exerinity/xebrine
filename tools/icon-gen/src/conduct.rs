@@ -22,9 +22,9 @@ impl Background {
     fn suffix(self) -> &'static str {
         match self {
             Self::Gradient => "",
-            Self::Transparent => "-transparent",
-            Self::Black => "-black",
-            Self::White => "-white",
+            Self::Transparent => "_transparent",
+            Self::Black => "_black",
+            Self::White => "_white",
         }
     }
 
@@ -51,11 +51,14 @@ fn write_icon(dir: &Path, size: u32, background: Background, font: &FontRef) {
     };
     composite_centered(&mut canvas, &glyph);
 
-    let out_path = dir.join(format!("icon-{size}{}.png", background.suffix()));
+    let out_path = dir.join(format!("xebrine_{size}{}.png", background.suffix()));
     canvas
         .save(&out_path)
         .unwrap_or_else(|e| panic!("failed to write {}: {e}", out_path.display()));
-    println!("wrote public/app/media/{}", out_path.file_name().unwrap().to_string_lossy());
+    println!(
+        "wrote public/i/xebrine/icon/{}",
+        out_path.file_name().unwrap().to_string_lossy()
+    );
 }
 
 pub fn run() {
@@ -85,7 +88,7 @@ pub fn run() {
         .and_then(Path::parent)
         .expect("tools/icon-gen should live two levels under the project root")
         .to_path_buf();
-    let out_dir = root.join("public").join("app").join("media");
+    let out_dir = root.join("public").join("i").join("xebrine").join("icon");
     fs::create_dir_all(&out_dir).expect("failed to create output directory");
 
     let matched = find_font_for_glyph(GLYPH as u32);
