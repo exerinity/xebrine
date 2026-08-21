@@ -183,9 +183,6 @@ export function ScrobblingSettings() {
               {connecting ? <Spinner size={14} /> : <LastfmIcon size={14} />}
               {connecting ? 'Waiting for Last.fm...' : 'Connect your Last.fm account'}
             </button>
-            <p className="xe_settings__hint">
-              through a traditional login flow
-            </p>
           </>
         )}
       </section>
@@ -206,11 +203,10 @@ export function ScrobblingSettings() {
             checked={settings.scrobbleNowPlaying}
             onChange={(e) => update({ scrobbleNowPlaying: e.target.checked })}
           />
-          <span>Show what I'm playing right now on my profile</span>
+          <span>Send a now playing status</span>
         </label>
         <p className="xe_settings__hint">
-          A track is scrobbled once it is longer than 30 seconds and you
-          have reached either half of it or four minutes, whichever comes first
+          Tracks over 30 seconds are scrobbled either after 4 minutes or 50% playback, whichever comes first
         </p>
       </section>
 
@@ -301,10 +297,10 @@ export function ScrobblingSettings() {
       </section>
 
       <section className="xe_settings__section">
-        <h2>Waiting to be sent</h2>
+        <h2>Offline / failed scrobbles queue</h2>
         {pending.length === 0 ? (
           <p className="xe_settings__hint">
-            No entries are waiting to be sent - if you're offline, songs you listen to will be enqueued here and sent when you're back online
+            There are no enqueued scrobbles
           </p>
         ) : (
           <>
