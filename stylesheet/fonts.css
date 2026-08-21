@@ -1,15 +1,15 @@
 @font-face {
-  font-family: 'Instrument Sans';
-  src: url('/app/fonts/instrument_sans/InstrumentSans.woff2') format('woff2');
+  font-family: 'Inter';
+  src: url('/app/fonts/inter/Inter.woff2') format('woff2');
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 100 900;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Instrument Sans';
-  src: url('/app/fonts/instrument_sans/InstrumentSans_Italic.woff2') format('woff2');
+  font-family: 'Inter';
+  src: url('/app/fonts/inter/Inter_Italic.woff2') format('woff2');
   font-style: italic;
-  font-weight: 400 700;
+  font-weight: 100 900;
   font-display: swap;
 }
