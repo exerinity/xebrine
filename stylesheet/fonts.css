@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Instrument Sans';
-  src: url('/app/fonts/instrument-sans/InstrumentSans.woff2') format('woff2');
+  src: url('/app/fonts/instrument_sans/InstrumentSans.woff2') format('woff2');
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
@@ -8,7 +8,7 @@
 
 @font-face {
   font-family: 'Instrument Sans';
-  src: url('/app/fonts/instrument-sans/InstrumentSans-Italic.woff2') format('woff2');
+  src: url('/app/fonts/instrument_sans/InstrumentSans_Italic.woff2') format('woff2');
   font-style: italic;
   font-weight: 400 700;
   font-display: swap;
