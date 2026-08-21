@@ -11,6 +11,15 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '11',
+    date: '2026-08-22',
+    notes: [
+      <>The Search LRCLIB button on <Link to="/lyrics">lyrics</Link> has been completely redone: instead of simply resending a query, it opens a suite to search LRCLIB</>,
+      'The album detail page cover art modal has been improved with action buttons and a 3D rotate on hover',
+      'The font has been changed to Inter and will be timely smoothened out'
+    ]
+  },
+  {
     version: '10',
     date: '2026-08-13',
     notes: [
