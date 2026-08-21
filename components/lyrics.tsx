@@ -2,7 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../context/player_context';
 import { useSettings } from '../context/settings_context';
-import { fetchLyrics } from '../api/lrclib';
+import {
+  fetchLyrics,
+  LrclibError,
+  lyricsFromLrclibRecord,
+  type LrclibRecord
+} from '../api/lrclib';
 import { parseLyricsFile, toLrc } from '../utils/lyrics';
 import { dbDelete, dbGet, dbPut } from '../management/db';
 import { containsProfanity } from '../utils/profanity';
@@ -13,10 +18,11 @@ import type { Lyrics, StoredLyrics, TrackMeta } from '../types';
 import { LyricsSkeleton } from './skeletons';
 import { Spinner } from './spinner';
 import { Modal } from './modal';
+import { LrclibSearchModal } from './lrclib_search_modal';
 import { ContextMenu, type ContextMenuItem } from './context_menu';
 import { DownloadIcon, NoteIcon, SearchIcon, ShareIcon, TrashIcon, UploadIcon } from './icons';
 
-type Status = 'idle' | 'waiting' | 'loading' | 'notfound' | 'error' | 'badfile';
+type Status = 'idle' | 'waiting' | 'loading' | 'notfound' | 'error' | 'ratelimited' | 'badfile';
 const AUTO_SEARCH_DELAY_MS = 2000;
 const NUDGE_SECONDS = 5;
 const HEADING_MAX = 25;
@@ -27,6 +33,7 @@ const STATUS_TEXT: Record<Exclude<Status, 'idle'>, string> = {
   loading: 'Searching LRCLIB...',
   notfound: 'No lyrics found',
   error: 'LRCLIB request failed - are you online?',
+  ratelimited: 'LRCLIB is rate limiting you - slow down!',
   badfile: 'Could not read any lyrics from that file'
 };
 
@@ -60,6 +67,7 @@ export function LyricsPanel({
   const [lyrics, setLyrics] = useState<Lyrics | null>(null);
   const [status, setStatus] = useState<Status>('idle');
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [lrclibSearchOpen, setLrclibSearchOpen] = useState(false);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteText, setPasteText] = useState('');
   const [menu, setMenu] = useState<{ x: number; y: number; index: number } | null>(null);
@@ -70,8 +78,10 @@ export function LyricsPanel({
   const userScrollUntil = useRef(0);
   const requestAbortRef = useRef<AbortController | null>(null);
   const menuOpenRef = useRef(false);
+  const trackIdRef = useRef(track?.id);
 
   menuOpenRef.current = menu !== null;
+  trackIdRef.current = track?.id;
 
   const runSearch = useCallback(
     async (target: TrackMeta, signal: AbortSignal) => {
@@ -90,20 +100,10 @@ export function LyricsPanel({
       } catch (error) {
         if (signal.aborted || isAbortError(error)) return;
         setLyrics(null);
-        setStatus('error');
+        setStatus(error instanceof LrclibError && error.status === 429 ? 'ratelimited' : 'error');
       }
     },
     [settings.lrclibMode]
-  );
-
-  const search = useCallback(
-    async (target: TrackMeta) => {
-      requestAbortRef.current?.abort();
-      const controller = new AbortController();
-      requestAbortRef.current = controller;
-      await runSearch(target, controller.signal);
-    },
-    [runSearch]
   );
 
   useEffect(() => {
@@ -111,6 +111,7 @@ export function LyricsPanel({
     setLyrics(null);
     setStatus('idle');
     setActiveIndex(-1);
+    setLrclibSearchOpen(false);
     setMenu(null);
     if (!track) return;
     let cancelled = false;
@@ -185,6 +186,19 @@ export function LyricsPanel({
     requestAbortRef.current = null;
     setStatus('idle');
   }, []);
+
+  const applyLrclibRecord = async (record: LrclibRecord) => {
+    if (!track) return;
+    const targetId = track.id;
+    const found = lyricsFromLrclibRecord(record);
+    if (!found) throw new Error('That LRCLIB entry has no usable synced or plain lyrics');
+    preferUserLyrics();
+    await dbPut('lyrics', { trackId: targetId, lyrics: found } satisfies StoredLyrics);
+    if (trackIdRef.current !== targetId) return;
+    setLyrics(found);
+    setStatus('idle');
+    setLrclibSearchOpen(false);
+  };
 
   const importFile = useCallback(async (file: File) => {
     if (!ACCEPTED_LYRICS_FILE.test(file.name)) {
@@ -288,9 +302,16 @@ export function LyricsPanel({
     <div className={`xe_lyrics-panel xe_lyrics-panel--${variant}`}>
       {showToolbar && (
         <div className="xe_lyrics-panel__toolbar">
-          <button type="button" className="xe_btn" onClick={() => search(track)} disabled={status === 'loading'}>
+          <button
+            type="button"
+            className="xe_btn"
+            onClick={() => {
+              preferUserLyrics();
+              setLrclibSearchOpen(true);
+            }}
+          >
             <SearchIcon size={14} />
-            Search LRCLIB ({settings.lrclibMode})
+            Search LRCLIB
           </button>
           <button type="button" className="xe_btn" onClick={() => fileInputRef.current?.click()}>
             <UploadIcon size={14} />
@@ -336,6 +357,14 @@ export function LyricsPanel({
           e.target.value = '';
         }}
       />
+
+      {lrclibSearchOpen && (
+        <LrclibSearchModal
+          track={track}
+          onSelect={applyLrclibRecord}
+          onClose={() => setLrclibSearchOpen(false)}
+        />
+      )}
 
       {pasteOpen && (
         <Modal
