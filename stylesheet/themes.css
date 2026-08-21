@@ -8,7 +8,7 @@
   --danger: #ff7c8a;
 }
 
-:root[data-theme='adaptive'] .xe_app {
+:root[data-theme='adaptive'] .xe_xebrine {
   --bg: color-mix(in srgb, #05070d 88%, var(--accent) 12%);
   --panel: color-mix(in srgb, #0a0d15 85%, var(--accent) 15%);
   --panel-2: color-mix(in srgb, #171d2a 74%, var(--accent) 26%);
@@ -108,7 +108,7 @@
   --danger: #ff5c5c;
 }
 
-:root[data-theme='adaptive'] .xe_app {
+:root[data-theme='adaptive'] .xe_xebrine {
   --adaptive-glow-core: color-mix(in srgb, var(--accent-glow) 50%, var(--panel) 50%);
   --adaptive-glow-soft: color-mix(in srgb, var(--accent-wash) 55%, var(--panel) 45%);
 }
