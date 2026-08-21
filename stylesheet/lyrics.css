@@ -54,7 +54,7 @@
 
 .xe_lyrics-header__title {
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .xe_lyrics-header__subtitle {
@@ -107,6 +107,321 @@
   gap: 8px;
 }
 
+.xe_lrclib-search {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: min(620px, calc(88vh - 94px));
+}
+
+.xe_lrclib-search__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.xe_lrclib-search__mode-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.xe_lrclib-search__legend,
+.xe_lrclib-search__field > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.xe_lrclib-search__modes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.xe_lrclib-search__mode {
+  position: relative;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.xe_lrclib-search__mode input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.xe_lrclib-search__mode span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--panel);
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.xe_lrclib-search__mode:hover span {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.xe_lrclib-search__mode input:checked + span {
+  border-color: var(--accent-bright);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.xe_lrclib-search__mode input:focus-visible + span {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+}
+
+.xe_lrclib-search__hint {
+  min-height: 17px;
+  margin: -4px 0 0;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.xe_lrclib-search__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.xe_lrclib-search__field {
+  min-width: 0;
+}
+
+.xe_lrclib-search__field--wide {
+  grid-column: 1 / -1;
+}
+
+.xe_lrclib-search__field input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  outline: none;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+}
+
+.xe_lrclib-search__field input:focus {
+  border-color: var(--accent-bright);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.xe_lrclib-search__actions,
+.xe_lrclib-search__actions-start {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.xe_lrclib-search__actions {
+  justify-content: space-between;
+  padding-top: 2px;
+}
+
+.xe_lrclib-search__validation {
+  margin: -4px 0 0;
+  color: var(--accent-text);
+  font-size: 11px;
+}
+
+.xe_lrclib-search__actions-start {
+  flex-wrap: wrap;
+}
+
+.xe_lrclib-search__results {
+  display: flex;
+  flex: 1;
+  min-height: 150px;
+  flex-direction: column;
+}
+
+.xe_lrclib-search__status,
+.xe_lrclib-search__empty,
+.xe_lrclib-search__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 120px;
+  margin: 0;
+  padding: 18px;
+  border-radius: 10px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.xe_lrclib-search__error {
+  min-height: auto;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
+  background: color-mix(in srgb, var(--danger) 9%, transparent);
+  color: var(--text);
+}
+
+.xe_lrclib-search__results-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 2px 9px;
+}
+
+.xe_lrclib-search__results-header span {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.xe_lrclib-search__result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 45vh;
+  margin: 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-width: thin;
+}
+
+.xe_lrclib-search__result {
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--panel-2) 26%, transparent);
+}
+
+.xe_lrclib-search__result-main {
+  padding: 12px;
+}
+
+.xe_lrclib-search__result-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.xe_lrclib-search__result-heading > div {
+  min-width: 0;
+}
+
+.xe_lrclib-search__result-heading h3,
+.xe_lrclib-search__result-heading p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.xe_lrclib-search__result-heading h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.xe_lrclib-search__result-heading p {
+  margin: 3px 0 0;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.xe_lrclib-search__result-heading .xe_btn {
+  flex: none;
+}
+
+.xe_lrclib-search__metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.xe_lrclib-search__metadata span {
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-size: 10px;
+}
+
+.xe_lrclib-search__preview {
+  margin-top: 9px;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.xe_lrclib-search__preview summary {
+  width: max-content;
+  cursor: pointer;
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.xe_lrclib-search__preview > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 7px;
+  padding: 8px 10px;
+  border-left: 2px solid var(--accent);
+  background: var(--panel);
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .xe_lrclib-search {
+    min-height: 0;
+  }
+
+  .xe_lrclib-search__modes,
+  .xe_lrclib-search__fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .xe_lrclib-search__actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .xe_lrclib-search__actions > .xe_btn {
+    justify-content: center;
+  }
+
+  .xe_lrclib-search__actions-start {
+    justify-content: center;
+  }
+
+  .xe_lrclib-search__result-heading {
+    flex-direction: column;
+  }
+
+  .xe_lrclib-search__result-heading .xe_btn {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
 .xe_lyrics-panel__badge {
   color: var(--text-dim);
   font-size: 12px;
@@ -155,6 +470,7 @@
   color: var(--text-dim);
   border-radius: 8px;
   transition: color 160ms ease, transform 160ms ease;
+  font-weight: 500;
 }
 
 .xe_lyrics-panel--fullscreen .xe_lyrics-line {
