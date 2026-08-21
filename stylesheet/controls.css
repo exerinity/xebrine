@@ -325,10 +325,6 @@
   border-color: var(--accent);
 }
 
-.xe_sleep-pill__label {
-  font-variant-numeric: tabular-nums;
-}
-
 @keyframes xe_sleep-panel-in {
   from {
     opacity: 0;
@@ -398,7 +394,7 @@
 
 .xe_sleep-panel__status strong {
   color: var(--text);
-  font-variant-numeric: tabular-nums;
+  
 }
 
 .xe_sleep-panel__quick {
