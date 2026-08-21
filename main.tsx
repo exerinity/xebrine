@@ -18,8 +18,8 @@ if (!redirectingToNewDomain) {
 }
 
 function revealApp() {
-  document.documentElement.classList.add('xe-ready');
-  const splash = document.getElementById('xebrine-splash');
+  document.documentElement.classList.add('xebrine_initialized');
+  const splash = document.getElementById('xebrine_splash');
   if (splash) {
     const remove = () => splash.remove();
     splash.addEventListener('transitionend', remove, { once: true });
