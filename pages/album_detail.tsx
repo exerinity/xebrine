@@ -98,7 +98,7 @@ export function AlbumDetailPage() {
               title={`Go to ${album.artist}`}
               onClick={() => navigate(`/artists/${toSlugParam(album.artist)}`)}
             >
-              <strong>{album.artist}</strong>
+              by <strong>{album.artist}</strong>
             </button>
             {album.year ? ` / released ${album.year}` : ''} / {album.tracks.length} track
             {album.tracks.length === 1 ? '' : 's'} / {formatTime(total)} total
