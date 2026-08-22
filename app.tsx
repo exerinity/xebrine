@@ -122,6 +122,13 @@ function Shell() {
   );
 
   useEffect(() => {
+    document.documentElement.style.setProperty('--xe-active-accent', accent.accent);
+    return () => {
+      document.documentElement.style.removeProperty('--xe-active-accent');
+    };
+  }, [accent.accent]);
+
+  useEffect(() => {
     document.documentElement.classList.toggle('xe_reduced-motion', settings.reducedMotion);
   }, [settings.reducedMotion]);
 
