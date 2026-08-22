@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLibrary } from '../context/library_context';
 import { formatEta, formatRate, useScanStats } from '../hooks/scan_eta';
@@ -14,6 +14,9 @@ export function ScanDrawer() {
   const [shownReport, setShownReport] = useState(scanReport);
   const [stopping, setStopping] = useState(false);
   const [listOpen, setListOpen] = useState(false);
+  const [fileNameOnly, setFileNameOnly] = useState(false);
+  const fileLineRef = useRef<HTMLDivElement>(null);
+  const fullPathRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (scanning) setShown(scanning);
@@ -45,6 +48,23 @@ export function ScanDrawer() {
   const indeterminate = !info || info.total <= 0;
   const percent = indeterminate ? 0 : Math.round((info!.done / info!.total) * 100);
   const skippedCount = report?.skipped.length ?? 0;
+  const currentFilePath = report ? '' : (info?.currentFilePath ?? '');
+  const currentFileName = currentFilePath.split('/').pop() ?? currentFilePath;
+
+  useLayoutEffect(() => {
+    const line = fileLineRef.current;
+    const fullPath = fullPathRef.current;
+    if (!line || !fullPath || !currentFilePath) {
+      setFileNameOnly(false);
+      return;
+    }
+
+    const measure = () => setFileNameOnly(fullPath.getBoundingClientRect().width > line.clientWidth);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(line);
+    return () => observer.disconnect();
+  }, [currentFilePath]);
 
   return (
     <>
@@ -62,7 +82,7 @@ export function ScanDrawer() {
             title={report ? 'Dismiss' : 'Stop scanning here'}
             aria-label={report ? 'Dismiss' : 'Stop scanning here'}
           >
-            {report ? 'Dismiss' : stopping ? 'Stopping...' : 'Stop'}
+            {report ? 'Dismiss' : stopping ? 'Aborting...' : 'Abort'}
           </button>
         </div>
         {!report && (
@@ -91,17 +111,25 @@ export function ScanDrawer() {
             <>
               <span className="xe_scan-drawer__count">
                 {indeterminate
-                  ? 'Initializing...'
-                  : `${info!.done}/${info!.total} read${info!.omitted > 0 ? ` - ${info!.omitted} excl` : ''}`}
+                  ? 'Starting scan, one moment...'
+                  : `${info!.done}/${info!.total} ${info!.omitted > 0 ? ` - ${info!.omitted} excl` : ''}`}
                 {rate !== null && !indeterminate && ` - ${formatRate(rate)}/s`}
                 {!indeterminate &&
                   info!.audioSeconds > 0 &&
-                  ` - ${formatDurationShort(info!.audioSeconds)} pback`}
+                  ` - ${formatDurationShort(info!.audioSeconds)}`}
               </span>
               {eta !== null && <span className="xe_scan-drawer__eta">{formatEta(eta)}</span>}
             </>
           )}
         </div>
+        {!report && currentFilePath && (
+          <div className="xe_scan-drawer__file" ref={fileLineRef} title={currentFilePath}>
+            <span className="xe_scan-drawer__file-measure" ref={fullPathRef} aria-hidden="true">
+              {currentFilePath}
+            </span>
+            <span>{fileNameOnly ? currentFileName : currentFilePath}</span>
+          </div>
+        )}
       </div>
       {listOpen &&
         scanReport &&
