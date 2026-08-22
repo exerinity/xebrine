@@ -52,6 +52,7 @@ export interface Settings {
   artistPronunciations: ArtistPronunciation[];
   tagExplicitSongs: boolean;
   theme: ThemeId;
+  showBackgroundIcon: boolean;
   searchEngine: SearchEngineId;
   customSearchUrl: string;
   pageKeyMode: PageKeyMode;
@@ -93,6 +94,7 @@ export const DEFAULT_SETTINGS: Settings = {
   artistPronunciations: [],
   tagExplicitSongs: false,
   theme: 'adaptive',
+  showBackgroundIcon: true,
   searchEngine: 'google',
   customSearchUrl: '',
   pageKeyMode: 'off',
