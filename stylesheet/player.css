@@ -344,7 +344,7 @@
 
 .xe_scan-drawer__title strong {
   color: var(--text);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .xe_scan-drawer__stop {
@@ -352,7 +352,7 @@
   padding: 2px 9px;
   border-radius: 6px;
   font-size: 10.5px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.02em;
   color: var(--text-dim);
   background: var(--panel-2);
@@ -419,6 +419,25 @@
 .xe_scan-drawer__eta {
   flex-shrink: 0;
   color: var(--accent-text);
+}
+
+.xe_scan-drawer__file {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-dim);
+  font-size: 10px;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.xe_scan-drawer__file-measure {
+  position: absolute;
+  display: block;
+  width: max-content;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .xe_scan-drawer__link {
