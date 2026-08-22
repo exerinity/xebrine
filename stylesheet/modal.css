@@ -1,4 +1,6 @@
 .xe_cover-modal {
+  --xe-modal-surface: color-mix(in srgb, #000 90%, var(--xe-active-accent, var(--accent)) 10%);
+  --xe-modal-surface-raised: color-mix(in srgb, #111 90%, var(--xe-active-accent, var(--accent)) 10%);
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -6,7 +8,7 @@
   align-items: center;
   justify-content: center;
   padding: 32px;
-  background: #00000053;
+  background: color-mix(in srgb, #00000053 92%, var(--xe-active-accent, var(--accent)) 8%);
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
   animation: cover-modal-in 140ms ease-out;
@@ -106,12 +108,12 @@
   white-space: nowrap;
   border-color: #292929;
   border-radius: 7px;
-  background: #0d0d0d;
+  background: var(--xe-modal-surface-raised);
   color: #ededed;
 }
 
 .xe_cover-modal__action:hover:not(:disabled) {
-  background: #171717;
+  background: color-mix(in srgb, #1a1a1a 88%, var(--xe-active-accent, var(--accent)) 12%);
 }
 
 .xe_cover-modal__close {
@@ -125,7 +127,7 @@
   align-items: center;
   justify-content: center;
   color: #a3a3a3;
-  background: #000;
+  background: var(--xe-modal-surface);
   border: 1px solid #292929;
   transition: border-color 120ms ease, color 120ms ease;
 }
@@ -136,6 +138,8 @@
 }
 
 .xe_modal-overlay {
+  --xe-modal-surface: color-mix(in srgb, #000 90%, var(--xe-active-accent, var(--accent)) 10%);
+  --xe-modal-surface-raised: color-mix(in srgb, #111 90%, var(--xe-active-accent, var(--accent)) 10%);
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -149,7 +153,7 @@
 
 .xe_modal-overlay--opaque {
   padding: 0;
-  background: #000;
+  background: var(--xe-modal-surface);
 }
 
 .xe_modal-overlay--closing {
@@ -168,8 +172,8 @@
 .xe_modal {
   --xe_modal-x: 0px;
   --xe_modal-y: 0px;
-  --panel: #000;
-  --panel-2: #111;
+  --panel: var(--xe-modal-surface);
+  --panel-2: var(--xe-modal-surface-raised);
   --border: #292929;
   --text: #f5f5f5;
   --text-dim: #9b9b9b;
@@ -184,7 +188,7 @@
   max-height: min(84vh, 760px);
   border: 1px solid #292929;
   border-radius: 10px;
-  background: #000;
+  background: var(--xe-modal-surface);
   color: #f5f5f5;
   overflow: hidden;
   transform: translate(var(--xe_modal-x), var(--xe_modal-y));
@@ -217,7 +221,7 @@
   min-height: 60px;
   padding: 12px 14px 12px 24px;
   border-bottom: 1px solid #202020;
-  background: #000;
+  background: var(--xe-modal-surface);
   cursor: move;
 }
 
@@ -236,7 +240,7 @@
 
 .xe_modal__header .xe_icon-btn:hover {
   border-color: #333;
-  background: #000;
+  background: var(--xe-modal-surface);
   color: #fff;
 }
 
@@ -276,12 +280,12 @@
 .xe_modal .xe_btn {
   border-color: #292929;
   border-radius: 7px;
-  background: #0d0d0d;
+  background: var(--xe-modal-surface-raised);
   color: #ededed;
 }
 
 .xe_modal .xe_btn:hover:not(:disabled) {
-  background: #171717;
+  background: color-mix(in srgb, #1a1a1a 88%, var(--xe-active-accent, var(--accent)) 12%);
 }
 
 .xe_modal .xe_btn--quiet {
@@ -290,7 +294,7 @@
 }
 
 .xe_modal .xe_btn--quiet:hover:not(:disabled) {
-  background: #0d0d0d;
+  background: var(--xe-modal-surface-raised);
   color: #fff;
 }
 
