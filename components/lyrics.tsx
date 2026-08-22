@@ -46,6 +46,11 @@ function lineHeading(text: string): string {
   return trimmed.length > HEADING_MAX ? `${trimmed.slice(0, HEADING_MAX)}...` : trimmed;
 }
 
+function editableLyricsText(lyrics: Lyrics | null): string {
+  if (!lyrics) return '';
+  return lyrics.synced ? toLrc(lyrics.lines) : lyrics.lines.map((line) => line.text).join('\n');
+}
+
 interface LyricsPanelProps {
   showToolbar?: boolean;
   variant?: 'page' | 'fullscreen';
@@ -317,7 +322,14 @@ export function LyricsPanel({
             <UploadIcon size={14} />
             Import LRC/SRT/VTT
           </button>
-          <button type="button" className="xe_btn" onClick={() => setPasteOpen(true)}>
+          <button
+            type="button"
+            className="xe_btn"
+            onClick={() => {
+              setPasteText(editableLyricsText(lyrics));
+              setPasteOpen(true);
+            }}
+          >
             <NoteIcon size={14} />
             Paste LRC/SRT/VTT
           </button>
