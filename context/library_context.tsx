@@ -27,6 +27,7 @@ const COVER_SCAN_CONCURRENCY = 3;
 
 interface ScanProgress {
   folderName: string;
+  currentFilePath: string;
   done: number;
   total: number;
   omitted: number;
@@ -124,7 +125,14 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     async (folder: FolderRecord) => {
       const controller = new AbortController();
       scanAbortRef.current = controller;
-      setScanning({ folderName: folder.name, done: 0, total: 0, omitted: 0, audioSeconds: 0 });
+      setScanning({
+        folderName: folder.name,
+        currentFilePath: '',
+        done: 0,
+        total: 0,
+        omitted: 0,
+        audioSeconds: 0
+      });
       setScanReport(null);
       let hidden = 0;
       let audioSeconds = 0;
@@ -137,6 +145,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
             if (Number.isFinite(track.duration)) audioSeconds += track.duration;
             setScanning({
               folderName: folder.name,
+              currentFilePath: [folder.name, ...track.relPath].join('/'),
               done,
               total,
               omitted: skippedByRules + hidden,
@@ -174,7 +183,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
           if (excluded > 0) {
             message += ` Excluded ${excluded} file${excluded === 1 ? '' : 's'} as per your ignore rules`;
           }
-          toast.success(message);
+          toast.success(message, 20000);
         }
         if (skipped.length > 0) setScanReport({ folderName: folder.name, skipped });
       } catch (err) {
