@@ -201,6 +201,61 @@
 
 .xe_main {
   grid-area: xe_main;
+  position: relative;
+  isolation: isolate;
   overflow: hidden;
   display: flex;
+}
+
+.xe_page-backdrops {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.xe_page-backdrop {
+  position: absolute;
+  right: -96px;
+  bottom: -118px;
+  width: 666px;
+  height: 666px;
+  color: var(--text);
+  opacity: 0.03;
+  transform: translateX(0) rotate(-8deg);
+  transform-origin: center;
+  animation: xe_page-backdrop-in 170ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.xe_page-backdrop svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.xe_page-backdrop--leaving {
+  animation: xe_page-backdrop-out 170ms cubic-bezier(0.4, 0, 0.8, 0.2) both;
+}
+
+@keyframes xe_page-backdrop-in {
+  from {
+    opacity: 0;
+    transform: translateX(760px) rotate(-3deg);
+  }
+  to {
+    opacity: 0.03;
+    transform: translateX(0) rotate(-8deg);
+  }
+}
+
+@keyframes xe_page-backdrop-out {
+  from {
+    opacity: 0.03;
+    transform: translateX(0) rotate(-8deg);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(760px) rotate(-3deg);
+  }
 }
