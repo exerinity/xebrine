@@ -1050,7 +1050,7 @@ export function SettingsPage() {
                   <Modal title="Filtered words" onClose={() => setShowFilteredWords(false)}>
                     <div className="xe_settings__chip-row">
                       {PROFANITY_WORDS.map((word) => (
-                        <span key={word} className="xe_settings__chip">
+                        <span key={word}>
                           {word}
                         </span>
                       ))}
