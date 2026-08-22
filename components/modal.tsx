@@ -133,10 +133,10 @@ export function Modal({ title = 'Xebrine', fullscreen = false, wide = false, onC
         onClick={(e) => e.stopPropagation()}
       >
         <div className="xe_modal__header" onPointerDown={startDrag}>
-          <h2 id={titleId} className="xe_modal__title">{title}</h2>
           <button type="button" className="xe_icon-btn" onClick={requestClose} title="Close" aria-label="Close">
             <CloseIcon size={18} />
           </button>
+          <h2 id={titleId} className="xe_modal__title">{title}</h2>
         </div>
         <div className="xe_modal__body">{children}</div>
       </div>

@@ -18,6 +18,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -32,6 +33,7 @@
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -70,12 +72,10 @@
   pointer-events: none;
   opacity: 0;
   background:
-    radial-gradient(
-      circle at var(--cover-shine-x) var(--cover-shine-y),
+    radial-gradient(circle at var(--cover-shine-x) var(--cover-shine-y),
       rgba(255, 255, 255, 0.32),
       rgba(255, 255, 255, 0.08) 22%,
-      transparent 48%
-    ),
+      transparent 48%),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.12), transparent 38%);
   mix-blend-mode: screen;
   transition: opacity 160ms ease;
@@ -214,15 +214,21 @@
 .xe_modal__header {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   min-height: 60px;
-  padding: 12px 14px 12px 24px;
+  padding: 12px 14px;
   border-bottom: 1px solid #202020;
   background: var(--xe-modal-surface);
   cursor: move;
+}
+
+.xe_modal__header::after {
+  content: '';
+  width: 34px;
+  height: 34px;
 }
 
 .xe_modal--fullscreen .xe_modal__header {
@@ -258,6 +264,7 @@
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.3;
+  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -268,6 +275,7 @@
   padding: 22px 24px 24px;
   overflow: auto;
   scrollbar-color: #333 #000;
+  user-select: text;
 }
 
 .xe_modal__actions {
@@ -319,6 +327,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -328,6 +337,7 @@
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -338,6 +348,7 @@
     opacity: 0;
     transform: translate(var(--xe_modal-x), calc(var(--xe_modal-y) + 8px));
   }
+
   to {
     opacity: 1;
     transform: translate(var(--xe_modal-x), var(--xe_modal-y));
@@ -348,6 +359,7 @@
   from {
     transform: translate(var(--xe_modal-x), var(--xe_modal-y));
   }
+
   to {
     transform: translate(var(--xe_modal-x), calc(var(--xe_modal-y) + 8px));
   }
@@ -357,12 +369,14 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .xe_cover-modal,
   .xe_modal-overlay,
   .xe_modal {
@@ -396,7 +410,7 @@
   }
 
   .xe_modal__header {
-    padding-left: 18px;
+    padding-inline: 12px;
   }
 
   .xe_modal__body {
