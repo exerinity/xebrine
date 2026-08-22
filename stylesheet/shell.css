@@ -225,13 +225,16 @@
   opacity: 0.03;
   transform: translateX(0) rotate(-8deg);
   transform-origin: center;
-  animation: xe_page-backdrop-in 170ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .xe_page-backdrop svg {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.xe_page-backdrop--entering {
+  animation: xe_page-backdrop-in 170ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .xe_page-backdrop--leaving {

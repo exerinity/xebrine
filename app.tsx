@@ -55,6 +55,7 @@ function KeyboardShortcuts({ toggleFullscreen }: { toggleFullscreen: () => void 
 }
 
 type NavItem = (typeof NAV_LINKS)[number];
+type BackdropPhase = 'entering' | 'visible' | 'leaving';
 
 function pageNavItem(pathname: string): NavItem | null {
   if (pathname === '/') return NAV_LINKS[0];
@@ -69,31 +70,40 @@ function PageIconBackdrop() {
   const { pathname } = useLocation();
   const item = pageNavItem(pathname);
   const requestedItemRef = useRef<NavItem | null>(item);
+  requestedItemRef.current = item;
   const [displayedItem, setDisplayedItem] = useState<NavItem | null>(item);
-  const [leaving, setLeaving] = useState(false);
+  const [phase, setPhase] = useState<BackdropPhase>('visible');
 
   useEffect(() => {
-    requestedItemRef.current = item;
+    if (phase !== 'visible') return;
     if (item?.path === displayedItem?.path) return;
-    if (displayedItem) setLeaving(true);
-    else setDisplayedItem(item);
-  }, [item, displayedItem]);
+    if (displayedItem) {
+      setPhase('leaving');
+    } else if (item) {
+      setDisplayedItem(item);
+      setPhase('entering');
+    }
+  }, [item, displayedItem, phase]);
 
-  useEffect(() => {
-    if (!leaving) return;
-    const timer = window.setTimeout(() => {
-      setDisplayedItem(requestedItemRef.current);
-      setLeaving(false);
-    }, 170);
-    return () => window.clearTimeout(timer);
-  }, [leaving]);
+  const finishAnimation = () => {
+    const requestedItem = requestedItemRef.current;
+    if (phase === 'leaving') {
+      setDisplayedItem(requestedItem);
+      setPhase(requestedItem ? 'entering' : 'visible');
+      return;
+    }
+    if (phase === 'entering') {
+      setPhase(requestedItem?.path === displayedItem?.path ? 'visible' : 'leaving');
+    }
+  };
 
   return (
     <div className="xe_page-backdrops" aria-hidden="true">
       {displayedItem && (
         <div
-          className={`xe_page-backdrop${leaving ? ' xe_page-backdrop--leaving' : ''}`}
+          className={`xe_page-backdrop xe_page-backdrop--${phase}`}
           key={displayedItem.path}
+          onAnimationEnd={finishAnimation}
         >
           <displayedItem.icon size={666} />
         </div>
