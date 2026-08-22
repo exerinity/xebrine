@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { SettingsProvider } from './context/settings_context';
 import { SetupFlowProvider } from './context/setup_flow_context';
 import { LibraryProvider } from './context/library_context';
@@ -32,7 +32,7 @@ import { ReleaseNotesPage } from './pages/release_notes';
 import { LastfmPage } from './pages/lastfm';
 import { RemotePage } from './pages/remote';
 import { SetupFlowPage } from './pages/setup_flow';
-import { Sidebar } from './components/sidebar';
+import { NAV_LINKS, Sidebar } from './components/sidebar';
 import { PlayerBar } from './components/player_bar';
 import { FullscreenPlayer } from './components/fs_player';
 import { ToastContainer } from './components/toast_container';
@@ -52,6 +52,54 @@ function MediaBridge() {
 function KeyboardShortcuts({ toggleFullscreen }: { toggleFullscreen: () => void }) {
   useKeyboardShortcuts({ toggleFullscreen });
   return null;
+}
+
+type NavItem = (typeof NAV_LINKS)[number];
+
+function pageNavItem(pathname: string): NavItem | null {
+  if (pathname === '/') return NAV_LINKS[0];
+  return (
+    NAV_LINKS.slice(1).find(
+      (item) => pathname === item.path || pathname.startsWith(`${item.path}/`)
+    ) ?? null
+  );
+}
+
+function PageIconBackdrop() {
+  const { pathname } = useLocation();
+  const item = pageNavItem(pathname);
+  const requestedItemRef = useRef<NavItem | null>(item);
+  const [displayedItem, setDisplayedItem] = useState<NavItem | null>(item);
+  const [leaving, setLeaving] = useState(false);
+
+  useEffect(() => {
+    requestedItemRef.current = item;
+    if (item?.path === displayedItem?.path) return;
+    if (displayedItem) setLeaving(true);
+    else setDisplayedItem(item);
+  }, [item, displayedItem]);
+
+  useEffect(() => {
+    if (!leaving) return;
+    const timer = window.setTimeout(() => {
+      setDisplayedItem(requestedItemRef.current);
+      setLeaving(false);
+    }, 170);
+    return () => window.clearTimeout(timer);
+  }, [leaving]);
+
+  return (
+    <div className="xe_page-backdrops" aria-hidden="true">
+      {displayedItem && (
+        <div
+          className={`xe_page-backdrop${leaving ? ' xe_page-backdrop--leaving' : ''}`}
+          key={displayedItem.path}
+        >
+          <displayedItem.icon size={666} />
+        </div>
+      )}
+    </div>
+  );
 }
 
 function Shell() {
@@ -107,6 +155,7 @@ function Shell() {
     >
       <Sidebar onOpenFullscreen={() => setFullscreenOpen(true)} />
       <main className="xe_main">
+        {settings.showBackgroundIcon && <PageIconBackdrop />}
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
