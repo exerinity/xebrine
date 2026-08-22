@@ -9,6 +9,7 @@ import {
 } from '../api/lrclib';
 import type { TrackMeta } from '../types';
 import { formatTime } from '../utils/format';
+import { FloatingInput } from './floating_input';
 import { SearchIcon } from './icons';
 import { Modal } from './modal';
 import { Spinner } from './spinner';
@@ -288,73 +289,67 @@ export function LrclibSearchModal({ track, onSelect, onClose }: LrclibSearchModa
 
           <div className="xe_lrclib-search__fields">
             {mode === 'keyword' && (
-              <label className="xe_lrclib-search__field xe_lrclib-search__field--wide">
-                <span>Query</span>
-                <input
-                  autoFocus
-                  value={draft.keyword}
-                  placeholder="avicii wake me up"
-                  onChange={(event) => set({ keyword: event.target.value })}
-                />
-              </label>
+              <FloatingInput
+                containerClassName="xe_lrclib-search__field xe_lrclib-search__field--wide"
+                label="Query"
+                autoFocus
+                value={draft.keyword}
+                placeholder="avicii wake me up"
+                onChange={(event) => set({ keyword: event.target.value })}
+              />
             )}
 
             {(mode === 'fields' || mode === 'signature') && (
               <>
-                <label className="xe_lrclib-search__field">
-                  <span>Title</span>
-                  <input
-                    autoFocus
-                    value={draft.trackName}
-                    onChange={(event) => set({ trackName: event.target.value })}
-                    placeholder="wake me up"
-                  />
-                </label>
-                <label className="xe_lrclib-search__field">
-                  <span>Artist</span>
-                  <input
-                    value={draft.artistName}
-                    onChange={(event) => set({ artistName: event.target.value })}
-                    placeholder="avicii"
-                  />
-                </label>
-                <label className="xe_lrclib-search__field">
-                  <span>Album</span>
-                  <input
-                    value={draft.albumName}
-                    onChange={(event) => set({ albumName: event.target.value })}
-                    placeholder="true"
-                  />
-                </label>
+                <FloatingInput
+                  containerClassName="xe_lrclib-search__field"
+                  label="Title"
+                  autoFocus
+                  value={draft.trackName}
+                  onChange={(event) => set({ trackName: event.target.value })}
+                  placeholder="wake me up"
+                />
+                <FloatingInput
+                  containerClassName="xe_lrclib-search__field"
+                  label="Artist"
+                  value={draft.artistName}
+                  onChange={(event) => set({ artistName: event.target.value })}
+                  placeholder="avicii"
+                />
+                <FloatingInput
+                  containerClassName="xe_lrclib-search__field"
+                  label="Album"
+                  value={draft.albumName}
+                  onChange={(event) => set({ albumName: event.target.value })}
+                  placeholder="true"
+                />
                 {mode === 'signature' && (
-                  <label className="xe_lrclib-search__field">
-                    <span>Duration (seconds)</span>
-                    <input
-                      inputMode="decimal"
-                      min="1"
-                      max="3600"
-                      step="0.1"
-                      type="number"
-                      value={draft.duration}
-                      onChange={(event) => set({ duration: event.target.value })}
-                      placeholder="249"
-                    />
-                  </label>
+                  <FloatingInput
+                    containerClassName="xe_lrclib-search__field"
+                    label="Duration (seconds)"
+                    inputMode="decimal"
+                    min="1"
+                    max="3600"
+                    step="0.1"
+                    type="number"
+                    value={draft.duration}
+                    onChange={(event) => set({ duration: event.target.value })}
+                    placeholder="249"
+                  />
                 )}
               </>
             )}
 
             {mode === 'id' && (
-              <label className="xe_lrclib-search__field xe_lrclib-search__field--wide">
-                <span>Entry ID</span>
-                <input
-                  autoFocus
-                  inputMode="numeric"
-                  value={draft.id}
-                  placeholder="22317263"
-                  onChange={(event) => set({ id: event.target.value })}
-                />
-              </label>
+              <FloatingInput
+                containerClassName="xe_lrclib-search__field xe_lrclib-search__field--wide"
+                label="Entry ID"
+                autoFocus
+                inputMode="numeric"
+                value={draft.id}
+                placeholder="22317263"
+                onChange={(event) => set({ id: event.target.value })}
+              />
             )}
           </div>
 
