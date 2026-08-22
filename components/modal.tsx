@@ -8,7 +8,7 @@ import {
   type ReactNode
 } from 'react';
 import { createPortal } from 'react-dom';
-import { CloseIcon, LogoIcon } from './icons';
+import { CloseIcon } from './icons';
 import { clamp } from '../utils/format';
 
 interface ModalProps {
@@ -21,15 +21,30 @@ interface ModalProps {
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const EXIT_DURATION_MS = 140;
 
 export function Modal({ title = 'Xebrine', fullscreen = false, wide = false, onClose, children }: ModalProps) {
   const titleId = useId();
   const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [closing, setClosing] = useState(false);
   const posRef = useRef(pos);
   const onCloseRef = useRef(onClose);
+  const closingRef = useRef(false);
+  const closeTimerRef = useRef<number | null>(null);
   posRef.current = pos;
   onCloseRef.current = onClose;
   const modalRef = useRef<HTMLDivElement | null>(null);
+
+  const requestClose = () => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    setClosing(true);
+    const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : EXIT_DURATION_MS;
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = null;
+      onCloseRef.current();
+    }, delay);
+  };
 
   useEffect(() => {
     const modal = modalRef.current;
@@ -40,7 +55,7 @@ export function Modal({ title = 'Xebrine', fullscreen = false, wide = false, onC
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onCloseRef.current();
+        requestClose();
         return;
       }
       if (event.key !== 'Tab' || !modal) return;
@@ -63,6 +78,7 @@ export function Modal({ title = 'Xebrine', fullscreen = false, wide = false, onC
     window.addEventListener('keydown', onKey);
     return () => {
       window.removeEventListener('keydown', onKey);
+      if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current);
       if (restoreFocus?.isConnected) restoreFocus.focus();
     };
   }, []);
@@ -97,8 +113,10 @@ export function Modal({ title = 'Xebrine', fullscreen = false, wide = false, onC
 
   return createPortal(
     <div
-      className={`xe_modal-overlay${fullscreen ? ' xe_modal-overlay--opaque' : ''}`}
-      onClick={onClose}
+      className={`xe_modal-overlay${fullscreen ? ' xe_modal-overlay--opaque' : ''}${
+        closing ? ' xe_modal-overlay--closing' : ''
+      }`}
+      onClick={requestClose}
     >
       <div
         ref={modalRef}
@@ -115,13 +133,8 @@ export function Modal({ title = 'Xebrine', fullscreen = false, wide = false, onC
         onClick={(e) => e.stopPropagation()}
       >
         <div className="xe_modal__header" onPointerDown={startDrag}>
-          <h2 id={titleId} className="xe_modal__title">
-            <span className="xe_modal__title-icon">
-              <LogoIcon size={14} />
-            </span>
-            <span className="xe_modal__title-text">{title}</span>
-          </h2>
-          <button type="button" className="xe_icon-btn" onClick={onClose} title="Close">
+          <h2 id={titleId} className="xe_modal__title">{title}</h2>
+          <button type="button" className="xe_icon-btn" onClick={requestClose} title="Close" aria-label="Close">
             <CloseIcon size={18} />
           </button>
         </div>
