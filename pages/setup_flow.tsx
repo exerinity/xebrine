@@ -213,8 +213,6 @@ export function SetupFlowPage() {
                   <Link to="/settings">the settings page</Link> - Xebrine has a fair few settings you can change.
                   <br></br>
                   And again - welcome aboard, and I hope you enjoy using Xebrine!
-                </p>
-                <p>
                   - <a href="https://exerinity.com" target="_blank">exerinity</a>
                 </p>
                 {tracks.length > 0 ? (
