@@ -495,6 +495,18 @@ export function SettingsPage() {
               </section>
 
               <section className="xe_settings__section">
+                <h2>Page background</h2>
+                <label className="xe_settings__radio">
+                  <input
+                    type="checkbox"
+                    checked={settings.showBackgroundIcon}
+                    onChange={(e) => update({ showBackgroundIcon: e.target.checked })}
+                  />
+                  <span>Show background icon</span>
+                </label>
+              </section>
+
+              <section className="xe_settings__section">
                 <h2>Player bar position</h2>
                 <label className="xe_settings__radio">
                   <input
