@@ -155,6 +155,8 @@ const RELEASES: Release[] = [
   }
 ];
 
+export const LATEST_VERSION = RELEASES[0].version;
+
 export function ReleaseNotesPage() {
   const navigate = useNavigate();
   usePageTitle('Release notes');
