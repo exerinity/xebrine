@@ -1,3 +1,7 @@
+.xe_search-toolbar {
+  min-height: 47px;
+}
+
 .xe_search-field--big {
   width: 100%;
   max-width: 460px;

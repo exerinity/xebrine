@@ -10,15 +10,34 @@ import { usePageTitle } from '../hooks/page_title';
 import { PlayIcon, SearchIcon, ShuffleIcon } from '../components/icons';
 import { buildSearchIndex, searchIndex } from '../utils/smart_search';
 
+const QUERY_KEY = 'xebrine.searchQuery';
+
+function loadQuery(): string {
+  try {
+    return localStorage.getItem(QUERY_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
 export function SearchPage() {
   const { tracks, scanning } = useLibrary();
   const { playNow, remoteLocked } = usePlayer();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(loadQuery);
   usePageTitle('Search');
 
   const index = useMemo(() => buildSearchIndex(tracks), [tracks]);
   const results = useMemo(() => searchIndex(index, query), [index, query]);
   const { visible: paged, hasMore, sentinelRef } = useInfiniteScroll(results);
+
+  const changeQuery = (value: string) => {
+    setQuery(value);
+    try {
+      localStorage.setItem(QUERY_KEY, value);
+    } catch {
+      null;
+    }
+  };
 
   const shuffleResults = () => {
     const order = intelligentShuffle(results, (t) => ({ id: t.id, artist: t.artist }), getRecentIds());
@@ -27,7 +46,7 @@ export function SearchPage() {
 
   return (
     <div className="xe_page">
-      <div className="xe_page__toolbar">
+      <div className="xe_page__toolbar xe_search-toolbar">
         <h1 className="xe_page__title">Search</h1>
         {query.trim() !== '' && results.length > 0 && (
           <>
@@ -52,7 +71,7 @@ export function SearchPage() {
           type="search"
           placeholder='Search...'
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => changeQuery(e.target.value)}
           autoFocus
         />
       </div>
