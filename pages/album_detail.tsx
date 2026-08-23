@@ -100,7 +100,7 @@ export function AlbumDetailPage() {
             >
               by <strong>{album.artist}</strong>
             </button>
-            {album.year ? ` / released ${album.year}` : ''} / {album.tracks.length} track
+            {album.year ? ` / ${album.year}` : ''} / {album.tracks.length} track
             {album.tracks.length === 1 ? '' : 's'} / {formatTime(total)} total
           </p>
           <div className="xe_album-hero__actions">
