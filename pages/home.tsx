@@ -10,6 +10,7 @@ import { useTrackMenu } from '../hooks/track_menu';
 import { toSlugParam } from '../utils/slug';
 import { AlbumCard } from './albums';
 import { ContextMenu } from '../components/context_menu';
+import { ScanStatusBanner } from '../components/scan_status_banner';
 import {
   FolderIcon,
   KeyIcon,
@@ -130,6 +131,8 @@ export function HomePage() {
       <div className="xe_home-greeting">
         <h1 className="xe_page__title">{getGreeting()}</h1>
       </div>
+
+      <ScanStatusBanner />
 
       {needsSetup && (
         <div className="xe_banner xe_home-setup-banner">
