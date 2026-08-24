@@ -4,7 +4,7 @@ import { usePlayer } from '../context/player_context';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { TrackList } from '../components/track_list';
-import { TrackListSkeleton } from '../components/skeletons';
+import { ScanStatusBanner } from '../components/scan_status_banner';
 import { SortSelect, type SortDirection, type SortOption } from '../components/sort_select';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { usePageTitle } from '../hooks/page_title';
@@ -150,6 +150,8 @@ export function LibraryPage() {
         <span className="xe_page__meta">{visible.length} tracks</span>
       </div>
 
+      <ScanStatusBanner />
+
       {permissionNeeded && (
         <div className="xe_banner">
           <span>Xebrine needs permission to read your music folders again.</span>
@@ -160,19 +162,19 @@ export function LibraryPage() {
         </div>
       )}
 
-      {tracks.length === 0 && !scanning ? (
-        <div className="xe_empty-hero">
-          <p>Your library is empty!</p>
-          <button type="button" className="xe_btn xe_btn--accent" onClick={() => void addFolder()}>
-            <FolderIcon size={14} />
-            Add a folder
-          </button>
-        </div>
+      {tracks.length === 0 ? (
+        !scanning && (
+          <div className="xe_empty-hero">
+            <p>Your library is empty!</p>
+            <button type="button" className="xe_btn xe_btn--accent" onClick={() => void addFolder()}>
+              <FolderIcon size={14} />
+              Add a folder
+            </button>
+          </div>
+        )
       ) : (
         <div className="xe_page__scroll">
-          {scanning ? (
-            <TrackListSkeleton rows={15} />
-          ) : visible.length === 0 ? (
+          {visible.length === 0 ? (
             <p className="xe_empty-note">No tracks match...</p>
           ) : (
             <>
