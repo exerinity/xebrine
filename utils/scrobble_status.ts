@@ -1,8 +1,8 @@
 export type ScrobbleStatus = 'off' | 'ready' | 'tracking' | 'sending' | 'scrobbled' | 'failed';
 
 export const SCROBBLE_STATUS_LABEL: Record<ScrobbleStatus, string> = {
-  off: 'Disabled',
-  ready: 'Ready',
+  off: 'Off',
+  ready: 'On',
   tracking: 'Scrobbling',
   sending: 'Sending...',
   scrobbled: 'Scrobbled',
