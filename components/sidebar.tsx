@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 
 import { Link, NavLink } from 'react-router-dom';
 import { usePlayer } from '../context/player_context';
 import { useRemote } from '../context/remote_context';
-import { LATEST_VERSION } from '../pages/release_notes';
 import { clamp } from '../utils/format';
 import {
   DiscIcon,
@@ -112,7 +111,7 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
     <nav className={`xe_nav${collapsed ? ' xe_nav--collapsed' : ''}`} style={{ width }}>
       <Link to="/i" className="xe_nav__logo" title="About Xebrine">
         <LogoIcon size={22} />
-        {!collapsed && <span>Xebrine {LATEST_VERSION}</span>}
+        {!collapsed && <span>Xebrine</span>}
       </Link>
       {NAV_LINKS.map((link) => (
         <NavLink
