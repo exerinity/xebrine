@@ -116,7 +116,10 @@ export function Modal({ title = 'Xebrine', fullscreen = false, wide = false, onC
       className={`xe_modal-overlay${fullscreen ? ' xe_modal-overlay--opaque' : ''}${
         closing ? ' xe_modal-overlay--closing' : ''
       }`}
-      onClick={requestClose}
+      onClick={(event) => {
+        event.stopPropagation();
+        requestClose();
+      }}
     >
       <div
         ref={modalRef}
