@@ -105,7 +105,7 @@ export function SleepTimerControl() {
       >
         <MoonIcon size={14} />
         <span className="xe_sleep-pill__label">
-          {active ? `${sleepTimerPaused ? 'Paused ' : ''}${formatTime(sleepTimerRemaining)}` : 'Sleep'}
+          {!active ? 'Sleep' : sleepTimerPaused ? 'Paused' : formatTime(sleepTimerRemaining)}
         </span>
       </button>
       {mounted &&
