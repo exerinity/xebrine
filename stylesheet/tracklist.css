@@ -27,10 +27,6 @@
   color: var(--accent-text);
 }
 
-.xe_track-table__row--skeleton:hover {
-  background: none;
-}
-
 .xe_track-table__cell {
   overflow: hidden;
   text-overflow: ellipsis;
