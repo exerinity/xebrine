@@ -1,18 +1,24 @@
 .xe_spinner {
   display: inline-block;
   flex-shrink: 0;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background:
-    conic-gradient(from 0deg, transparent 0%, var(--accent-text) 96%, var(--accent-text) 100%),
-    rgba(255, 255, 255, 0.07);
-  -webkit-mask: radial-gradient(farthest-side, transparent 76%, #000 79%);
-  mask: radial-gradient(farthest-side, transparent 76%, #000 79%);
-  filter: drop-shadow(0 0 2px var(--accent-glow, rgba(122, 92, 240, 0.65)));
-  animation: spin 0.85s linear infinite;
+  color: var(--accent-text);
+  vertical-align: -0.125em;
+  animation: xe_spinner-spin 600ms linear infinite;
+  transform-origin: center;
+  will-change: transform;
 }
 
-@keyframes spin {
+.xe_spinner__track {
+  stroke: currentColor;
+  opacity: 0.16;
+}
+
+.xe_spinner__arc {
+  stroke: currentColor;
+  stroke-dasharray: 42 60;
+}
+
+@keyframes xe_spinner-spin {
   to {
     transform: rotate(360deg);
   }
