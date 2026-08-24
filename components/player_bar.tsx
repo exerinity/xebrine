@@ -188,7 +188,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
     });
   };
 
-  const autoMixLabel = autoMixEnabled ? 'Enabled' : 'Disabled';
+  const autoMixLabel = autoMixEnabled ? 'On' : 'Off';
   const autoMixBusy = autoMixEnabled && (autoMixPhase === 'analyzing-current' || autoMixPhase === 'analyzing-next');
   const scrobbleMenuItems: ContextMenuItem[] = lastfm
     ? [
