@@ -10,6 +10,7 @@ import { getRecentIds } from '../queue/history';
 import { useAlbumArt } from '../hooks/album_art';
 import { LogoIcon, PlayIcon, PlusIcon, SearchIcon, ShuffleIcon } from '../components/icons';
 import { ContextMenu, type ContextMenuItem } from '../components/context_menu';
+import { ScanStatusBanner } from '../components/scan_status_banner';
 import { SortSelect, type SortDirection, type SortOption } from '../components/sort_select';
 import { toSlugParam } from '../utils/slug';
 import { useScrollRestoration } from '../hooks/scroll_restoration';
@@ -237,6 +238,7 @@ export function AlbumsPage() {
         />
         <span className="xe_page__meta">{albums.length} albums</span>
       </div>
+      <ScanStatusBanner />
       {visible.length === 0 ? (
         <p className="xe_empty-note">
           {tracks.length === 0 ? 'Your library is empty!' : 'No albums match...'}
