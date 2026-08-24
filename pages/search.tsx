@@ -4,7 +4,7 @@ import { usePlayer } from '../context/player_context';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { TrackList } from '../components/track_list';
-import { TrackListSkeleton } from '../components/skeletons';
+import { ScanStatusBanner } from '../components/scan_status_banner';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { usePageTitle } from '../hooks/page_title';
 import { PlayIcon, SearchIcon, ShuffleIcon } from '../components/icons';
@@ -21,7 +21,7 @@ function loadQuery(): string {
 }
 
 export function SearchPage() {
-  const { tracks, scanning } = useLibrary();
+  const { tracks } = useLibrary();
   const { playNow, remoteLocked } = usePlayer();
   const [query, setQuery] = useState(loadQuery);
   usePageTitle('Search');
@@ -64,6 +64,9 @@ export function SearchPage() {
           </>
         )}
       </div>
+
+      <ScanStatusBanner />
+
       <div className="xe_search-field xe_search-field--big">
         <SearchIcon size={16} />
         <input
@@ -76,11 +79,7 @@ export function SearchPage() {
         />
       </div>
 
-      {query.trim() === '' ? null : scanning ? (
-        <div className="xe_page__scroll">
-          <TrackListSkeleton rows={10} />
-        </div>
-      ) : results.length === 0 ? (
+      {query.trim() === '' ? null : results.length === 0 ? (
         <p className="xe_empty-note">No matches for "{query}"...</p>
       ) : (
         <div className="xe_page__scroll">
