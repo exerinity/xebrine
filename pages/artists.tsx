@@ -11,6 +11,7 @@ import { toSlugParam } from '../utils/slug';
 import { toast } from '../utils/toast';
 import { SortSelect, type SortDirection, type SortOption } from '../components/sort_select';
 import { ContextMenu, type ContextMenuItem } from '../components/context_menu';
+import { ScanStatusBanner } from '../components/scan_status_banner';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { usePageTitle } from '../hooks/page_title';
 import { SearchIcon } from '../components/icons';
@@ -152,6 +153,7 @@ export function ArtistsPage() {
         />
         <span className="xe_page__meta">{artists.length} artists</span>
       </div>
+      <ScanStatusBanner />
       {visible.length === 0 ? (
         <p className="xe_empty-note">
           {tracks.length === 0 ? 'Your library is empty!' : 'No artists match...'}
