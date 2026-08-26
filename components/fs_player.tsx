@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { usePlayer } from '../context/player_context';
 import { useSettings } from '../context/settings_context';
 import { useAlbumArt } from '../hooks/album_art';
@@ -11,6 +11,7 @@ import { CloseIcon, LogoIcon, PauseIcon, PlayIcon } from './icons';
 
 interface FullscreenPlayerProps {
   open: boolean;
+  playerBarCollapsed: boolean;
   onClose(): void;
 }
 
@@ -19,12 +20,10 @@ const EXIT_DURATION_MS = 200;
 function TrackPreviewCard({
   item,
   onPlay,
-  primary,
   title
 }: {
   item: QueueItem;
   onPlay(): void;
-  primary?: boolean;
   title?: string;
 }) {
   const artUrl = useAlbumArt(item.track.id, item.track);
@@ -32,25 +31,22 @@ function TrackPreviewCard({
   return (
     <button
       type="button"
-      className={`xe_fullscreen-player__track-card${primary ? ' xe_fullscreen-player__track-card--primary' : ''}`}
+      className="xe_fullscreen-player__track-card"
       onClick={onPlay}
       title={title}
     >
       <span className="xe_fullscreen-player__track-art">
-        {artUrl ? <img src={artUrl} alt="" /> : <LogoIcon size={primary ? 24 : 18} />}
+        {artUrl ? <img src={artUrl} alt="" /> : <LogoIcon size={18} />}
       </span>
       <span className="xe_fullscreen-player__track-copy">
         <ScrollingText text={item.track.title} className="xe_fullscreen-player__track-title" />
         <ScrollingText text={item.track.artist} className="xe_fullscreen-player__track-artist" />
       </span>
-      {primary && (
-        <span className="xe_fullscreen-player__track-duration">{formatTime(item.track.duration)}</span>
-      )}
     </button>
   );
 }
 
-export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
+export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: FullscreenPlayerProps) {
   const {
     current,
     queue,
@@ -138,6 +134,24 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
     else playNow([displayJustPlayed.track], 0);
   };
 
+  const tiltCover = (event: MouseEvent<HTMLButtonElement>) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width;
+    const y = (event.clientY - bounds.top) / bounds.height;
+
+    event.currentTarget.style.setProperty('--cover-rotate-x', `${(y - 0.5) * 10}deg`);
+    event.currentTarget.style.setProperty('--cover-rotate-y', `${(0.5 - x) * 10}deg`);
+    event.currentTarget.style.setProperty('--cover-shine-x', `${x * 100}%`);
+    event.currentTarget.style.setProperty('--cover-shine-y', `${y * 100}%`);
+  };
+
+  const resetCoverTilt = (event: MouseEvent<HTMLButtonElement>) => {
+    event.currentTarget.style.setProperty('--cover-rotate-x', '0deg');
+    event.currentTarget.style.setProperty('--cover-rotate-y', '0deg');
+    event.currentTarget.style.setProperty('--cover-shine-x', '50%');
+    event.currentTarget.style.setProperty('--cover-shine-y', '18%');
+  };
+
   return (
     <section
       className={`xe_fullscreen-player${leaving ? ' xe_fullscreen-player--leaving' : ''}`}
@@ -173,6 +187,8 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
               type="button"
               className="xe_fullscreen-player__cover"
               onClick={onClose}
+              onMouseMove={tiltCover}
+              onMouseLeave={resetCoverTilt}
               title="Close fullscreen player"
               aria-label="Close fullscreen player"
             >
@@ -180,36 +196,52 @@ export function FullscreenPlayer({ open, onClose }: FullscreenPlayerProps) {
             </button>
           </div>
           <div className="xe_fullscreen-player__identity">
-            <div className="xe_fullscreen-player__state">
+            <div
+              className={`xe_fullscreen-player__state${
+                playerBarCollapsed ? '' : ' xe_fullscreen-player__state--hidden'
+              }`}
+              aria-hidden={!playerBarCollapsed}
+            >
               {displayPlaying ? <PlayIcon size={14} /> : <PauseIcon size={14} />}
               <span>{formatTime(displayCurrentTime)} / {formatTime(displayDuration)}</span>
             </div>
             <ScrollingText text={displayTrack.title} className="xe_fullscreen-player__title" />
             <ScrollingText text={displayTrack.artist} className="xe_fullscreen-player__artist" />
-            <div className="xe_fullscreen-player__progress" aria-hidden="true">
+            <div
+              className={`xe_fullscreen-player__progress${
+                playerBarCollapsed ? '' : ' xe_fullscreen-player__progress--hidden'
+              }`}
+              aria-hidden="true"
+            >
               <span style={{ width: `${progress}%` }} />
             </div>
           </div>
         </section>
 
-        <section className="xe_fullscreen-player__panel xe_fullscreen-player__lyrics" aria-label="Lyrics">
+        <section
+          className="xe_fullscreen-player__panel xe_fullscreen-player__lyrics"
+          aria-label="Lyrics, up next and just played"
+        >
           <h2>Lyrics</h2>
           <LyricsPanel showToolbar={false} variant="fullscreen" />
-        </section>
-
-        <section className="xe_fullscreen-player__panel xe_fullscreen-player__queue" aria-label="Up next and just played">
-          <h2>Up next</h2>
-          {nextItem ? (
-            <TrackPreviewCard item={nextItem} onPlay={() => jumpTo(displayPosition + 1)} primary />
-          ) : (
-            <p className="xe_empty-note">Nothing up next</p>
-          )}
-          {displayJustPlayed && (
-            <>
-              <h2 className="xe_fullscreen-player__queue-subheading">Just played</h2>
-              <TrackPreviewCard item={displayJustPlayed} onPlay={backToJustPlayed} title="Back to this track" />
-            </>
-          )}
+          <div className="xe_fullscreen-player__queue" aria-label="Queue preview">
+            <div className="xe_fullscreen-player__queue-item">
+              <h3>Up next</h3>
+              {nextItem ? (
+                <TrackPreviewCard item={nextItem} onPlay={() => jumpTo(displayPosition + 1)} />
+              ) : (
+                <p className="xe_empty-note">Nothing up next</p>
+              )}
+            </div>
+            <div className="xe_fullscreen-player__queue-item">
+              <h3>Just played</h3>
+              {displayJustPlayed ? (
+                <TrackPreviewCard item={displayJustPlayed} onPlay={backToJustPlayed} title="Back to this track" />
+              ) : (
+                <p className="xe_empty-note">Nothing yet</p>
+              )}
+            </div>
+          </div>
         </section>
       </div>
     </section>
