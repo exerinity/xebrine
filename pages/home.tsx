@@ -149,7 +149,7 @@ export function HomePage() {
 
       {permissionNeeded && (
         <div className="xe_banner">
-          <span>Xebrine needs permission to read your music folders again.</span>
+          <span>Xebrine needs permission to read your music folders again. If you can, click "Allow on every visit"</span>
           <button type="button" className="xe_btn xe_btn--accent" onClick={() => void restoreAccess()}>
             <KeyIcon size={14} />
             Restore access
