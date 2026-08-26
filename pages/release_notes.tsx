@@ -11,6 +11,14 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '12',
+    date: '2026-08-27',
+    notes: [
+      'The favicon now updates with the accent color',
+      'The fullscreen player has been reworked: instead of two cards (lyrics, just played + up next) that has been merged into one large card, and the album cover now has the same 3D rotate on hover effect'
+    ]
+  },
+  {
     version: '11',
     date: '2026-08-22',
     notes: [
