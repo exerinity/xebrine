@@ -14,6 +14,7 @@ import { useSpeechAnnouncements } from './hooks/speech_announcements';
 import { useQueueFinishedSound } from './hooks/queue_finished_sound';
 import { useScrobbler } from './hooks/scrobbler';
 import { useAccentColor } from './hooks/accent_color';
+import { useDynamicFavicon } from './hooks/dynamic_favicon';
 import { useKeyboardShortcuts } from './hooks/keyboard_shortcuts';
 import { usePageKeys } from './hooks/page_keys';
 import { HomePage } from './pages/home';
@@ -114,9 +115,11 @@ function PageIconBackdrop() {
 
 function Shell() {
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
+  const [playerBarCollapsed, setPlayerBarCollapsed] = useState(false);
   const { current, artworkUrl } = usePlayer();
   const { settings } = useSettings();
   const accent = useAccentColor(artworkUrl);
+  useDynamicFavicon(Boolean(current), accent.accent);
   usePageKeys(settings.pageKeyMode);
   const accentStyle = useMemo(
     () =>
@@ -196,9 +199,15 @@ function Shell() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <FullscreenPlayer open={fullscreenOpen} onClose={() => setFullscreenOpen(false)} />
+      <FullscreenPlayer
+        open={fullscreenOpen}
+        playerBarCollapsed={playerBarCollapsed}
+        onClose={() => setFullscreenOpen(false)}
+      />
       <PlayerBar
+        collapsed={playerBarCollapsed}
         fullscreenOpen={fullscreenOpen && Boolean(current)}
+        onCollapsedChange={setPlayerBarCollapsed}
         onToggleFullscreen={() => setFullscreenOpen((open) => !open)}
       />
       <MediaBridge />
