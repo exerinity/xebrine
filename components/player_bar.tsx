@@ -36,11 +36,18 @@ import { AutoMixDrawer } from './auto_mix_drawer';
 import { SleepTimerControl } from './sleep_timer';
 
 interface PlayerBarProps {
+  collapsed?: boolean;
   fullscreenOpen?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
   onToggleFullscreen?: () => void;
 }
 
-export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: PlayerBarProps) {
+export function PlayerBar({
+  collapsed = false,
+  fullscreenOpen = false,
+  onCollapsedChange,
+  onToggleFullscreen
+}: PlayerBarProps) {
   const navigate = useNavigate();
   const {
     current,
@@ -72,7 +79,6 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
   const [copiedField, setCopiedField] = useState<'title' | 'artist' | 'album' | null>(null);
   const copiedTimeoutRef = useRef<number | null>(null);
   const [visualizerOn, setVisualizerOn] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [nowEntering, setNowEntering] = useState(false);
   const [scrobbleMenu, setScrobbleMenu] = useState<{ x: number; y: number } | null>(null);
@@ -230,7 +236,7 @@ export function PlayerBar({ fullscreenOpen = false, onToggleFullscreen }: Player
         className={`xe_player-handle${collapsed ? ' xe_player-handle--collapsed' : ''}${
           playerAtTop ? ' xe_player-handle--top' : ''
         }`}
-        onClick={() => setCollapsed((value) => !value)}
+        onClick={() => onCollapsedChange?.(!collapsed)}
         title={collapsed ? 'Show the player' : 'Hide the player'}
         aria-label={collapsed ? 'Show the player' : 'Hide the player'}
         aria-expanded={!collapsed}
