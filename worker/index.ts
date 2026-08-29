@@ -37,12 +37,13 @@ function embed(value: unknown): string {
 
 function callbackPage(origin: string, payload: unknown): Response {
   const html = `<!doctype html><meta charset="utf-8"><title>xebrine</title>
-<body style="font:14px system-ui;background:#0f1115;color:#e6e8ee;padding:24px">
-<p>Finishing connection... this window should automatically close soon. If not, just close it.</p>
+<body style="font:14px system-ui;background:#000;color:#fff;padding:24px">
+<p>Connecting Xebrine to Last.fm...</p>
+<small>If this window doesn't close after a few seconds automatically, just close it</small>
 <script>
   var payload = ${embed(payload)};
   if (window.opener) window.opener.postMessage(payload, ${embed(origin)});
-  setTimeout(function () { window.close(); }, 1000);
+  setTimeout(function () { window.close(); }, 3000);
 </script>`;
   return new Response(html, {
     headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' }
@@ -85,7 +86,7 @@ function sessionKeyOf(body: Record<string, unknown>): string | null {
 
 async function routeRemote(request: Request, env: Env, path: string, url: URL): Promise<Response> {
   if (request.headers.get('Upgrade') !== 'websocket') {
-    return json({ error: 'This endpoint only accepts WebSocket connections' }, 426);
+    return json({ error: 'This service only accepts WebSocket connections!' }, 426);
   }
 
   const forward = (target: string): Request => {
@@ -124,14 +125,14 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
   if (path === `${PREFIX}/auth/callback`) {
     const token = url.searchParams.get('token');
     if (!token) {
-      return callbackPage(url.origin, { source: 'xebrine-lastfm', error: 'No token was returned' });
+      return callbackPage(url.origin, { source: 'xebrine-lastfm', error: 'Xebrine did not get a token back, try again?' });
     }
     try {
       const session = await getSession(env, token);
       return callbackPage(url.origin, { source: 'xebrine-lastfm', ...session });
     } catch (error) {
       const message =
-        error instanceof LastfmError ? error.message : 'Could not complete the Last.fm sign-in';
+        error instanceof LastfmError ? error.message : 'The connection did not complete, try again?';
       return callbackPage(url.origin, { source: 'xebrine-lastfm', error: message });
     }
   }
