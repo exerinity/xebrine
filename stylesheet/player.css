@@ -895,6 +895,12 @@ button.xe_scrubber__time:hover {
   --cover-rotate-y: 0deg;
   --cover-shine-x: 50%;
   --cover-shine-y: 18%;
+  --cover-deform-a: 1;
+  --cover-deform-b: 0;
+  --cover-deform-c: 0;
+  --cover-deform-d: 1;
+  --cover-drag-x: 0px;
+  --cover-drag-y: 0px;
   position: relative;
   width: 100%;
   height: 100%;
@@ -906,10 +912,29 @@ button.xe_scrubber__time:hover {
   color: var(--text-dim);
   background: var(--panel-2);
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.42);
-  transform: rotateX(var(--cover-rotate-x)) rotateY(var(--cover-rotate-y));
+  transform:
+    rotateX(var(--cover-rotate-x))
+    rotateY(var(--cover-rotate-y))
+    translate3d(var(--cover-drag-x), var(--cover-drag-y), 0)
+    matrix(
+      var(--cover-deform-a),
+      var(--cover-deform-b),
+      var(--cover-deform-c),
+      var(--cover-deform-d),
+      0,
+      0
+    );
   transform-style: preserve-3d;
   transition: transform 120ms ease-out;
   will-change: transform;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.xe_fullscreen-player__cover--deforming {
+  transition: none;
+  cursor: grabbing;
 }
 
 .xe_fullscreen-player__cover::after {
@@ -939,6 +964,8 @@ button.xe_scrubber__time:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  pointer-events: none;
+  -webkit-user-drag: none;
 }
 
 .xe_fullscreen-player__identity {
