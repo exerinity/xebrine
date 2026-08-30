@@ -34,7 +34,22 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  padding-bottom: calc(20px + var(--player-height));
+  scroll-padding-bottom: var(--player-height);
+}
+
+.xe_xebrine--player-top .xe_page {
+  padding-top: calc(20px + var(--player-height));
+}
+
+.xe_xebrine--player-top .xe_page__scroll,
+.xe_player-hidden .xe_page__scroll {
   padding-bottom: 20px;
+  scroll-padding-bottom: 0;
+}
+
+.xe_player-hidden .xe_xebrine--player-top .xe_page {
+  padding-top: 20px;
 }
 
 .xe_infinite-sentinel {
