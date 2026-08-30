@@ -28,6 +28,8 @@
 
 .xe_nav {
   grid-area: xe_nav;
+  grid-row: 1 / -1;
+  grid-column: 1;
   position: relative;
   background: var(--panel);
   border-right: 1px solid var(--border);
@@ -201,10 +203,25 @@
 
 .xe_main {
   grid-area: xe_main;
+  grid-row: 1 / -1;
+  grid-column: 2;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   display: flex;
+}
+
+.xe_xebrine:not(.xe_xebrine--player-top) .xe_nav {
+  padding-bottom: calc(16px + var(--player-height));
+}
+
+.xe_xebrine--player-top .xe_nav {
+  padding-top: calc(16px + var(--player-height));
+}
+
+.xe_player-hidden .xe_xebrine .xe_nav {
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
 
 .xe_page-backdrops {
