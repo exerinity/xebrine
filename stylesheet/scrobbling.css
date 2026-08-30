@@ -66,6 +66,47 @@
   flex-wrap: wrap;
 }
 
+.xe_scrobble-duration {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  gap: 9px;
+  margin: 3px 0 8px 26px;
+}
+
+.xe_scrobble-duration__input {
+  width: 96px;
+  height: 36px;
+  padding: 6px 8px 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  outline: none;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color-scheme: dark;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.xe_scrobble-duration__input:hover {
+  background: var(--panel-2);
+  border-color: color-mix(in srgb, var(--accent-bright) 45%, var(--border));
+}
+
+.xe_scrobble-duration__input:focus {
+  border-color: var(--accent-bright);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.xe_scrobble-duration__unit {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
 .xe_scrobble-list {
   list-style: none;
   margin: 0 0 12px;
