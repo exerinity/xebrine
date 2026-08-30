@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
 import { BackIcon, ChevronRightIcon, LogoIcon, NoteIcon } from '../components/icons';
@@ -31,9 +31,106 @@ type SectionId = 'info' | 'stats' | 'acknowledgements' | 'hotkeys';
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'info', label: 'About Xebrine' },
-  { id: 'stats', label: 'Library stats' },
+  { id: 'stats', label: 'Cool stats' },
   { id: 'acknowledgements', label: 'Acknowledgements' },
   { id: 'hotkeys', label: 'Hotkeys' }
+];
+
+interface Acknowledgement {
+  name: string;
+  url: string;
+  role: ReactNode;
+}
+
+const DEPENDENCY_ACKNOWLEDGEMENTS: { heading: string; items: Acknowledgement[] }[] = [
+  {
+    heading: 'Application',
+    items: [
+      { name: 'React', url: 'https://react.dev', role: 'React React React' },
+      { name: 'react-dom', url: 'https://react.dev', role: 'rendering' },
+      {
+        name: 'react-router-dom',
+        url: 'https://reactrouter.com',
+        role: 'routing, navigation'
+      },
+      {
+        name: 'music-metadata',
+        url: 'https://github.com/borewit/music-metadata',
+        role: 'audio metadata parser'
+      },
+      {
+        name: 'meSpeak',
+        url: 'https://github.com/mikolalysenko/mespeak',
+        role: 'the library used for the TTS announcer because the speech synthesis API is very inconsistent across devices'
+      }
+    ]
+  },
+  {
+    heading: 'Compilation',
+    items: [
+      { name: 'Vite', url: 'https://vite.dev', role: 'bundler' },
+      {
+        name: '@vitejs/plugin-react',
+        url: 'https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react',
+        role: 'React JSX transformation and Fast Refresh'
+      },
+      {
+        name: 'vite-plugin-pwa',
+        url: 'https://vite-pwa-org.netlify.app',
+        role: 'the thing that makes the pwa a pwa'
+      },
+      {
+        name: 'Workbox',
+        url: 'https://developer.chrome.com/docs/workbox',
+        role: 'precaching'
+      },
+      { name: 'TypeScript', url: 'https://www.typescriptlang.org', role: '75% of the codebase' }
+    ]
+  },
+  {
+    heading: 'Types',
+    items: [
+      {
+        name: '@types/react',
+        url: 'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react',
+        role: 'React definitions'
+      },
+      {
+        name: '@types/react-dom',
+        url: 'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react-dom',
+        role: 'React DOM definitions'
+      },
+      {
+        name: '@types/wicg-file-system-access',
+        url: 'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wicg-file-system-access',
+        role: 'File System Access API definitions'
+      }
+    ]
+  },
+  {
+    heading: 'Icon generation',
+    items: [
+      { name: 'ab_glyph', url: 'https://crates.io/crates/ab_glyph', role: 'font glyph loading / rendering' },
+      { name: 'image', url: 'https://crates.io/crates/image', role: 'PNG composition' },
+      {
+        name: 'yeslogic-fontconfig-sys',
+        url: 'https://crates.io/crates/yeslogic-fontconfig-sys',
+        role: 'system font discovery'
+      }
+    ]
+  }
+];
+
+const EXTERNAL_ACKNOWLEDGEMENTS: Acknowledgement[] = [
+  { name: 'LRCLIB', url: 'https://lrclib.net', role: 'lyrics' },
+  { name: 'Last.fm', url: 'https://www.last.fm', role: <Link to="/lastfm">scrobbling</Link> },
+  {
+    name: 'Cloudflare Workers',
+    url: 'https://workers.dev',
+    role: 'basically where this thing lives'
+  },
+  { name: 'Inter', url: 'https://rsms.me/inter/', role: 'font' },
+  { name: 'Voxity', url: 'https://voxity.dev', role: 'THE KING' }
 ];
 
 export function AboutPage() {
@@ -153,9 +250,9 @@ export function AboutPage() {
                     <LogoIcon size={60} />
                   </span>
                   <div>
-                    <h2 className="xe_about__name">Xebrine Alpha</h2>
+                    <h2 className="xe_about__name">Xebrine Beta</h2>
                     {isElectron && (
-                      <p className="xe_about__version">Desktop shell · Electron {electronVersion()}</p>
+                      <p className="xe_about__version">You are running Electron ({electronVersion()})</p>
                     )}
                   </div>
                 </div>
@@ -170,38 +267,6 @@ export function AboutPage() {
                 <p className="xe_about__text">
                     (No - Xebrine is not <i>replacing</i> Voxity nor am I canning it)
                 </p>
-
-                <h3 className="xe_about__heading">Stack</h3>
-                <ul className="xe_about__list xe_about__packages">
-                  <li>
-                    <code>react</code>
-                    <span>19.0.0</span>
-                  </li>
-                  <li>
-                    <code>react-dom</code>
-                    <span>19.0.0</span>
-                  </li>
-                  <li>
-                    <code>react-router-dom</code>
-                    <span>7.18.1</span>
-                  </li>
-                  <li>
-                    <code>vite</code>
-                    <span>6.3.0</span>
-                  </li>
-                  <li>
-                    <code>@vitejs/plugin-react</code>
-                    <span>4.4.0</span>
-                  </li>
-                  <li>
-                    <code>vite-plugin-pwa</code>
-                    <span>1.0.0</span>
-                  </li>
-                  <li>
-                    <code>typescript</code>
-                    <span>5.8.0</span>
-                  </li>
-                </ul>
 
                 <h3 className="xe_about__heading">Features</h3>
 
@@ -266,7 +331,7 @@ export function AboutPage() {
                 </p>
               ) : (
                 <>
-                  <h3 className="xe_about__heading">Back to back, your library runs for</h3>
+                  <h3 className="xe_about__heading">Your library has a runtime of...</h3>
                   <div className="xe_about__duration">
                     <div className="xe_about__duration-parts">
                       {breakdown.map((part, i) => (
@@ -287,7 +352,7 @@ export function AboutPage() {
                     </p>
                   </div>
 
-                  <h3 className="xe_about__heading">The collection</h3>
+                  <h3 className="xe_about__heading">The big numbers</h3>
                   <div className="xe_about__stats">
                     <div className="xe_about__stat">
                       <strong>
@@ -335,11 +400,11 @@ export function AboutPage() {
                       <strong>
                         <CountUp value={stats.averageSeconds} delay={420} format={formatTime} />
                       </strong>
-                      <span>average track</span>
+                      <span>average duration</span>
                     </div>
                   </div>
 
-                  <h3 className="xe_about__heading">Odds and ends</h3>
+                  <h3 className="xe_about__heading">Tidbits</h3>
                   <ul className="xe_about__list">
                     {stats.longest && (
                       <li>
@@ -355,7 +420,7 @@ export function AboutPage() {
                     )}
                     {stats.earliestYear > 0 && (
                       <li>
-                        Released between <strong>{stats.earliestYear}</strong> and{' '}
+                        Your library has songs released between <strong>{stats.earliestYear}</strong> and{' '}
                         <strong>{stats.latestYear}</strong>, spanning{' '}
                         {stats.latestYear - stats.earliestYear + 1} year
                         {stats.latestYear - stats.earliestYear === 0 ? '' : 's'}
@@ -372,7 +437,7 @@ export function AboutPage() {
                       and {(tracks.length / Math.max(1, stats.albums)).toFixed(1)} tracks per album
                     </li>
                     <li>
-                      Formats:{' '}
+                      The most prominent formats are:{' '}
                       {stats.formats
                         .map(([ext, count]) => `${ext.toLowerCase()} (${count.toLocaleString()})`)
                         .join(', ')}
@@ -383,42 +448,33 @@ export function AboutPage() {
 
             {active === 'acknowledgements' && (
               <>
-                <h3 className="xe_about__heading">Dependencies</h3>
-                <ul className="xe_about__list">
-                  <li>
-                    <a href="https://github.com/borewit/music-metadata" target="_blank" rel="noopener noreferrer">
-                      music-metadata
-                    </a>
-                    : audio tag and artwork parsing
-                  </li>
-                  <li>
-                    <a href="https://github.com/mikolalysenko/mespeak" target="_blank" rel="noopener noreferrer">
-                      meSpeak
-                    </a>
-                    : offline text-to-speech fallback for track announcements
-                  </li>
-                </ul>
+              <p className="xe_about__text">This is a list of what Xebrine was built with and what it uses. You can view the source here: <a href="https://github.com/xebrine/xebrine" target="_blank">github.com/xebrine/xebrine</a></p>
+                {DEPENDENCY_ACKNOWLEDGEMENTS.map((group) => (
+                  <section key={group.heading}>
+                    <h3 className="xe_about__heading">{group.heading}</h3>
+                    <ul className="xe_about__list">
+                      {group.items.map((item) => (
+                        <li key={item.name}>
+                          <a href={item.url} target="_blank" rel="noopener noreferrer">
+                            {item.name}
+                          </a>
+                          : {item.role}
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ))}
 
-                <h3 className="xe_about__heading">External links</h3>
+                <h3 className="xe_about__heading">Miscellaneous</h3>
                 <ul className="xe_about__list">
-                  <li>
-                    <a href="https://lrclib.net" target="_blank" rel="noopener noreferrer">
-                      LRCLIB
-                    </a>
-                    : lyrics
-                  </li>
-                  <li>
-                    <a href="https://rsms.me/inter/" target="_blank" rel="noopener noreferrer">
-                      Inter
-                    </a>
-                    : typeface
-                  </li>
-                  <li>
-                    <a href="https://voxity.dev" target="_blank" rel="noopener noreferrer">
-                      Voxity
-                    </a>
-                    : the original
-                  </li>
+                  {EXTERNAL_ACKNOWLEDGEMENTS.map((item) => (
+                    <li key={item.name}>
+                      <a href={item.url} target="_blank" rel="noopener noreferrer">
+                        {item.name}
+                      </a>
+                      : {item.role}
+                    </li>
+                  ))}
                 </ul>
               </>
             )}
