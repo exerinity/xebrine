@@ -345,6 +345,8 @@
 
 .xe_settings__folder-actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 12px;
   flex-shrink: 0;
 }
