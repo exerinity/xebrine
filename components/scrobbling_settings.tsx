@@ -281,8 +281,9 @@ export function ScrobblingSettings() {
           <span>Are shorter than a set length</span>
         </label>
         {rules.minDurationSeconds !== null && (
-          <label className="xe_settings__radio">
+          <label className="xe_scrobble-duration">
             <input
+              className="xe_scrobble-duration__input"
               type="number"
               min={31}
               max={3600}
@@ -291,7 +292,7 @@ export function ScrobblingSettings() {
                 updateRules({ minDurationSeconds: Math.max(31, Number(e.target.value) || 31) })
               }
             />
-            <span>seconds</span>
+            <span className="xe_scrobble-duration__unit">seconds</span>
           </label>
         )}
       </section>
@@ -300,7 +301,7 @@ export function ScrobblingSettings() {
         <h2>Offline / failed scrobbles queue</h2>
         {pending.length === 0 ? (
           <p className="xe_settings__hint">
-            There are no enqueued scrobbles
+            There are no enqueued scrobbles - if a scrobble is unsuccessful, either for being offline or otherwise did not complete, it will be enqueued here to try later
           </p>
         ) : (
           <>
