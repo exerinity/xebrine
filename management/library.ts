@@ -42,9 +42,11 @@ interface CollectStats {
 async function collectAudioFiles(
   dir: FileSystemDirectoryHandle,
   rootName: string,
+  folderId: string,
   rules: IgnoreRules,
   skipped: SkippedFile[],
   stats: CollectStats,
+  skipTrackIds?: ReadonlySet<string>,
   prefix: string[] = []
 ): Promise<FoundFile[]> {
   const found: FoundFile[] = [];
@@ -62,6 +64,8 @@ async function collectAudioFiles(
     try {
       if (entry.kind === 'file') {
         if (!isAudioFile(entry.name)) continue;
+        const relPath = [...prefix, entry.name];
+        if (skipTrackIds?.has(trackId(folderId, relPath))) continue;
         if (isIgnoredFormat(entry.name, rules)) {
           stats.excluded++;
           continue;
@@ -72,15 +76,17 @@ async function collectAudioFiles(
           stats.excluded++;
           continue;
         }
-        found.push({ source: handle, relPath: [...prefix, entry.name], sizeBytes: size });
+        found.push({ source: handle, relPath, sizeBytes: size });
       } else if (entry.kind === 'directory') {
         found.push(
           ...(await collectAudioFiles(
             entry as FileSystemDirectoryHandle,
             rootName,
+            folderId,
             rules,
             skipped,
             stats,
+            skipTrackIds,
             [...prefix, entry.name]
           ))
         );
@@ -127,6 +133,7 @@ async function collectElectronAudioFiles(
   rules: IgnoreRules,
   skipped: SkippedFile[],
   stats: CollectStats,
+  skipTrackIds?: ReadonlySet<string>,
   prefix: string[] = []
 ): Promise<FoundFile[]> {
   const found: FoundFile[] = [];
@@ -144,10 +151,11 @@ async function collectElectronAudioFiles(
   for (const entry of entries) {
     const relPath = [...prefix, entry.name];
     if (entry.kind === 'directory') {
-      found.push(...(await collectElectronAudioFiles(folder, rules, skipped, stats, relPath)));
+      found.push(...(await collectElectronAudioFiles(folder, rules, skipped, stats, skipTrackIds, relPath)));
       continue;
     }
     if (!isAudioFile(entry.name)) continue;
+    if (skipTrackIds?.has(trackId(folder.id, relPath))) continue;
     if (isIgnoredFormat(entry.name, rules) || isIgnoredSize(entry.size, rules)) {
       stats.excluded++;
       continue;
@@ -193,13 +201,14 @@ export async function scanFolder(
   folder: FolderRecord,
   rules: IgnoreRules,
   onProgress?: (done: number, total: number, track: TrackMeta, excluded: number) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  skipTrackIds?: ReadonlySet<string>
 ): Promise<ScanResult> {
   const skipped: SkippedFile[] = [];
   const stats: CollectStats = { excluded: 0 };
   const files = isElectronFolder(folder)
-    ? await collectElectronAudioFiles(folder, rules, skipped, stats)
-    : await collectAudioFiles(folder.handle, folder.name, rules, skipped, stats);
+    ? await collectElectronAudioFiles(folder, rules, skipped, stats, skipTrackIds)
+    : await collectAudioFiles(folder.handle, folder.name, folder.id, rules, skipped, stats, skipTrackIds);
   const tracks: (TrackMeta | undefined)[] = new Array(files.length);
   let done = 0;
   await parseTagsBatch(
