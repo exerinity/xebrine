@@ -28,6 +28,7 @@ import {
   KeyIcon,
   PlayIcon,
   RefreshIcon,
+  SearchIcon,
   TrashIcon
 } from '../components/icons';
 import { usePageTitle } from '../hooks/page_title';
@@ -103,6 +104,7 @@ export function SettingsPage() {
     addFolder,
     removeFolder,
     rescanFolder,
+    scanNewFiles,
     restoreAccess
   } = useLibrary();
   const { current } = usePlayer();
@@ -745,6 +747,16 @@ export function SettingsPage() {
                         </span>
                       </div>
                       <div className="xe_settings__folder-actions">
+                        <button
+                          type="button"
+                          className="xe_btn"
+                          onClick={() => void scanNewFiles(folder.id)}
+                          disabled={scanning !== null}
+                          aria-label={`Search ${folder.name} for new files only`}
+                        >
+                          <SearchIcon size={14} />
+                          Search for new files only
+                        </button>
                         <button
                           type="button"
                           className="xe_btn xe_btn--accent"
