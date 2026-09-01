@@ -1,6 +1,9 @@
 .xe_cover-modal {
-  --xe-modal-surface: color-mix(in srgb, #000 90%, var(--xe-active-accent, var(--accent)) 10%);
-  --xe-modal-surface-raised: color-mix(in srgb, #111 90%, var(--xe-active-accent, var(--accent)) 10%);
+  --xe-modal-accent: var(--xe-active-accent, var(--accent));
+  --xe-modal-surface: color-mix(in srgb, #000 90%, var(--xe-modal-accent) 10%);
+  --xe-modal-surface-raised: color-mix(in srgb, #111 90%, var(--xe-modal-accent) 10%);
+  --xe-modal-border: #292929;
+  --xe-modal-hover: color-mix(in srgb, #1a1a1a 88%, var(--xe-modal-accent) 12%);
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -8,9 +11,9 @@
   align-items: center;
   justify-content: center;
   padding: 32px;
-  background: color-mix(in srgb, #00000053 92%, var(--xe-active-accent, var(--accent)) 8%);
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
+  background: rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   animation: cover-modal-in 140ms ease-out;
 }
 
@@ -56,8 +59,9 @@
   display: block;
   line-height: 0;
   overflow: hidden;
-  border: 1px solid #242424;
-  border-radius: 4px;
+  border: 1px solid var(--xe-modal-border);
+  border-radius: 10px;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.42);
   transform: rotateX(var(--cover-rotate-x)) rotateY(var(--cover-rotate-y));
   transform-style: preserve-3d;
   transition: transform 120ms ease-out;
@@ -90,7 +94,7 @@
   max-height: min(calc(80vh - 52px), 640px);
   width: auto;
   height: auto;
-  border-radius: 3px;
+  border-radius: 9px;
   cursor: zoom-in;
   display: block;
 }
@@ -106,14 +110,16 @@
   justify-content: center;
   flex: 1;
   white-space: nowrap;
-  border-color: #292929;
-  border-radius: 7px;
+  border-color: var(--xe-modal-border);
+  border-radius: 9px;
   background: var(--xe-modal-surface-raised);
   color: #ededed;
+  font-weight: 450;
 }
 
 .xe_cover-modal__action:hover:not(:disabled) {
-  background: color-mix(in srgb, #1a1a1a 88%, var(--xe-active-accent, var(--accent)) 12%);
+  border-color: color-mix(in srgb, var(--xe-modal-border) 62%, var(--xe-modal-accent) 38%);
+  background: var(--xe-modal-hover);
 }
 
 .xe_cover-modal__close {
@@ -122,24 +128,34 @@
   right: 20px;
   width: 36px;
   height: 36px;
-  border-radius: 7px;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a3a3a3;
+  color: #8a8a8a;
   background: var(--xe-modal-surface);
-  border: 1px solid #292929;
-  transition: border-color 120ms ease, color 120ms ease;
+  border: 1px solid var(--xe-modal-border);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
 .xe_cover-modal__close:hover {
-  border-color: #555;
+  border-color: var(--xe-modal-accent);
+  background: var(--xe-modal-surface-raised);
   color: #fff;
 }
 
+.xe_cover-modal__close:focus-visible {
+  outline: 2px solid var(--xe-modal-accent);
+  outline-offset: 3px;
+}
+
 .xe_modal-overlay {
-  --xe-modal-surface: color-mix(in srgb, #000 90%, var(--xe-active-accent, var(--accent)) 10%);
-  --xe-modal-surface-raised: color-mix(in srgb, #111 90%, var(--xe-active-accent, var(--accent)) 10%);
+  --xe-modal-accent: var(--xe-active-accent, var(--accent));
+  --xe-modal-surface: color-mix(in srgb, #000 90%, var(--xe-modal-accent) 10%);
+  --xe-modal-surface-raised: color-mix(in srgb, #111 90%, var(--xe-modal-accent) 10%);
+  --xe-modal-border: #292929;
+  --xe-modal-hover: color-mix(in srgb, #1a1a1a 88%, var(--xe-modal-accent) 12%);
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -147,22 +163,26 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(0, 0, 0, 0.52);
-  animation: xe_modal-overlay-in 40ms ease-out;
+  background: rgba(0, 0, 0, 0.56);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  animation: xe_modal-overlay-in 140ms ease-out;
 }
 
 .xe_modal-overlay--opaque {
   padding: 0;
   background: var(--xe-modal-surface);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 .xe_modal-overlay--closing {
   pointer-events: none;
-  animation: xe_modal-overlay-out 40ms ease-in forwards;
+  animation: xe_modal-overlay-out 140ms ease-in forwards;
 }
 
 .xe_modal-overlay--closing .xe_modal {
-  animation: xe_modal-out 40ms ease-in forwards;
+  animation: xe_modal-out 140ms ease-in forwards;
 }
 
 .xe_modal-overlay--closing .xe_modal--fullscreen {
@@ -172,24 +192,28 @@
 .xe_modal {
   --xe_modal-x: 0px;
   --xe_modal-y: 0px;
+  --accent: var(--xe-modal-accent);
+  --accent-soft: color-mix(in srgb, var(--xe-modal-accent) 22%, transparent);
+  --accent-text: color-mix(in srgb, var(--xe-modal-accent) 62%, #fff 38%);
+  --accent-bright: color-mix(in srgb, var(--xe-modal-accent) 82%, #fff 18%);
   --panel: var(--xe-modal-surface);
   --panel-2: var(--xe-modal-surface-raised);
-  --border: #292929;
+  --border: var(--xe-modal-border);
   --text: #f5f5f5;
-  --text-dim: #9b9b9b;
-  --accent: #f5f5f5;
-  --accent-soft: #161616;
-  --accent-text: #f5f5f5;
-  --accent-bright: #fff;
+  --text-dim: #8a8a8a;
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   width: min(92vw, 520px);
   max-height: min(84vh, 760px);
-  border: 1px solid #292929;
+  border: 1px solid var(--xe-modal-border);
   border-radius: 10px;
   background: var(--xe-modal-surface);
-  color: #f5f5f5;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 450;
   overflow: hidden;
   transform: translate(var(--xe_modal-x), var(--xe_modal-y));
   animation: xe_modal-in 180ms ease-out;
@@ -202,6 +226,7 @@
   max-height: none;
   border-radius: 0;
   border: none;
+  box-shadow: none;
   transform: none;
   animation: xe_modal-fullscreen-in 140ms ease-out;
 }
@@ -241,17 +266,17 @@
   border: 1px solid transparent;
   border-radius: 7px;
   color: #8a8a8a;
-  transition: border-color 120ms ease, color 120ms ease;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
 .xe_modal__header .xe_icon-btn:hover {
-  border-color: #333;
-  background: var(--xe-modal-surface);
-  color: #fff;
+  border-color: #292929;
+  background: var(--xe-modal-surface-raised);
+  color: var(--text);
 }
 
 .xe_modal__header .xe_icon-btn:focus-visible {
-  outline: 1px solid #fff;
+  outline: 2px solid var(--accent-bright);
   outline-offset: 2px;
 }
 
@@ -259,9 +284,9 @@
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
   letter-spacing: -0.01em;
   line-height: 1.3;
   text-align: center;
@@ -274,7 +299,7 @@
   z-index: 1;
   padding: 22px 24px 24px;
   overflow: auto;
-  scrollbar-color: #333 #000;
+  scrollbar-color: #333 var(--xe-modal-surface);
   user-select: text;
 }
 
@@ -285,47 +310,16 @@
   padding-top: 24px;
 }
 
-.xe_modal .xe_btn {
-  border-color: #292929;
-  border-radius: 7px;
-  background: var(--xe-modal-surface-raised);
-  color: #ededed;
-}
-
-.xe_modal .xe_btn:hover:not(:disabled) {
-  background: color-mix(in srgb, #1a1a1a 88%, var(--xe-active-accent, var(--accent)) 12%);
-}
-
-.xe_modal .xe_btn--quiet {
-  background: transparent;
-  color: #a3a3a3;
-}
-
-.xe_modal .xe_btn--quiet:hover:not(:disabled) {
-  background: var(--xe-modal-surface-raised);
-  color: #fff;
-}
-
-.xe_modal .xe_btn--accent {
-  border-color: #fff;
-  background: #fff;
-  color: #000;
-}
-
-.xe_modal .xe_btn--accent:hover:not(:disabled) {
-  border-color: #d7d7d7;
-  background: #d7d7d7;
-}
-
 .xe_modal input,
 .xe_modal textarea,
 .xe_modal select {
-  color-scheme: dark;
+  color-scheme: inherit;
+  accent-color: var(--accent-bright);
 }
 
 .xe_explicit-lyrics__flagged {
   border-radius: 3px;
-  background: #ff0000;
+  background: var(--danger);
   color: #fff;
 }
 
