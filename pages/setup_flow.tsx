@@ -69,7 +69,7 @@ export function SetupFlowPage() {
         <div className="xe_setup__shell">
           <header className="xe_setup__header">
             <h1>Welcome to Xebrine!</h1>
-            <p>Let's get you set up, then some music playing! A few steps:</p>
+            <p>Let's configure Xebrine exactly how you like it.</p>
           </header>
 
           <ol className="xe_setup__progress" aria-label="Setup progress">
@@ -209,10 +209,9 @@ export function SetupFlowPage() {
                 <span className="xe_setup__step-label">Step 5/5</span>
                 <h2>Now get playing!</h2>
                 <p>
-                  Xebrine is all yours. I highly recommend you perform more setup by going through
-                  <Link to="/settings">the settings page</Link> - Xebrine has a fair few settings you can change.
+                  Xebrine is all yours. I highly recommend you perform more setup by going through <Link to="/settings">the settings page</Link> - Xebrine has a lot of settings you can change.
                   <br></br>
-                  And again - welcome aboard, and I hope you enjoy using Xebrine!
+                  And again - welcome in, and I hope you enjoy using Xebrine!
                   - <a href="https://exerinity.com" target="_blank">exerinity</a>
                 </p>
                 {tracks.length > 0 ? (

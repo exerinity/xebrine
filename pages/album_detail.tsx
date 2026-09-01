@@ -108,10 +108,12 @@ export function AlbumDetailPage() {
               <PlayIcon size={14} />
               Play
             </button>
-            <button type="button" className="xe_btn" onClick={shuffle} disabled={remoteLocked}>
-              <ShuffleIcon size={14} />
-              Shuffle
-            </button>
+            {album.tracks.length > 1 && (
+              <button type="button" className="xe_btn" onClick={shuffle} disabled={remoteLocked}>
+                <ShuffleIcon size={14} />
+                Shuffle
+              </button>
+            )}
           </div>
         </div>
       </div>
