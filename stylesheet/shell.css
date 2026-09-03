@@ -211,6 +211,15 @@
   display: flex;
 }
 
+.xe_route-view {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .xe_xebrine:not(.xe_xebrine--player-top) .xe_nav {
   padding-bottom: calc(16px + var(--player-height));
 }
