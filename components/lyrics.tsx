@@ -53,7 +53,7 @@ function editableLyricsText(lyrics: Lyrics | null): string {
 
 interface LyricsPanelProps {
   showToolbar?: boolean;
-  variant?: 'page' | 'fullscreen';
+  variant?: 'page' | 'fullscreen' | 'sidebar';
   droppedFile?: File | null;
   onDroppedFileHandled?(): void;
 }
