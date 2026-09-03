@@ -2,6 +2,7 @@
 @import './base.css';
 @import './themes.css';
 @import './shell.css';
+@import './side_panel.css';
 @import './page.css';
 @import './home.css';
 @import './setup.css';
