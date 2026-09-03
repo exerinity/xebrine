@@ -18,7 +18,13 @@ interface MenuState {
   index: number;
 }
 
-export function QueueList({ query = '' }: { query?: string }) {
+export function QueueList({
+  query = '',
+  variant = 'page'
+}: {
+  query?: string;
+  variant?: 'page' | 'panel';
+}) {
   const { queue, position, isPlaying, jumpTo, removeAt, removeAbove, removeBelow, move, enqueueEnd } = usePlayer();
   const { listRef, dragging, handleProps, itemStyle } = useDragReorder(move);
   const navigate = useNavigate();
@@ -84,7 +90,7 @@ export function QueueList({ query = '' }: { query?: string }) {
 
   return (
     <>
-      <div className="xe_queue-list" ref={listRef}>
+      <div className={`xe_queue-list xe_queue-list--${variant}`} ref={listRef}>
         {visible.map(({ item, index }) => {
           const isCurrent = index === position;
           const isDragged = dragging?.from === index;
