@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MAX_VOLUME, REMOTE_LOCK_MESSAGE, usePlayer } from '../context/player_context';
 import { useSettings } from '../context/settings_context';
@@ -22,6 +29,8 @@ import {
   RepeatIcon,
   RepeatOneIcon,
   LastfmIcon,
+  MoreIcon,
+  SidePanelIcon,
   ShuffleIcon,
   VisualizerIcon,
   VolumeIcon
@@ -40,13 +49,60 @@ interface PlayerBarProps {
   fullscreenOpen?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
   onToggleFullscreen?: () => void;
+  sidePanelOpen?: boolean;
+  sidePanelAvailable?: boolean;
+  onToggleSidePanel?: () => void;
+}
+
+type SecondaryToolId = 'automix' | 'sleep' | 'lastfm' | 'autoplay' | 'side-panel';
+
+const SECONDARY_TOOL_WIDTH: Record<SecondaryToolId, number> = {
+  automix: 76,
+  sleep: 68,
+  lastfm: 100,
+  autoplay: 42,
+  'side-panel': 42
+};
+const SECONDARY_COLLAPSE_ORDER: SecondaryToolId[] = [
+  'lastfm',
+  'automix',
+  'sleep',
+  'autoplay',
+  'side-panel'
+];
+const PRIMARY_VOLUME_CONTROLS_WIDTH = 150;
+const FLYOUT_TRIGGER_WIDTH = 42;
+
+function collapsedSecondaryTools(
+  width: number,
+  hasLastfm: boolean,
+  hasSidePanel: boolean
+): Set<SecondaryToolId> {
+  const availableTools = SECONDARY_COLLAPSE_ORDER.filter(
+    (id) => (id !== 'lastfm' || hasLastfm) && (id !== 'side-panel' || hasSidePanel)
+  );
+  let requiredWidth =
+    PRIMARY_VOLUME_CONTROLS_WIDTH +
+    availableTools.reduce((total, id) => total + SECONDARY_TOOL_WIDTH[id], 0);
+  const collapsed = new Set<SecondaryToolId>();
+
+  for (const id of availableTools) {
+    if (requiredWidth <= width) break;
+    collapsed.add(id);
+    requiredWidth -= SECONDARY_TOOL_WIDTH[id];
+    if (collapsed.size === 1) requiredWidth += FLYOUT_TRIGGER_WIDTH;
+  }
+  return collapsed;
 }
 
 export function PlayerBar({
   collapsed = false,
   fullscreenOpen = false,
   onCollapsedChange,
-  onToggleFullscreen
+  onToggleFullscreen,
+  sidePanelOpen = false,
+  sidePanelAvailable = true,
+  onToggleSidePanel
 }: PlayerBarProps) {
   const navigate = useNavigate();
   const {
@@ -82,6 +138,10 @@ export function PlayerBar({
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [nowEntering, setNowEntering] = useState(false);
   const [scrobbleMenu, setScrobbleMenu] = useState<{ x: number; y: number } | null>(null);
+  const [secondaryToolsOpen, setSecondaryToolsOpen] = useState(false);
+  const secondaryToolsRef = useRef<HTMLDivElement | null>(null);
+  const volumeControlsRef = useRef<HTMLDivElement | null>(null);
+  const [volumeControlsWidth, setVolumeControlsWidth] = useState(0);
   const scrubberSlotRef = useRef<HTMLDivElement | null>(null);
   const previousScrubberRectRef = useRef<DOMRect | null>(null);
 
@@ -95,6 +155,12 @@ export function PlayerBar({
   const remainingPercent = 100 - elapsedPercent;
   const elapsedLabel = track ? `${elapsedPercent}%` : '--%';
   const remainingLabel = track ? `${remainingPercent}%` : '--%';
+  const collapsedTools = collapsedSecondaryTools(
+    volumeControlsWidth,
+    Boolean(lastfm),
+    sidePanelAvailable
+  );
+  const hasCollapsedTools = collapsedTools.size > 0;
   if (volume > 0) lastAudibleVolumeRef.current = volume;
 
   useEffect(() => {
@@ -105,8 +171,45 @@ export function PlayerBar({
 
   useEffect(() => {
     document.documentElement.classList.toggle('xe_player-hidden', collapsed);
+    if (collapsed) setSecondaryToolsOpen(false);
     return () => document.documentElement.classList.remove('xe_player-hidden');
   }, [collapsed]);
+
+  useEffect(() => {
+    if (!secondaryToolsOpen) return;
+    const closeOnOutsideClick = (event: globalThis.MouseEvent) => {
+      if (secondaryToolsRef.current?.contains(event.target as Node)) return;
+      setSecondaryToolsOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.stopPropagation();
+      setSecondaryToolsOpen(false);
+    };
+    const closeOnResize = () => setSecondaryToolsOpen(false);
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    window.addEventListener('resize', closeOnResize);
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+      window.removeEventListener('resize', closeOnResize);
+    };
+  }, [secondaryToolsOpen]);
+
+  useEffect(() => {
+    if (!hasCollapsedTools) setSecondaryToolsOpen(false);
+  }, [hasCollapsedTools]);
+
+  useLayoutEffect(() => {
+    const controls = volumeControlsRef.current;
+    if (!controls) return;
+    const updateWidth = () => setVolumeControlsWidth(Math.round(controls.getBoundingClientRect().width));
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(controls);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const hasTrack = Boolean(track);
@@ -226,6 +329,134 @@ export function PlayerBar({
   const scrubber = (
     <div key="scrubber" ref={scrubberSlotRef} className="xe_player-bar__scrubber-slot">
       <Scrubber />
+    </div>
+  );
+  const secondaryControls: Array<{
+    id: SecondaryToolId;
+    label: string;
+    control: ReactNode;
+  }> = [
+    {
+      id: 'automix',
+      label: 'Auto mix',
+      control: (
+        <div className="xe_automix-pill-wrap">
+          <AutoMixDrawer />
+          <button
+            type="button"
+            className={`xe_automix-pill${autoMixEnabled ? ' xe_automix-pill--on' : ''}${
+              autoMixEnabled && autoMixColor ? ` xe_automix-pill--${autoMixColor}` : ''
+            }${autoMixBusy ? ' xe_automix-pill--busy' : ''}${
+              autoMixPhase === 'mixing' ? ' xe_automix-pill--mixing' : ''
+            }`}
+            onClick={toggleAutoMix}
+            title={`Auto mix is ${autoMixLabel.toLowerCase()}`}
+            aria-pressed={autoMixEnabled}
+          >
+            <AutoMixIcon size={14} />
+            <span
+              className="xe_automix-pill__label"
+              title={`Auto mix is ${autoMixLabel.toLowerCase()}`}
+            >
+              {autoMixLabel}
+            </span>
+          </button>
+        </div>
+      )
+    },
+    {
+      id: 'sleep',
+      label: 'Sleep timer',
+      control: <SleepTimerControl />
+    },
+    ...(lastfm
+      ? [
+          {
+            id: 'lastfm' as const,
+            label: 'Last.fm',
+            control: (
+              <button
+                type="button"
+                className={`xe_scrobble-pill xe_scrobble-pill--${scrobbleStatus}`}
+                onClick={() => update({ scrobbleEnabled: !settings.scrobbleEnabled })}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setScrobbleMenu({ x: e.clientX, y: e.clientY });
+                }}
+                title={
+                  settings.scrobbleEnabled
+                    ? `Scrobbling to ${lastfm.username} - click to suspend`
+                    : 'Scrobbling is suspended - click to resume'
+                }
+                aria-pressed={settings.scrobbleEnabled}
+              >
+                <LastfmIcon size={14} />
+                <span className="xe_scrobble-pill__label">
+                  {SCROBBLE_STATUS_LABEL[scrobbleStatus]}
+                </span>
+              </button>
+            )
+          }
+        ]
+      : []),
+    {
+      id: 'autoplay',
+      label: 'Auto play',
+      control: (
+        <button
+          type="button"
+          className={`xe_icon-btn${settings.autoPlay ? ' xe_icon-btn--active' : ''}`}
+          onClick={() => update({ autoPlay: !settings.autoPlay })}
+          title={
+            settings.autoPlay
+              ? `Auto play is on (${AUTO_PLAY_LABELS[settings.autoPlayLevel].toLowerCase()}) - click to turn off`
+              : 'Auto play is off - click to keep playing when the queue runs out'
+          }
+          aria-label="Toggle auto play"
+          aria-pressed={settings.autoPlay}
+        >
+          <AutoPlayIcon size={16} />
+        </button>
+      )
+    },
+    ...(sidePanelAvailable
+      ? [
+          {
+            id: 'side-panel' as const,
+            label: 'Side panel',
+            control: (
+              <button
+                type="button"
+                className={`xe_icon-btn xe_player-bar__side-panel-toggle${
+                  sidePanelOpen ? ' xe_icon-btn--active' : ''
+                }`}
+                onClick={() => {
+                  onToggleSidePanel?.();
+                  setSecondaryToolsOpen(false);
+                }}
+                title={sidePanelOpen ? 'Close side panel' : 'Open side panel'}
+                aria-label={sidePanelOpen ? 'Close side panel' : 'Open side panel'}
+                aria-expanded={sidePanelOpen}
+                aria-controls="xe-side-panel-content"
+              >
+                <SidePanelIcon size={18} />
+              </button>
+            )
+          }
+        ]
+      : [])
+  ];
+  const renderSecondaryControl = ({
+    id,
+    label,
+    control
+  }: (typeof secondaryControls)[number]) => (
+    <div
+      key={id}
+      className={`xe_player-bar__secondary-item xe_player-bar__secondary-item--${id}`}
+    >
+      <span className="xe_player-bar__secondary-label">{label}</span>
+      {control}
     </div>
   );
 
@@ -358,65 +589,48 @@ export function PlayerBar({
           {settings.playerBarSliderPosition === 'below' && scrubber}
         </div>
 
-        <div className="xe_player-bar__volume">
-          <div className="xe_automix-pill-wrap">
-            <AutoMixDrawer />
-            <button
-              type="button"
-              className={`xe_automix-pill${autoMixEnabled ? ' xe_automix-pill--on' : ''}${
-                autoMixEnabled && autoMixColor ? ` xe_automix-pill--${autoMixColor}` : ''
-              }${autoMixBusy ? ' xe_automix-pill--busy' : ''}${
-                autoMixPhase === 'mixing' ? ' xe_automix-pill--mixing' : ''
-              }`}
-              onClick={toggleAutoMix}
-              title={`Auto mix is ${autoMixLabel.toLowerCase()}`}
-              aria-pressed={autoMixEnabled}
-            >
-              <AutoMixIcon size={14} />
-              <span className="xe_automix-pill__label" title={`Auto mix is ${autoMixLabel.toLowerCase()}`}>
-                {autoMixLabel}
-              </span>
-            </button>
+        <div className="xe_player-bar__volume" ref={volumeControlsRef}>
+          <div className="xe_player-bar__secondary-tools" ref={secondaryToolsRef}>
+            <div className="xe_player-bar__secondary-inline">
+              {secondaryControls
+                .filter(({ id }) => !collapsedTools.has(id))
+                .map(renderSecondaryControl)}
+            </div>
+            {hasCollapsedTools && (
+              <>
+                <button
+                  type="button"
+                  className={`xe_icon-btn xe_player-bar__secondary-tools-toggle${
+                    secondaryToolsOpen ? ' xe_icon-btn--active' : ''
+                  }`}
+                  onClick={() => setSecondaryToolsOpen((open) => !open)}
+                  title={secondaryToolsOpen ? 'Close player controls' : 'More player controls'}
+                  aria-label={secondaryToolsOpen ? 'Close player controls' : 'More player controls'}
+                  aria-haspopup="true"
+                  aria-expanded={secondaryToolsOpen}
+                  aria-controls="xe-player-secondary-tools"
+                >
+                  <MoreIcon size={18} />
+                </button>
+                <div
+                  id="xe-player-secondary-tools"
+                  className={`xe_player-bar__secondary-menu${
+                    secondaryToolsOpen ? ' xe_player-bar__secondary-menu--open' : ''
+                  }`}
+                  aria-label="More player controls"
+                >
+                  {secondaryControls
+                    .filter(({ id }) => collapsedTools.has(id))
+                    .map(renderSecondaryControl)}
+                </div>
+              </>
+            )}
           </div>
-          <SleepTimerControl />
-          {lastfm && (
-            <button
-              type="button"
-              className={`xe_scrobble-pill xe_scrobble-pill--${scrobbleStatus}`}
-              onClick={() => update({ scrobbleEnabled: !settings.scrobbleEnabled })}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                setScrobbleMenu({ x: e.clientX, y: e.clientY });
-              }}
-              title={
-                settings.scrobbleEnabled
-                  ? `Scrobbling to ${lastfm.username} - click to suspend`
-                  : 'Scrobbling is suspended - click to resume'
-              }
-              aria-pressed={settings.scrobbleEnabled}
-            >
-              <LastfmIcon size={14} />
-              <span className="xe_scrobble-pill__label">
-                {SCROBBLE_STATUS_LABEL[scrobbleStatus]}
-              </span>
-            </button>
-          )}
           <button
             type="button"
-            className={`xe_icon-btn${settings.autoPlay ? ' xe_icon-btn--active' : ''}`}
-            onClick={() => update({ autoPlay: !settings.autoPlay })}
-            title={
-              settings.autoPlay
-                ? `Auto play is on (${AUTO_PLAY_LABELS[settings.autoPlayLevel].toLowerCase()}) - click to turn off`
-                : 'Auto play is off - click to keep playing when the queue runs out'
-            }
-            aria-pressed={settings.autoPlay}
-          >
-            <AutoPlayIcon size={16} />
-          </button>
-          <button
-            type="button"
-            className={`xe_icon-btn${visualizerOn ? ' xe_icon-btn--active' : ''}`}
+            className={`xe_icon-btn xe_player-bar__visualizer-toggle${
+              visualizerOn ? ' xe_icon-btn--active' : ''
+            }`}
             onClick={toggleVisualizer}
             title={visualizerOn ? 'Hide visualizer' : 'Show visualizer'}
             aria-pressed={visualizerOn}
