@@ -39,6 +39,9 @@ import { FullscreenPlayer } from './components/fs_player';
 import { ToastContainer } from './components/toast_container';
 import { UpdateModal } from './components/update_modal';
 import { SetupLeaveModal } from './components/setup_leave_modal';
+import { SidePanel, type SidePanelView } from './components/side_panel';
+
+const SIDE_PANEL_MEDIA = '(min-width: 1100px)';
 
 function MediaBridge() {
   useMediaSession();
@@ -116,6 +119,11 @@ function PageIconBackdrop() {
 function Shell() {
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
   const [playerBarCollapsed, setPlayerBarCollapsed] = useState(false);
+  const [sidePanelOpen, setSidePanelOpen] = useState(false);
+  const [sidePanelView, setSidePanelView] = useState<SidePanelView>('queue');
+  const [sidePanelSupported, setSidePanelSupported] = useState(
+    () => window.matchMedia(SIDE_PANEL_MEDIA).matches
+  );
   const { current, artworkUrl } = usePlayer();
   const { settings } = useSettings();
   const accent = useAccentColor(artworkUrl);
@@ -156,6 +164,16 @@ function Shell() {
   useEffect(() => {
     if (!current) setFullscreenOpen(false);
   }, [current]);
+
+  useEffect(() => {
+    const media = window.matchMedia(SIDE_PANEL_MEDIA);
+    const handleChange = () => {
+      setSidePanelSupported(media.matches);
+      if (!media.matches) setSidePanelOpen(false);
+    };
+    media.addEventListener('change', handleChange);
+    return () => media.removeEventListener('change', handleChange);
+  }, []);
   useEffect(() => {
     if (!fullscreenOpen || !current) return;
     const previous = document.title;
@@ -175,29 +193,37 @@ function Shell() {
     >
       <Sidebar onOpenFullscreen={() => setFullscreenOpen(true)} />
       <main className="xe_main">
-        {settings.showBackgroundIcon && <PageIconBackdrop />}
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/library" element={<LibraryPage />} />
-          <Route path="/artists" element={<ArtistsPage />} />
-          <Route path="/artists/:artistName" element={<ArtistDetailPage />} />
-          <Route path="/albums/:artistName/:albumName" element={<AlbumDetailPage />} />
-          <Route path="/albums" element={<AlbumsPage />} />
-          <Route path="/queue" element={<QueuePage />} />
-          <Route path="/lyrics" element={<LyricsPage />} />
-          <Route path="/lyrics/share" element={<ShareLyricsPage />} />
-          <Route path="/settings" element={<Navigate to="/settings/preferences" replace />} />
-          <Route path="/settings/scrobbling" element={<Navigate to="/lastfm" replace />} />
-          <Route path="/settings/:section" element={<SettingsPage />} />
-          <Route path="/i" element={<Navigate to="/i/info" replace />} />
-          <Route path="/i/flow/setup" element={<SetupFlowPage />} />
-          <Route path="/i/:section" element={<AboutPage />} />
-          <Route path="/i/release_notes" element={<ReleaseNotesPage />} />
-          <Route path="/lastfm" element={<LastfmPage />} />
-          <Route path="/remote" element={<RemotePage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <div className="xe_route-view">
+          {settings.showBackgroundIcon && <PageIconBackdrop />}
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/library" element={<LibraryPage />} />
+            <Route path="/artists" element={<ArtistsPage />} />
+            <Route path="/artists/:artistName" element={<ArtistDetailPage />} />
+            <Route path="/albums/:artistName/:albumName" element={<AlbumDetailPage />} />
+            <Route path="/albums" element={<AlbumsPage />} />
+            <Route path="/queue" element={<QueuePage />} />
+            <Route path="/lyrics" element={<LyricsPage />} />
+            <Route path="/lyrics/share" element={<ShareLyricsPage />} />
+            <Route path="/settings" element={<Navigate to="/settings/preferences" replace />} />
+            <Route path="/settings/scrobbling" element={<Navigate to="/lastfm" replace />} />
+            <Route path="/settings/:section" element={<SettingsPage />} />
+            <Route path="/i" element={<Navigate to="/i/info" replace />} />
+            <Route path="/i/flow/setup" element={<SetupFlowPage />} />
+            <Route path="/i/:section" element={<AboutPage />} />
+            <Route path="/i/release_notes" element={<ReleaseNotesPage />} />
+            <Route path="/lastfm" element={<LastfmPage />} />
+            <Route path="/remote" element={<RemotePage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+        <SidePanel
+          open={sidePanelOpen && sidePanelSupported}
+          view={sidePanelView}
+          onViewChange={setSidePanelView}
+          onClose={() => setSidePanelOpen(false)}
+        />
       </main>
       <FullscreenPlayer
         open={fullscreenOpen}
@@ -209,6 +235,11 @@ function Shell() {
         fullscreenOpen={fullscreenOpen && Boolean(current)}
         onCollapsedChange={setPlayerBarCollapsed}
         onToggleFullscreen={() => setFullscreenOpen((open) => !open)}
+        sidePanelOpen={sidePanelOpen && sidePanelSupported}
+        sidePanelAvailable={sidePanelSupported}
+        onToggleSidePanel={() => {
+          if (sidePanelSupported) setSidePanelOpen((open) => !open);
+        }}
       />
       <MediaBridge />
       <KeyboardShortcuts
