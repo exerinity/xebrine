@@ -11,6 +11,14 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '13',
+    date: '2026-09-04',
+    notes: [
+      'Added a new sidebar which can show either lyrics or the queue',
+      'Items in the player bar are now collapsed into a flyout if your screen is too small'
+    ]
+  },
+  {
     version: '12',
     date: '2026-08-27',
     notes: [
