@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../context/player_context';
+import type { SidePanelView } from '../context/settings_context';
 import { formatTime } from '../utils/format';
 import { LyricsPanel } from './lyrics';
 import { QueueList } from './queue_list';
@@ -20,8 +21,6 @@ import {
   QueueIcon,
   SearchIcon
 } from './icons';
-
-export type SidePanelView = 'queue' | 'lyrics';
 
 const WIDTH_KEY = 'xebrine.sidePanelWidth';
 const MIN_WIDTH = 300;
