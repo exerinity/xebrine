@@ -4,6 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 const CHUNK_RULES: [RegExp, string][] = [
   [/node_modules\/mespeak/, 'mespeak'],
+  [/node_modules\/mediainfo\.js/, 'mediainfo'],
   [/node_modules\/music-metadata/, 'music_metadata'],
   [/node_modules\/(react|react-dom|scheduler)\//, 'react_vendor'],
   [/node_modules\/(react-router|react-router-dom)\//, 'router_vendor'],
@@ -100,7 +101,7 @@ export default defineConfig({
       },
       workbox: {
         inlineWorkboxRuntime: true,
-        globPatterns: ['**/*.{js,css,html,png,woff2,json}'],
+        globPatterns: ['**/*.{js,css,html,png,woff2,json,wasm}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/i\/services\//],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
