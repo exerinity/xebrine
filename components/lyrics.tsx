@@ -434,6 +434,7 @@ export function LyricsPanel({
         <div
           className="xe_lyrics-panel__lines"
           ref={containerRef}
+          data-context-menu-scroll-root
           onWheel={markUserScroll}
           onTouchMove={markUserScroll}
         >
@@ -469,6 +470,7 @@ export function LyricsPanel({
               y={menu.y}
               items={menuItems(menu.index)}
               onClose={() => setMenu(null)}
+              scrollRoot={containerRef}
             />
           )}
         </div>

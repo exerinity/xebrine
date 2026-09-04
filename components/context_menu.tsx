@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject
+} from 'react';
 import { createPortal } from 'react-dom';
 
 export interface ContextMenuItem {
@@ -14,12 +21,13 @@ interface ContextMenuProps {
   y: number;
   items: ContextMenuItem[];
   onClose: () => void;
+  scrollRoot?: RefObject<HTMLElement | null>;
 }
 
 const MARGIN = 8;
 const DRAG_SLOP = 8;
 
-export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
+export function ContextMenu({ x, y, items, onClose, scrollRoot }: ContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   const itemsRef = useRef(items);
   const closeRef = useRef(onClose);
@@ -76,22 +84,30 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
 
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) onClose();
+      if (!ref.current?.contains(e.target as Node)) closeRef.current();
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') closeRef.current();
+    };
+    const onResize = () => closeRef.current();
+    const onScroll = (e: Event) => {
+      const target = e.target;
+      const isolatedRoot =
+        target instanceof Element ? target.closest<HTMLElement>('[data-context-menu-scroll-root]') : null;
+      if (isolatedRoot && isolatedRoot !== scrollRoot?.current) return;
+      closeRef.current();
     };
     document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onKey);
-    window.addEventListener('resize', onClose);
-    window.addEventListener('scroll', onClose, true);
+    window.addEventListener('resize', onResize);
+    window.addEventListener('scroll', onScroll, true);
     return () => {
       document.removeEventListener('mousedown', onDown);
       document.removeEventListener('keydown', onKey);
-      window.removeEventListener('resize', onClose);
-      window.removeEventListener('scroll', onClose, true);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', onScroll, true);
     };
-  }, [onClose]);
+  }, [scrollRoot]);
 
   return createPortal(
     <div
