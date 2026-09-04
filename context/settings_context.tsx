@@ -26,6 +26,7 @@ export type PlayerBarClickAction = 'copy' | 'open';
 export type PlayerBarPosition = 'top' | 'bottom';
 export type PlayerBarSliderPosition = 'above' | 'below';
 export type PlayerBarLayout = 'compact' | 'comfortable';
+export type SidePanelView = 'queue' | 'lyrics';
 
 export interface Settings {
   lrclibMode: LrclibMode;
@@ -43,6 +44,8 @@ export interface Settings {
   playerBarPosition: PlayerBarPosition;
   playerBarSliderPosition: PlayerBarSliderPosition;
   playerBarLayout: PlayerBarLayout;
+  sidePanelOpen: boolean;
+  sidePanelView: SidePanelView;
   fsBlur: number;
   fsSaturate: number;
   fsKenBurns: boolean;
@@ -74,7 +77,7 @@ export const DEFAULT_SETTINGS: Settings = {
   notifications: true,
   preventExit: true,
   ignoreRules: DEFAULT_IGNORE_RULES,
-  autoMixDuration: 15,
+  autoMixDuration: 67,
   autoPlay: false,
   autoPlayLevel: 1,
   eqEnabled: false,
@@ -85,6 +88,8 @@ export const DEFAULT_SETTINGS: Settings = {
   playerBarPosition: 'bottom',
   playerBarSliderPosition: 'below',
   playerBarLayout: 'comfortable',
+  sidePanelOpen: false,
+  sidePanelView: 'queue',
   fsBlur: 56,
   fsSaturate: 1.35,
   fsKenBurns: false,
@@ -107,7 +112,10 @@ export const DEFAULT_SETTINGS: Settings = {
 function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(KEY);
-    const merged = raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS;
+    const stored = raw ? JSON.parse(raw) : {};
+    const merged = { ...DEFAULT_SETTINGS, ...stored };
+    const legacySidePanelOpen = localStorage.getItem('xebrine.sidePanelOpen');
+    const legacySidePanelView = localStorage.getItem('xebrine.sidePanelView');
     return {
       ...merged,
       eqBands: normalize_bands(merged.eqBands),
@@ -121,6 +129,18 @@ function loadSettings(): Settings {
       playerBarPosition: merged.playerBarPosition === 'top' ? 'top' : 'bottom',
       playerBarSliderPosition: merged.playerBarSliderPosition === 'above' ? 'above' : 'below',
       playerBarLayout: merged.playerBarLayout === 'compact' ? 'compact' : 'comfortable',
+      sidePanelOpen:
+        typeof stored.sidePanelOpen === 'boolean'
+          ? stored.sidePanelOpen
+          : legacySidePanelOpen === '1',
+      sidePanelView:
+        stored.sidePanelView === 'lyrics'
+          ? 'lyrics'
+          : stored.sidePanelView === 'queue'
+            ? 'queue'
+            : legacySidePanelView === 'lyrics'
+              ? 'lyrics'
+              : 'queue',
       autoPlayLevel: isAutoPlayLevel(merged.autoPlayLevel) ? merged.autoPlayLevel : 1,
       scrobbleMode: merged.scrobbleMode === 'lax' ? 'lax' : 'strict',
       scrobbleIgnoreRules: normalizeScrobbleIgnoreRules(merged.scrobbleIgnoreRules)
