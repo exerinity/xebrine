@@ -13,12 +13,20 @@ interface MixStatus {
   progress: number | null;
 }
 
+interface PerformanceMemory {
+  usedJSHeapSize: number;
+}
+
+type PerformanceWithMemory = Performance & { memory?: PerformanceMemory };
+
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 export function AutoMixDrawer() {
-  const { autoMixEnabled, autoMixPhase, autoMixColor, currentTime, duration } = usePlayer();
+  const { autoMixEnabled, autoMixPhase, autoMixColor, autoMixBpm, currentTime, duration } =
+    usePlayer();
   const { settings } = useSettings();
   const [justDone, setJustDone] = useState(false);
+  const [memoryUsage, setMemoryUsage] = useState<number | null>(null);
   const prevPhaseRef = useRef(autoMixPhase);
   const doneTimeoutRef = useRef<number | null>(null);
 
@@ -40,6 +48,20 @@ export function AutoMixDrawer() {
     };
   }, []);
 
+  useEffect(() => {
+    if (autoMixPhase !== 'mixing') {
+      setMemoryUsage(null);
+      return;
+    }
+    const updateMemoryUsage = () => {
+      const memory = (performance as PerformanceWithMemory).memory;
+      setMemoryUsage(memory && Number.isFinite(memory.usedJSHeapSize) ? memory.usedJSHeapSize : null);
+    };
+    updateMemoryUsage();
+    const timer = window.setInterval(updateMemoryUsage, 1000);
+    return () => window.clearInterval(timer);
+  }, [autoMixPhase]);
+
   const fade = settings.autoMixDuration;
   const mixPoint = duration - fade;
   const secondsUntilMix = mixPoint - currentTime;
@@ -53,7 +75,10 @@ export function AutoMixDrawer() {
     secondsUntilMix,
     hasMixPoint,
     mixPoint,
-    currentTime
+    currentTime,
+    bpm: autoMixBpm,
+    memoryUsage,
+    transitionDuration: fade
   });
 
   const accent = autoMixColor ? ` xe_automix-drawer--${autoMixColor}` : '';
@@ -96,27 +121,43 @@ function getStatus(input: {
   hasMixPoint: boolean;
   mixPoint: number;
   currentTime: number;
+  bpm: { current: number; next: number } | null;
+  memoryUsage: number | null;
+  transitionDuration: number;
 }): MixStatus {
-  const { phase, justDone, fadeProgress, secondsUntilMix, hasMixPoint, mixPoint, currentTime } = input;
+  const {
+    phase,
+    justDone,
+    fadeProgress,
+    secondsUntilMix,
+    hasMixPoint,
+    mixPoint,
+    currentTime,
+    bpm,
+    memoryUsage,
+    transitionDuration
+  } = input;
 
   if (phase === 'analyzing-current') {
-    return { label: 'Loading...', detail: 'Reading the BPM of the current song', spinner: true, done: false, progress: null };
+    return { label: 'Analyzing current...', detail: 'Reading the BPM of the current song', spinner: true, done: false, progress: null };
   }
   if (phase === 'analyzing-next') {
-    return { label: 'Loading...', detail: 'Reading the BPM of the next song', spinner: true, done: false, progress: null };
+    return { label: 'Analyzing next...', detail: 'Reading the BPM of the next song', spinner: true, done: false, progress: null };
   }
   if (phase === 'mixing') {
+    const progressLabel = `${Math.round(clamp01(fadeProgress) * 100)}%`;
+    const memoryLabel = memoryUsage === null ? '--' : formatMemory(memoryUsage);
     return fadeProgress < 0.55
       ? {
           label: 'Mixing...',
-          detail: 'Blending the two tracks',
+          detail: `Auto mix ongoing: ${progressLabel} - MEM: ${memoryLabel}`,
           spinner: true,
           done: false,
           progress: fadeProgress
         }
       : {
           label: 'Finishing up...',
-          detail: 'Fading out the outgoing track',
+          detail: `Auto mix ongoing: ${progressLabel} - MEM: ${memoryLabel}`,
           spinner: true,
           done: false,
           progress: fadeProgress
@@ -129,13 +170,29 @@ function getStatus(input: {
     return { label: 'Done', detail: 'Mixed into the next track', spinner: false, done: true, progress: 1 };
   }
   if (hasMixPoint && secondsUntilMix > 0) {
+    const transitionTime = formatTime(Math.ceil(secondsUntilMix));
+    const transitionDurationLabel = `(${formatSeconds(transitionDuration)}s)`;
     return {
-      label: 'Auto mix is idling',
-      detail: `Transition will start in ${formatTime(Math.ceil(secondsUntilMix))}`,
+      label: 'Auto mix ready',
+      detail: bpm
+        ? `${formatBpm(bpm.current)} > ${formatBpm(bpm.next)} - transition starts in ${transitionTime} ${transitionDurationLabel}`
+        : `Transition starts in ${transitionTime} ${transitionDurationLabel}`,
       spinner: false,
       done: false,
       progress: mixPoint > 0 ? clamp01(currentTime / mixPoint) : 0
     };
   }
-  return { label: 'Auto mix is idling', detail: 'Waiting for a mix point', spinner: false, done: false, progress: 0 };
+  return { label: 'Enqueue more songs to auto mix', detail: 'There is no song up next', spinner: false, done: false, progress: null };
+}
+
+function formatBpm(bpm: number): string {
+  return Number.isInteger(bpm) ? String(bpm) : bpm.toFixed(1).replace(/\.0$/, '');
+}
+
+function formatMemory(bytes: number): string {
+  return `${Math.round(bytes / (1024 * 1024))} MB`;
+}
+
+function formatSeconds(seconds: number): string {
+  return Number.isInteger(seconds) ? String(seconds) : seconds.toFixed(1).replace(/\.0$/, '');
 }
