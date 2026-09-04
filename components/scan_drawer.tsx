@@ -45,7 +45,8 @@ export function ScanDrawer() {
   const report = scanning === null ? (scanReport ?? shownReport) : null;
   const open = scanning !== null || scanReport !== null;
   const info = scanning ?? shown;
-  const indeterminate = !info || info.total <= 0;
+  const waitingForFiles = !info || info.total <= 0;
+  const indeterminate = waitingForFiles || info.discovering;
   const percent = indeterminate ? 0 : Math.round((info!.done / info!.total) * 100);
   const skippedCount = report?.skipped.length ?? 0;
   const currentFilePath = report ? '' : (info?.currentFilePath ?? '');
@@ -110,11 +111,11 @@ export function ScanDrawer() {
           ) : (
             <>
               <span className="xe_scan-drawer__count">
-                {indeterminate
+                {waitingForFiles
                   ? 'Starting scan, one moment...'
-                  : `${info!.done}/${info!.total} ${info!.omitted > 0 ? ` - ${info!.omitted} excl` : ''}`}
-                {rate !== null && !indeterminate && ` - ${formatRate(rate)}/s`}
-                {!indeterminate &&
+                  : `${info!.done}/${info!.total}${info!.discovering ? '+' : ''} ${info!.omitted > 0 ? ` - ${info!.omitted} excl` : ''}`}
+                {rate !== null && !waitingForFiles && ` - ${formatRate(rate)}/s`}
+                {!waitingForFiles &&
                   info!.audioSeconds > 0 &&
                   ` - ${formatDurationShort(info!.audioSeconds)}`}
               </span>
