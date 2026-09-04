@@ -7,7 +7,7 @@
   "author": "exerinity <me@exerinity.com>",
   "scripts": {
     "dev": "vite",
-    "stage": "wrangler types && tsc --noEmit && tsc -p worker --noEmit && vite build && vite preview",
+    "stage": "wrangler types && tsc --noEmit && tsc -p worker --noEmit && vite build --mode stage && vite preview --strictPort",
     "dev:worker": "wrangler dev",
     "types": "wrangler types",
     "build": "wrangler types && tsc --noEmit && tsc -p worker --noEmit && vite build",
