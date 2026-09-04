@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react';
 import { usePlayer } from '../context/player_context';
 import { useSettings } from '../context/settings_context';
-import { useAlbumArt } from '../hooks/album_art';
 import { useKenBurns } from '../hooks/ken_burns';
 import { formatTime } from '../utils/format';
-import type { QueueItem } from '../types';
 import { LyricsPanel } from './lyrics';
 import { ScrollingText } from './scrolling_text';
+import { TrackPreviewCard } from './track_preview_card';
 import { CloseIcon, LogoIcon, PauseIcon, PlayIcon } from './icons';
 
 interface FullscreenPlayerProps {
@@ -20,35 +19,6 @@ const DRAG_THRESHOLD_PX = 4;
 type CoverDeformation = [number, number, number, number, number, number];
 
 const RESTING_DEFORMATION: CoverDeformation = [1, 0, 0, 1, 0, 0];
-
-function TrackPreviewCard({
-  item,
-  onPlay,
-  title
-}: {
-  item: QueueItem;
-  onPlay(): void;
-  title?: string;
-}) {
-  const artUrl = useAlbumArt(item.track.id, item.track);
-
-  return (
-    <button
-      type="button"
-      className="xe_fullscreen-player__track-card"
-      onClick={onPlay}
-      title={title}
-    >
-      <span className="xe_fullscreen-player__track-art">
-        {artUrl ? <img src={artUrl} alt="" /> : <LogoIcon size={18} />}
-      </span>
-      <span className="xe_fullscreen-player__track-copy">
-        <ScrollingText text={item.track.title} className="xe_fullscreen-player__track-title" />
-        <ScrollingText text={item.track.artist} className="xe_fullscreen-player__track-artist" />
-      </span>
-    </button>
-  );
-}
 
 export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: FullscreenPlayerProps) {
   const {

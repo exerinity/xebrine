@@ -251,6 +251,26 @@
   font-size: 11px;
 }
 
+.xe_side-panel__up-next {
+  flex-shrink: 0;
+  margin: 0 14px;
+  padding: 12px 0 10px;
+  border-top: 1px solid var(--border);
+}
+
+.xe_side-panel__up-next h3 {
+  margin: 0 8px 3px;
+  color: var(--accent-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.xe_side-panel__up-next .xe_fullscreen-player__track-card {
+  width: 100%;
+}
+
 .xe_side-panel__lyrics > .xe_empty-note {
   padding: 24px 16px;
   line-height: 1.5;

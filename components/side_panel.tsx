@@ -13,6 +13,7 @@ import { formatTime } from '../utils/format';
 import { LyricsPanel } from './lyrics';
 import { QueueList } from './queue_list';
 import { ScrollingText } from './scrolling_text';
+import { TrackPreviewCard } from './track_preview_card';
 import {
   CloseIcon,
   ExternalLinkIcon,
@@ -46,13 +47,15 @@ interface SidePanelProps {
 
 export function SidePanel({ open, view, onViewChange, onClose }: SidePanelProps) {
   const navigate = useNavigate();
-  const { queue, current, artworkUrl } = usePlayer();
+  const { queue, position, current, artworkUrl, jumpTo } = usePlayer();
   const [query, setQuery] = useState('');
   const [panelWidth, setPanelWidth] = useState(loadWidth);
   const [resizing, setResizing] = useState(false);
   const panelWidthRef = useRef(panelWidth);
   panelWidthRef.current = panelWidth;
   const track = current?.track ?? null;
+  const nextPosition = position + 1;
+  const nextItem = queue[nextPosition] ?? null;
   const totalSeconds = queue.reduce((sum, item) => sum + item.track.duration, 0);
 
   useEffect(() => {
@@ -229,6 +232,12 @@ export function SidePanel({ open, view, onViewChange, onClose }: SidePanelProps)
                 </div>
               )}
               <LyricsPanel showToolbar={false} variant="sidebar" />
+              {nextItem && (
+                <section className="xe_side-panel__up-next" aria-label="Up next">
+                  <h3>Up next</h3>
+                  <TrackPreviewCard item={nextItem} onPlay={() => jumpTo(nextPosition)} />
+                </section>
+              )}
             </div>
           )}
         </div>
