@@ -37,7 +37,7 @@ const PRECACHE_NAME = `${PRECACHE_PREFIX}${buildId(PRECACHE_ENTRIES)}`;
 const PRECACHE_URLS = Array.from(
   new Set(PRECACHE_ENTRIES.map((entry) => new URL(entry.url, self.registration.scope).href))
 );
-const INDEX_URL = new URL('index.html', self.registration.scope).href;
+const INDEX_URL = new URL('/', self.registration.scope).href;
 
 let downloadPromise: Promise<void> | null = null;
 
@@ -105,7 +105,14 @@ self.addEventListener('activate', (event) => {
 async function appResponse(request: Request): Promise<Response> {
   const cache = await caches.open(PRECACHE_NAME);
   if (request.mode === 'navigate') {
-    return (await cache.match(INDEX_URL)) ?? fetch(request);
+    const cached = await cache.match(INDEX_URL);
+    if (!cached) return fetch(request);
+    if (!cached.redirected) return cached;
+    return new Response(cached.body, {
+      status: cached.status,
+      statusText: cached.statusText,
+      headers: cached.headers
+    });
   }
   return (await cache.match(request)) ?? fetch(request);
 }

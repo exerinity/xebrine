@@ -108,6 +108,14 @@ export default defineConfig(({ mode }) => ({
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,png,woff2,json,wasm}'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        manifestTransforms: [
+          async (entries) => ({
+            manifest: entries.map((entry) =>
+              entry.url === 'index.html' ? { ...entry, url: '/' } : entry
+            ),
+            warnings: []
+          })
+        ],
         rollupFormat: 'iife'
       }
     })
