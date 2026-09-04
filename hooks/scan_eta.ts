@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 interface ScanLike {
   done: number;
   total: number;
+  discovering?: boolean;
 }
 
 export interface ScanStats {
@@ -39,7 +40,10 @@ export function useScanStats(scanning: ScanLike | null): ScanStats {
     if (dSeconds >= 0.5 && dDone > 0) {
       const rate = dDone / dSeconds;
       const remaining = scanning.total - scanning.done;
-      setStats({ eta: remaining > 0 ? remaining / rate : 0, rate });
+      setStats({
+        eta: scanning.discovering ? null : remaining > 0 ? remaining / rate : 0,
+        rate
+      });
     }
   }, [scanning]);
 
