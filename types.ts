@@ -18,6 +18,7 @@ export interface TrackMeta {
   relPath: string[];
   fileName: string;
   sizeBytes: number;
+  lastModified?: number;
   title: string;
   artist: string;
   album: string;
