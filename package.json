@@ -19,6 +19,7 @@
     "icons:white": "cargo run --quiet --release --manifest-path tools/icon-gen/Cargo.toml -- --white-background"
   },
   "dependencies": {
+    "mediainfo.js": "^0.3.7",
     "mespeak": "^2.0.2",
     "music-metadata": "^11.0.0",
     "react": "^19.0.0",
