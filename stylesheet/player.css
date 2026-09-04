@@ -217,6 +217,12 @@
   pointer-events: auto;
 }
 
+.xe_update-drawer {
+  right: 18px;
+  left: auto;
+  width: min(340px, calc(100vw - 36px));
+}
+
 .xe_player-bar--top .xe_scan-drawer {
   top: calc(100% - 1px);
   bottom: auto;
@@ -1354,6 +1360,11 @@ button.xe_scrubber__time:hover {
   .xe_scan-drawer {
     left: 14px;
     width: min(340px, calc(100vw - 28px));
+  }
+
+  .xe_update-drawer {
+    right: 14px;
+    left: auto;
   }
 
   .xe_automix-drawer {
