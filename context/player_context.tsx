@@ -39,6 +39,10 @@ import {
 export type RepeatMode = 'off' | 'all' | 'one';
 export type AutoMixPhase = 'idle' | 'analyzing-current' | 'analyzing-next' | 'mixing' | 'switching';
 export type AutoMixColor = 'green' | 'orange' | 'red' | null;
+export interface AutoMixBpm {
+  current: number;
+  next: number;
+}
 
 const FADE_CURVES = equal_power_fade_curves(64);
 const MEDIA_LATENCY = 0.0;
@@ -80,13 +84,16 @@ export interface PlayerContextValue {
   autoMixEnabled: boolean;
   autoMixPhase: AutoMixPhase;
   autoMixColor: AutoMixColor;
+  autoMixBpm: AutoMixBpm | null;
   toggleAutoMix(): void;
   sleepTimerRemaining: number;
   sleepTimerPaused: boolean;
+  sleepTimerFinished: boolean;
   addSleepTimer(minutes: number): void;
   setSleepTimerMinutes(minutes: number): void;
   togglePauseSleepTimer(): void;
   cancelSleepTimer(): void;
+  dismissSleepTimerFinished(): void;
   remoteLocked: boolean;
   setRemoteLocked(locked: boolean): void;
 }
@@ -201,6 +208,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [sleepTimerEndAt, setSleepTimerEndAt] = useState<number | null>(null);
   const [sleepTimerPausedRemaining, setSleepTimerPausedRemaining] = useState<number | null>(null);
   const [sleepTimerRemaining, setSleepTimerRemaining] = useState(0);
+  const [sleepTimerFinished, setSleepTimerFinished] = useState(false);
   const sleepTimerEndAtRef = useRef<number | null>(null);
   sleepTimerEndAtRef.current = sleepTimerEndAt;
   const sleepTimerPausedRemainingRef = useRef<number | null>(null);
@@ -212,6 +220,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   autoMixEnabledRef.current = autoMixEnabled;
   const [autoMixPhase, setAutoMixPhase] = useState<AutoMixPhase>('idle');
   const [autoMixColor, setAutoMixColor] = useState<AutoMixColor>(null);
+  const [autoMixBpm, setAutoMixBpm] = useState<AutoMixBpm | null>(null);
   const pendingMixRef = useRef<{
     key: string;
     outgoing: TrackAnalysis;
@@ -649,7 +658,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       if (remaining <= 0) {
         audio.pause();
         setSleepTimerEndAt(null);
-        toast.info('Sleep timer elapsed, playback paused');
+        setSleepTimerFinished(true);
       }
     };
     tick();
@@ -766,6 +775,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     preloadedBufferRef.current = null;
+    pendingMixRef.current = null;
+    setAutoMixBpm(null);
     if (!autoMixEnabled || !current) {
       setAutoMixPhase('idle');
       setAutoMixColor(null);
@@ -798,6 +809,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           incoming: nextAnalysis,
           status
         };
+        setAutoMixBpm({ current: curAnalysis.bpm, next: nextAnalysis.bpm });
         setAutoMixColor(status);
         setAutoMixPhase('idle');
         toast.info(
@@ -1009,12 +1021,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const addSleepTimer = useCallback((minutes: number) => {
     const seconds = clamp(currentSleepTimerSeconds() + minutes * 60, 0, MAX_SLEEP_TIMER_SECONDS);
+    setSleepTimerFinished(false);
     setSleepTimerPausedRemaining(null);
     setSleepTimerEndAt(Date.now() + seconds * 1000);
   }, []);
 
   const setSleepTimerMinutes = useCallback((minutes: number) => {
     const seconds = clamp(Math.round(minutes * 60), 0, MAX_SLEEP_TIMER_SECONDS);
+    setSleepTimerFinished(false);
     setSleepTimerPausedRemaining(null);
     if (seconds <= 0) {
       setSleepTimerEndAt(null);
@@ -1043,6 +1057,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setSleepTimerEndAt(null);
     setSleepTimerPausedRemaining(null);
     setSleepTimerRemaining(0);
+  }, []);
+
+  const dismissSleepTimerFinished = useCallback(() => {
+    setSleepTimerFinished(false);
   }, []);
 
   const toggleAutoMix = useCallback(() => {
@@ -1096,13 +1114,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       autoMixEnabled,
       autoMixPhase,
       autoMixColor,
+      autoMixBpm,
       toggleAutoMix,
       sleepTimerRemaining,
       sleepTimerPaused,
+      sleepTimerFinished,
       addSleepTimer,
       setSleepTimerMinutes,
       togglePauseSleepTimer,
       cancelSleepTimer,
+      dismissSleepTimerFinished,
       remoteLocked,
       setRemoteLocked
     }),
@@ -1140,13 +1161,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       autoMixEnabled,
       autoMixPhase,
       autoMixColor,
+      autoMixBpm,
       toggleAutoMix,
       sleepTimerRemaining,
       sleepTimerPaused,
+      sleepTimerFinished,
       addSleepTimer,
       setSleepTimerMinutes,
       togglePauseSleepTimer,
       cancelSleepTimer,
+      dismissSleepTimerFinished,
       remoteLocked,
       setRemoteLocked
     ]
