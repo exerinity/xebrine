@@ -2,20 +2,15 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './app';
-import { handleDomainMigration } from './utils/domain_migration';
 import './stylesheet/index.css';
 
-const redirectingToNewDomain = handleDomainMigration();
-
-if (!redirectingToNewDomain) {
-  createRoot(document.getElementById('xebrine')!).render(
-    <StrictMode>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </StrictMode>
-  );
-}
+createRoot(document.getElementById('xebrine')!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>
+);
 
 function revealApp() {
   document.documentElement.classList.add('xebrine_initialized');
@@ -27,6 +22,4 @@ function revealApp() {
   }
 }
 
-if (!redirectingToNewDomain) {
-  requestAnimationFrame(() => requestAnimationFrame(revealApp));
-}
+requestAnimationFrame(() => requestAnimationFrame(revealApp));
