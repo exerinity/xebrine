@@ -35,28 +35,6 @@ export function fallbackTags(fileName: string): TrackTags {
   };
 }
 
-export async function readTrackTags(file: File): Promise<TrackTags> {
-  try {
-    const meta = await parseBlob(file, { duration: true, skipCovers: true });
-    return {
-      title: meta.common.title?.trim() || stripExtension(file.name),
-      artist: meta.common.artist?.trim() || 'Unknown Artist',
-      album: meta.common.album?.trim() || 'Unknown Album',
-      albumArtist: meta.common.albumartist?.trim() || undefined,
-      duration: meta.format.duration ?? 0,
-      trackNo: meta.common.track?.no ?? undefined,
-      year: meta.common.year,
-      genre: meta.common.genre?.[0],
-      hasTitleTag: !!meta.common.title?.trim(),
-      hasArtistTag: !!meta.common.artist?.trim(),
-      hasAlbumTag: !!meta.common.album?.trim(),
-      hasCoverArt: false
-    };
-  } catch {
-    return fallbackTags(file.name);
-  }
-}
-
 export async function readCoverArt(file: File): Promise<Blob | null> {
   if (file.size > MAX_COVER_PARSE_SIZE) return null;
   try {
