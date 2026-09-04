@@ -37,7 +37,6 @@ import { NAV_LINKS, Sidebar } from './components/sidebar';
 import { PlayerBar } from './components/player_bar';
 import { FullscreenPlayer } from './components/fs_player';
 import { ToastContainer } from './components/toast_container';
-import { UpdateModal } from './components/update_modal';
 import { SetupLeaveModal } from './components/setup_leave_modal';
 import { SidePanel } from './components/side_panel';
 import { SleepTimerFinishedModal } from './components/sleep_timer_finished_modal';
@@ -246,7 +245,6 @@ function Shell() {
       />
       <ToastContainer />
       <SleepTimerFinishedModal />
-      <UpdateModal />
     </div>
   );
 }
