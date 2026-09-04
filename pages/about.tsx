@@ -56,7 +56,12 @@ const DEPENDENCY_ACKNOWLEDGEMENTS: { heading: string; items: Acknowledgement[] }
       {
         name: 'music-metadata',
         url: 'https://github.com/borewit/music-metadata',
-        role: 'audio metadata parser'
+        role: 'embedded artwork extraction'
+      },
+      {
+        name: 'mediainfo.js',
+        url: 'https://mediainfo.js.org',
+        role: 'fast audio metadata scanning'
       },
       {
         name: 'meSpeak',
