@@ -39,7 +39,8 @@ import { FullscreenPlayer } from './components/fs_player';
 import { ToastContainer } from './components/toast_container';
 import { UpdateModal } from './components/update_modal';
 import { SetupLeaveModal } from './components/setup_leave_modal';
-import { SidePanel, type SidePanelView } from './components/side_panel';
+import { SidePanel } from './components/side_panel';
+import { SleepTimerFinishedModal } from './components/sleep_timer_finished_modal';
 
 const SIDE_PANEL_MEDIA = '(min-width: 1100px)';
 
@@ -119,13 +120,11 @@ function PageIconBackdrop() {
 function Shell() {
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
   const [playerBarCollapsed, setPlayerBarCollapsed] = useState(false);
-  const [sidePanelOpen, setSidePanelOpen] = useState(false);
-  const [sidePanelView, setSidePanelView] = useState<SidePanelView>('queue');
   const [sidePanelSupported, setSidePanelSupported] = useState(
     () => window.matchMedia(SIDE_PANEL_MEDIA).matches
   );
   const { current, artworkUrl } = usePlayer();
-  const { settings } = useSettings();
+  const { settings, update } = useSettings();
   const accent = useAccentColor(artworkUrl);
   useDynamicFavicon(Boolean(current), accent.accent);
   usePageKeys(settings.pageKeyMode);
@@ -167,13 +166,11 @@ function Shell() {
 
   useEffect(() => {
     const media = window.matchMedia(SIDE_PANEL_MEDIA);
-    const handleChange = () => {
-      setSidePanelSupported(media.matches);
-      if (!media.matches) setSidePanelOpen(false);
-    };
+    const handleChange = () => setSidePanelSupported(media.matches);
     media.addEventListener('change', handleChange);
     return () => media.removeEventListener('change', handleChange);
   }, []);
+
   useEffect(() => {
     if (!fullscreenOpen || !current) return;
     const previous = document.title;
@@ -219,10 +216,10 @@ function Shell() {
           </Routes>
         </div>
         <SidePanel
-          open={sidePanelOpen && sidePanelSupported}
-          view={sidePanelView}
-          onViewChange={setSidePanelView}
-          onClose={() => setSidePanelOpen(false)}
+          open={settings.sidePanelOpen && sidePanelSupported}
+          view={settings.sidePanelView}
+          onViewChange={(view) => update({ sidePanelView: view })}
+          onClose={() => update({ sidePanelOpen: false })}
         />
       </main>
       <FullscreenPlayer
@@ -235,10 +232,10 @@ function Shell() {
         fullscreenOpen={fullscreenOpen && Boolean(current)}
         onCollapsedChange={setPlayerBarCollapsed}
         onToggleFullscreen={() => setFullscreenOpen((open) => !open)}
-        sidePanelOpen={sidePanelOpen && sidePanelSupported}
+        sidePanelOpen={settings.sidePanelOpen && sidePanelSupported}
         sidePanelAvailable={sidePanelSupported}
         onToggleSidePanel={() => {
-          if (sidePanelSupported) setSidePanelOpen((open) => !open);
+          if (sidePanelSupported) update({ sidePanelOpen: !settings.sidePanelOpen });
         }}
       />
       <MediaBridge />
@@ -248,6 +245,7 @@ function Shell() {
         }}
       />
       <ToastContainer />
+      <SleepTimerFinishedModal />
       <UpdateModal />
     </div>
   );
