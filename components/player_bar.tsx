@@ -43,6 +43,7 @@ import { ExplicitBadge } from './explicit_badge';
 import { ScanDrawer } from './scan_drawer';
 import { AutoMixDrawer } from './auto_mix_drawer';
 import { SleepTimerControl } from './sleep_timer';
+import { UpdateDrawer } from './update_drawer';
 
 interface PlayerBarProps {
   collapsed?: boolean;
@@ -483,6 +484,7 @@ export function PlayerBar({
       >
         {visualizerOn && <Visualizer analyser={analyser} />}
         <ScanDrawer />
+        <UpdateDrawer />
         <div
           className={`xe_player-bar__now${nowEntering ? ' xe_player-bar__now--entering' : ''}`}
           onAnimationEnd={(e) => {
