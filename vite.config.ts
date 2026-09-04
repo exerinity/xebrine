@@ -26,7 +26,7 @@ const CHUNK_RULES: [RegExp, string][] = [
   [/utils\/remote_protocol/, 'context'],
 
   [/components\/(fs_player|player_bar|scrubber|slider|equalizer|visualizer|auto_mix_drawer|queue_list|sleep_timer)/, 'ui_player'],
-  [/components\/(modal|cover_modal|update_modal|scan_drawer|context_menu)/, 'ui_modals'],
+  [/components\/(modal|cover_modal|update_drawer|scan_drawer|context_menu)/, 'ui_modals'],
   [/components\/(track_list|sort_select|skeletons|explicit_badge)/, 'ui_tracklist'],
   [/components\/(lyrics|lrclib_search_modal)/, 'ui_lyrics'],
   [/components\/(sidebar|icons|toast_container|spinner|scrolling_text)/, 'ui_shell'],
@@ -61,10 +61,16 @@ const chunkFileName = ({ name, moduleIds }: { name: string; moduleIds: string[] 
     ? `i/xebrine/modules/xe_${name}_[hash].js`
     : scriptFileName(name, 'xe_');
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  define: {
+    __XEBRINE_BUILD_ID__: JSON.stringify(mode === 'stage' ? `stage-${Date.now()}` : 'production')
+  },
   plugins: [
     react(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: '.',
+      filename: 'sw.ts',
       manifestFilename: 'xebrine.webmanifest',
       registerType: 'prompt',
       includeAssets: [
@@ -99,22 +105,10 @@ export default defineConfig({
           }
         ]
       },
-      workbox: {
-        inlineWorkboxRuntime: true,
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,png,woff2,json,wasm}'],
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/i\/services\//],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/lrclib\.net\/api\/.*/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'lrclib',
-              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 }
-            }
-          }
-        ]
+        rollupFormat: 'iife'
       }
     })
   ],
@@ -153,4 +147,4 @@ export default defineConfig({
       }
     }
   }
-});
+}));
