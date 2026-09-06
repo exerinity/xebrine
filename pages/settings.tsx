@@ -2,7 +2,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSettings, type Settings } from '../context/settings_context';
 import { useLibrary } from '../context/library_context';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import {
   DEFAULT_SIZE_LIMIT_BYTES,
   IGNORABLE_FORMATS,
