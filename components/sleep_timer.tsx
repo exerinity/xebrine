@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type AnimationEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { formatTime } from '../utils/format';
 import { MoonIcon, PauseIcon, PlayIcon } from './icons';
 
