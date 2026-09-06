@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { QueueList } from '../components/queue_list';
 import { formatTime } from '../utils/format';
 import { usePageTitle } from '../hooks/page_title';
