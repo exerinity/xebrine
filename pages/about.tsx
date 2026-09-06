@@ -9,6 +9,7 @@ import { Spinner } from '../components/spinner';
 import { albumKey, displayArtist } from '../utils/groups';
 import { durationBreakdown, formatBytes, formatTime } from '../utils/format';
 import type { TrackMeta } from '../types';
+import { LATEST_VERSION } from './release_notes';
 
 const HOTKEYS: { chords: string[][]; action: string }[] = [
   { chords: [['Space'], ['K']], action: 'Play / pause' },
@@ -255,7 +256,7 @@ export function AboutPage() {
                     <LogoIcon size={60} />
                   </span>
                   <div>
-                    <h2 className="xe_about__name">Xebrine Beta</h2>
+                    <h2 className="xe_about__name">Xebrine {LATEST_VERSION}</h2>
                     {isElectron && (
                       <p className="xe_about__version">You are running Electron ({electronVersion()})</p>
                     )}
@@ -263,14 +264,17 @@ export function AboutPage() {
                 </div>
 
                 <p className="xe_about__lead">
-                  Xebrine <i>(zeh-brine)</i> is the React-made heavy-duty spiritual-successor to the venerable{' '}
+                  <strong>Xebrine</strong> (pronounced <i>"zeh-brine"</i>) is a heavy-duty highly customizable power-user desktop-focused PWA music app designed for
+                  large music collections and very long listening sessions</p>
+
+                <p className="xe_about__lead">
+                  Made in React with a minimal amount of dependencies by <a href="https://exerinity.com" target="_blank">exerinity</a>, it is the non-replacing spiritual-successor to the venerable{' '}
                   <a href="https://voxity.dev" target="_blank" rel="noopener noreferrer">
                     Voxity
-                  </a>{' '}
-                  PWA music player by <a href="https://exerinity.com" target="_blank">exerinity</a>. Xebrine was released exactly 1 year after Voxity was created.
-                </p>
-                <p className="xe_about__text">
-                    (No - Xebrine is not <i>replacing</i> Voxity nor am I canning it)
+                  </a>, a music player PWA written in vanilla JavaScript</p>
+
+                <p className="xe_about__lead">
+                  Xebrine was released a year after Voxity (or then "Music player") was born
                 </p>
 
                 <h3 className="xe_about__heading">Features</h3>
@@ -453,7 +457,7 @@ export function AboutPage() {
 
             {active === 'acknowledgements' && (
               <>
-              <p className="xe_about__text">This is a list of what Xebrine was built with and what it uses. You can view the source here: <a href="https://github.com/xebrine/xebrine" target="_blank">github.com/xebrine/xebrine</a></p>
+                <p className="xe_about__text">This is a list of what Xebrine was built with and what it uses. You can view the source here: <a href="https://github.com/xebrine/xebrine" target="_blank">github.com/xebrine/xebrine</a></p>
                 {DEPENDENCY_ACKNOWLEDGEMENTS.map((group) => (
                   <section key={group.heading}>
                     <h3 className="xe_about__heading">{group.heading}</h3>
