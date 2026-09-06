@@ -6,7 +6,7 @@ import { Spinner } from '../components/spinner';
 import { useLastfmSession } from '../hooks/lastfm_session';
 import { usePageTitle } from '../hooks/page_title';
 import { useLibrary } from '../context/library_context';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
 import { useSetupFlow } from '../context/setup_flow_context';
 import { setLastfmSession } from '../utils/lastfm_session';
