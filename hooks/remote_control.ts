@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import {
   isValidPin,
   type ControlInbound,
