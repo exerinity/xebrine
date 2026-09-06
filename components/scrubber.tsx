@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { formatTime, parseSeekInput } from '../utils/format';
 import { Slider } from './slider';
 import { Modal } from './modal';
