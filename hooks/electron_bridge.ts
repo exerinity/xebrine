@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { MAX_VOLUME, usePlayer, type RepeatMode } from '../context/player_context';
+import { MAX_VOLUME, usePlayer, type RepeatMode } from '../src/context/player';
 import { clamp } from '../utils/format';
 import {
   electron,
