@@ -7,7 +7,7 @@ import {
   type ReactNode
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MAX_VOLUME, REMOTE_LOCK_MESSAGE, usePlayer } from '../context/player_context';
+import { MAX_VOLUME, REMOTE_LOCK_MESSAGE, usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
 import { ScrollingText } from './scrolling_text';
 import { Scrubber } from './scrubber';
