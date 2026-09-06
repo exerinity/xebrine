@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { REMOTE_LOCK_MESSAGE, usePlayer } from '../context/player_context';
+import { REMOTE_LOCK_MESSAGE, usePlayer } from '../src/context/player';
 import { useTrackMenu } from '../hooks/track_menu';
 import { formatTime } from '../utils/format';
 import type { TrackMeta } from '../types';
