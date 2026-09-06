@@ -146,7 +146,7 @@ async function toLrclibError(response: Response): Promise<LrclibError> {
       if (typeof error.message === 'string' && error.message.trim()) message = error.message;
     }
   } catch {
-    // Some upstream failures do not include a JSON response body.
+    null;
   }
 
   const retryAfterMs =
