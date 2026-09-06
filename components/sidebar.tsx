@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { useRemote } from '../context/remote_context';
 import { clamp } from '../utils/format';
 import {
