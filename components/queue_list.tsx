@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { useDragReorder } from '../hooks/drag_reorder';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { formatTime } from '../utils/format';
