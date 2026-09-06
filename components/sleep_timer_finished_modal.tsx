@@ -1,4 +1,4 @@
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { Modal } from './modal';
 
 export function SleepTimerFinishedModal() {
