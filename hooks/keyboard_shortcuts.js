@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { MAX_VOLUME, usePlayer } from '../context/player_context';
+import { MAX_VOLUME, usePlayer } from '../src/context/player';
 import { formatTime } from '../utils/format';
 import { dismissToast, toast } from '../utils/toast';
 import { isTypingTarget } from '../utils/keyboard';
