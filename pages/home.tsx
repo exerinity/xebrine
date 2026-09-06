@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { groupAlbums, albumKey } from '../utils/groups';
