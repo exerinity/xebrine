@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
 import {
   fetchLyrics,
