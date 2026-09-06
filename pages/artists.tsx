@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
 import { groupArtists, type ArtistGroup } from '../utils/groups';
 import { openSearch, searchLabel } from '../utils/search_engine';
