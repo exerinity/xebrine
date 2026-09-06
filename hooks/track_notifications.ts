@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
 
 export function useTrackNotifications(): void {
