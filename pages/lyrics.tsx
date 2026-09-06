@@ -1,5 +1,5 @@
 import { useRef, useState, type DragEvent } from 'react';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { LyricsPanel } from '../components/lyrics';
 import { ScrollingText } from '../components/scrolling_text';
 import { usePageTitle } from '../hooks/page_title';
