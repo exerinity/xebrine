@@ -17,5 +17,5 @@
     "useDefineForClassFields": true,
     "types": ["vite/client", "wicg-file-system-access", "vite-plugin-pwa/client"]
   },
-  "include": ["main.tsx", "app.tsx", "types.ts", "vite-env.d.ts", "api", "audio", "components", "context", "hooks", "management", "pages", "queue", "types", "utils"]
+  "include": ["main.tsx", "app.tsx", "types.ts", "vite-env.d.ts", "api", "audio", "components", "context", "hooks", "management", "pages", "queue", "src", "types", "utils"]
 }
