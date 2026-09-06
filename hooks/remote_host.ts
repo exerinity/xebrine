@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MAX_VOLUME, usePlayer, type PlayerContextValue } from '../context/player_context';
+import { MAX_VOLUME, usePlayer, type PlayerContextValue } from '../src/context/player';
 import { displayArtist } from '../utils/groups';
 import { toast } from '../utils/toast';
 import {
