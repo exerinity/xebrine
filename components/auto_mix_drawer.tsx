@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
 import { formatTime } from '../utils/format';
 import { AutoMixIcon, CheckIcon } from './icons';
@@ -22,8 +22,15 @@ type PerformanceWithMemory = Performance & { memory?: PerformanceMemory };
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 export function AutoMixDrawer() {
-  const { autoMixEnabled, autoMixPhase, autoMixColor, autoMixBpm, currentTime, duration } =
-    usePlayer();
+  const {
+    autoMixEnabled,
+    autoMixPhase,
+    autoMixColor,
+    autoMixBpm,
+    autoMixProgress,
+    currentTime,
+    duration
+  } = usePlayer();
   const { settings } = useSettings();
   const [justDone, setJustDone] = useState(false);
   const [memoryUsage, setMemoryUsage] = useState<number | null>(null);
@@ -65,7 +72,8 @@ export function AutoMixDrawer() {
   const fade = settings.autoMixDuration;
   const mixPoint = duration - fade;
   const secondsUntilMix = mixPoint - currentTime;
-  const fadeProgress = fade > 0 ? clamp01((currentTime - mixPoint) / fade) : 0;
+  const trackFadeProgress = fade > 0 ? clamp01((currentTime - mixPoint) / fade) : 0;
+  const fadeProgress = autoMixProgress ?? trackFadeProgress;
   const hasMixPoint = duration > fade && duration > 0;
 
   const status = getStatus({
