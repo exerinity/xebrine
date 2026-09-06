@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { usePlayer } from '../context/player_context';
+import { usePlayer } from '../src/context/player';
 
 export function useMediaSession() {
   const player = usePlayer();
