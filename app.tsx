@@ -3,7 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { SettingsProvider } from './context/settings_context';
 import { SetupFlowProvider } from './context/setup_flow_context';
 import { LibraryProvider } from './context/library_context';
-import { PlayerProvider, usePlayer } from './context/player_context';
+import { PlayerProvider, usePlayer } from './src/context/player';
 import { RemoteProvider } from './context/remote_context';
 import { useSettings } from './context/settings_context';
 import { useMediaSession } from './hooks/media_session';
