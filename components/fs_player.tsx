@@ -23,6 +23,7 @@ const RESTING_DEFORMATION: CoverDeformation = [1, 0, 0, 1, 0, 0];
 export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: FullscreenPlayerProps) {
   const {
     current,
+    radio_station,
     queue,
     position,
     isPlaying,
@@ -34,7 +35,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
     playNow
   } = usePlayer();
   const { settings } = useSettings();
-  const track = current?.track ?? null;
+  const track = radio_station ? { title: radio_station.name, artist: 'Live radio' } : current?.track ?? null;
   const visible = open && Boolean(track);
   const [rendered, setRendered] = useState(visible);
   const [leaving, setLeaving] = useState(false);
@@ -64,6 +65,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
   });
   const snapshotRef = useRef<{
     track: NonNullable<typeof track>;
+    radio: boolean;
     queue: typeof queue;
     position: number;
     isPlaying: boolean;
@@ -73,7 +75,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
     justPlayed: typeof justPlayed;
   } | null>(null);
   if (track) {
-    snapshotRef.current = { track, queue, position, isPlaying, artworkUrl, currentTime, duration, justPlayed };
+    snapshotRef.current = { radio: !!radio_station, track, queue, position, isPlaying, artworkUrl, currentTime, duration, justPlayed };
   }
 
   useEffect(() => {
@@ -119,6 +121,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
   if (!rendered || !snapshotRef.current) return null;
 
   const {
+    radio: display_radio,
     track: displayTrack,
     queue: displayQueue,
     position: displayPosition,
@@ -340,7 +343,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
               aria-hidden={!playerBarCollapsed}
             >
               {displayPlaying ? <PlayIcon size={14} /> : <PauseIcon size={14} />}
-              <span>{formatTime(displayCurrentTime)} / {formatTime(displayDuration)}</span>
+              <span>{display_radio ? 'LIVE' : `${formatTime(displayCurrentTime)} / ${formatTime(displayDuration)}`}</span>
             </div>
             <ScrollingText text={displayTrack.title} className="xe_fullscreen-player__title" />
             <ScrollingText text={displayTrack.artist} className="xe_fullscreen-player__artist" />
@@ -359,6 +362,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
           className="xe_fullscreen-player__panel xe_fullscreen-player__lyrics"
           aria-label="Lyrics, up next and just played"
         >
+          {display_radio ? <p className="xe_empty-note">Live radio</p> : <>
           <h2>Lyrics</h2>
           <LyricsPanel showToolbar={false} variant="fullscreen" />
           <div className="xe_fullscreen-player__queue" aria-label="Queue preview">
@@ -379,6 +383,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
               )}
             </div>
           </div>
+          </>}
         </section>
       </div>
     </section>
