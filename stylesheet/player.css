@@ -566,6 +566,11 @@
   font-weight: 500;
 }
 
+.xe_player-bar__titles > .xe_scroll-text {
+  align-self: flex-start;
+  max-width: 100%;
+}
+
 .xe_player-bar__subtitle {
   color: var(--text-dim);
   font-size: 13px;
