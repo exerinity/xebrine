@@ -74,7 +74,7 @@ const KEY = 'xebrine.settings';
 
 export const DEFAULT_SETTINGS: Settings = {
   lrclibMode: 'strict',
-  notifications: true,
+  notifications: false,
   preventExit: true,
   ignoreRules: DEFAULT_IGNORE_RULES,
   autoMixDuration: 67,
