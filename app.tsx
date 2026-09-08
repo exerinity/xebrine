@@ -17,6 +17,7 @@ import { useAccentColor } from './hooks/accent_color';
 import { useDynamicFavicon } from './hooks/dynamic_favicon';
 import { useKeyboardShortcuts } from './hooks/keyboard_shortcuts';
 import { usePageKeys } from './hooks/page_keys';
+import { Radio_page } from './pages/radio';
 import { HomePage } from './pages/home';
 import { LibraryPage } from './pages/library';
 import { SearchPage } from './pages/search';
@@ -122,10 +123,10 @@ function Shell() {
   const [sidePanelSupported, setSidePanelSupported] = useState(
     () => window.matchMedia(SIDE_PANEL_MEDIA).matches
   );
-  const { current, artworkUrl } = usePlayer();
+  const { current, radio_station, artworkUrl } = usePlayer();
   const { settings, update } = useSettings();
   const accent = useAccentColor(artworkUrl);
-  useDynamicFavicon(Boolean(current), accent.accent);
+  useDynamicFavicon(Boolean(current || radio_station), accent.accent);
   usePageKeys(settings.pageKeyMode);
   const accentStyle = useMemo(
     () =>
@@ -160,8 +161,8 @@ function Shell() {
   }, [settings.theme]);
 
   useEffect(() => {
-    if (!current) setFullscreenOpen(false);
-  }, [current]);
+    if (!current && !radio_station) setFullscreenOpen(false);
+  }, [current, radio_station]);
 
   useEffect(() => {
     const media = window.matchMedia(SIDE_PANEL_MEDIA);
@@ -171,14 +172,14 @@ function Shell() {
   }, []);
 
   useEffect(() => {
-    if (!fullscreenOpen || !current) return;
+    if (!fullscreenOpen || (!current && !radio_station)) return;
     const previous = document.title;
-    const { title, artist } = current.track;
+    const { title, artist } = radio_station ? { title: radio_station.name, artist: 'Live radio' } : current!.track;
     document.title = isElectron ? `${title} by ${artist}` : `${title} by ${artist} / Xebrine`;
     return () => {
       document.title = previous;
     };
-  }, [fullscreenOpen, current]);
+  }, [fullscreenOpen, current, radio_station]);
 
   return (
     <div
@@ -192,6 +193,7 @@ function Shell() {
         <div className="xe_route-view">
           {settings.showBackgroundIcon && <PageIconBackdrop />}
           <Routes>
+            <Route path="/radio" element={<Radio_page />} />
             <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/library" element={<LibraryPage />} />
@@ -228,7 +230,7 @@ function Shell() {
       />
       <PlayerBar
         collapsed={playerBarCollapsed}
-        fullscreenOpen={fullscreenOpen && Boolean(current)}
+        fullscreenOpen={fullscreenOpen && Boolean(current || radio_station)}
         onCollapsedChange={setPlayerBarCollapsed}
         onToggleFullscreen={() => setFullscreenOpen((open) => !open)}
         sidePanelOpen={settings.sidePanelOpen && sidePanelSupported}
@@ -240,7 +242,7 @@ function Shell() {
       <MediaBridge />
       <KeyboardShortcuts
         toggleFullscreen={() => {
-          if (current) setFullscreenOpen((open) => !open);
+          if (current || radio_station) setFullscreenOpen((open) => !open);
         }}
       />
       <ToastContainer />
