@@ -13,7 +13,7 @@ function loadTimeMode(): TimeMode {
 }
 
 export function Scrubber() {
-  const { currentTime, duration, seek, current } = usePlayer();
+  const { currentTime, duration, seek, current, radio_station } = usePlayer();
   const [dragValue, setDragValue] = useState<number | null>(null);
   const [timeMode, setTimeMode] = useState<TimeMode>(loadTimeMode);
   const [seekModalOpen, setSeekModalOpen] = useState(false);
@@ -36,7 +36,7 @@ export function Scrubber() {
     }
   };
 
-  const durationLabel = !current
+  const durationLabel = radio_station ? 'LIVE' : !current
     ? '-:--'
     : timeMode === 'elapsed'
       ? formatTime(duration)
@@ -71,7 +71,8 @@ export function Scrubber() {
         type="button"
         className="xe_scrubber__time xe_scrubber__time--total"
         onClick={toggleTimeMode}
-        title="Toggle duration / remaining"
+        disabled={!!radio_station}
+        title={radio_station ? 'Live radio cannot be seeked' : 'Toggle duration / remaining'}
       >
         {durationLabel}
       </button>
