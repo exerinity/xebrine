@@ -1,3 +1,4 @@
+import { route_radio } from './radio';
 import { LastfmError, type ScrobbleItem } from './types';
 import {
   authUrl,
@@ -115,6 +116,8 @@ async function routeRemote(request: Request, env: Env, path: string, url: URL): 
 
 async function route(request: Request, env: Env, url: URL): Promise<Response> {
   const path = url.pathname.replace(/\/+$/, '');
+
+  if (path.startsWith('/i/services/radio/')) return route_radio(request, url);
 
   if (path.startsWith(REMOTE_PREFIX)) return routeRemote(request, env, path, url);
 
