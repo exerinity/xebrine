@@ -393,7 +393,7 @@ export function SettingsPage() {
                     onChange={() => update({ playerBarClickAction: 'open' })}
                   />
                   <span>
-                    <strong>Open field</strong> navigates to the artist or album page
+                    <strong>Open field</strong> navigates to the artist or album page, or opens the radio station website
                   </span>
                 </label>
                 <p className="xe_settings__hint">Secondary clicking will always do the opposite action set here</p>
