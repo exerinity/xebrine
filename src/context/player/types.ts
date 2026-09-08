@@ -1,3 +1,4 @@
+import type { radio_station_record } from '../../../api/radio_browser';
 import type { RefObject } from 'react';
 import type { QueueItem, TrackMeta } from '../../../types';
 
@@ -35,6 +36,9 @@ export interface PlayerContextValue {
   next(): void;
   prev(): void;
   togglePlay(): void;
+  radio_station: radio_station_record | null;
+  radio_connecting: boolean;
+  play_radio(station: radio_station_record): void;
   seek(time: number): void;
   setVolume(volume: number): void;
   duckVolume(ducking: boolean): void;
