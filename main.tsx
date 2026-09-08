@@ -2,7 +2,11 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './app';
+import { installButtonRipples } from './utils/button_ripple';
 import './stylesheet/index.css';
+
+const removeButtonRipples = installButtonRipples();
+if (import.meta.hot) import.meta.hot.dispose(removeButtonRipples);
 
 createRoot(document.getElementById('xebrine')!).render(
   <StrictMode>
