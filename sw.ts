@@ -104,17 +104,28 @@ self.addEventListener('activate', (event) => {
 
 async function appResponse(request: Request): Promise<Response> {
   const cache = await caches.open(PRECACHE_NAME);
+
+  const exact = await cache.match(request);
+  if (exact) return navigationSafeResponse(request, exact);
+
   if (request.mode === 'navigate') {
+    const pathname = new URL(request.url).pathname;
+    if (/\/[^/]+\.[^/]+$/.test(pathname)) return fetch(request);
+
     const cached = await cache.match(INDEX_URL);
     if (!cached) return fetch(request);
-    if (!cached.redirected) return cached;
-    return new Response(cached.body, {
-      status: cached.status,
-      statusText: cached.statusText,
-      headers: cached.headers
-    });
+    return navigationSafeResponse(request, cached);
   }
-  return (await cache.match(request)) ?? fetch(request);
+  return fetch(request);
+}
+
+function navigationSafeResponse(request: Request, response: Response): Response {
+  if (request.mode !== 'navigate' || !response.redirected) return response;
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers
+  });
 }
 
 async function trimCache(cache: Cache, maximum: number): Promise<void> {
