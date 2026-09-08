@@ -13,6 +13,7 @@ import {
   NoteIcon,
   PersonIcon,
   QueueIcon,
+  Radio_icon,
   RemoteIcon,
   SearchIcon,
   SettingsIcon
@@ -21,6 +22,7 @@ import {
 export const NAV_LINKS = [
   { path: '/', label: 'Home', icon: HomeIcon },
   { path: '/search', label: 'Search', icon: SearchIcon },
+  { path: '/radio', label: 'Radio', icon: Radio_icon },
   { path: '/library', label: 'Library', icon: NoteIcon },
   { path: '/artists', label: 'Artists', icon: PersonIcon },
   { path: '/albums', label: 'Albums', icon: DiscIcon },
@@ -50,7 +52,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onOpenFullscreen }: SidebarProps) {
-  const { queue, current } = usePlayer();
+  const { queue, current, radio_station } = usePlayer();
   const remote = useRemote();
   const remoteWaiting = remote.pending.length;
   const remoteRunning = remote.phase === 'live' || remote.phase === 'connecting';
@@ -154,7 +156,7 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
             ))}
         </NavLink>
       ))}
-      {current && (
+      {(current || radio_station) && (
         <div className="xe_nav__fullscreen-slot">
           <button
             type="button"
