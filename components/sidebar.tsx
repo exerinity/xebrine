@@ -13,7 +13,7 @@ import {
   NoteIcon,
   PersonIcon,
   QueueIcon,
-  Radio_icon,
+  RadioIcon,
   RemoteIcon,
   SearchIcon,
   SettingsIcon
@@ -22,7 +22,6 @@ import {
 export const NAV_LINKS = [
   { path: '/', label: 'Home', icon: HomeIcon },
   { path: '/search', label: 'Search', icon: SearchIcon },
-  { path: '/radio', label: 'Radio', icon: Radio_icon },
   { path: '/library', label: 'Library', icon: NoteIcon },
   { path: '/artists', label: 'Artists', icon: PersonIcon },
   { path: '/albums', label: 'Albums', icon: DiscIcon },
@@ -30,6 +29,7 @@ export const NAV_LINKS = [
   { path: '/lyrics', label: 'Lyrics', icon: LyricsIcon },
   { path: '/lastfm', label: 'Last.fm', icon: LastfmMarkIcon },
   { path: '/remote', label: 'Remote', icon: RemoteIcon },
+  { path: '/radio', label: 'Radio', icon: RadioIcon },
   { path: '/settings', label: 'Settings', icon: SettingsIcon }
 ];
 
@@ -120,8 +120,7 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
           key={link.path}
           to={link.path}
           className={({ isActive }) =>
-            `xe_nav__link${isActive ? ' xe_nav__link--active' : ''}${
-              link.path === '/remote' && remoteState ? ` xe_nav__link--remote-${remoteState}` : ''
+            `xe_nav__link${isActive ? ' xe_nav__link--active' : ''}${link.path === '/remote' && remoteState ? ` xe_nav__link--remote-${remoteState}` : ''
             }`
           }
           title={
