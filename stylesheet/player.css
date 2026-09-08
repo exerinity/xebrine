@@ -563,6 +563,7 @@
 }
 
 .xe_player-bar__title {
+  color: inherit;
   font-weight: 500;
 }
 
