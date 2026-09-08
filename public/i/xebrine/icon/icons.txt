@@ -1,0 +1,13 @@
+192x icons for Xebrine 
+
+https://xebrine.com/i/xebrine/icon/xebrine_192_black.png
+https://xebrine.com/i/xebrine/icon/xebrine_192_transparent.png
+https://xebrine.com/i/xebrine/icon/xebrine_192_white.png
+https://xebrine.com/i/xebrine/icon/xebrine_192.png (default, purple gradient bg)
+
+512x
+
+https://xebrine.com/i/xebrine/icon/xebrine_512_black.png
+https://xebrine.com/i/xebrine/icon/xebrine_512_transparent.png
+https://xebrine.com/i/xebrine/icon/xebrine_512_white.png
+https://xebrine.com/i/xebrine/icon/xebrine_512.png
