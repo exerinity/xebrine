@@ -1,0 +1,44 @@
+:where(button, a.xe_btn, [role='button']) {
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.xe_ripple-layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.xe_ripple-layer > .xe_ripple-circle {
+  position: absolute;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.2;
+  transform: scale(0);
+  pointer-events: none;
+  animation: xe_button-ripple 650ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes xe_button-ripple {
+  to {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+.xe_reduced-motion .xe_ripple-layer {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xe_ripple-layer {
+    display: none;
+  }
+}
