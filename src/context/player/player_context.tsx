@@ -33,6 +33,9 @@ import {
   saveRepeat,
   saveVolume
 } from './storage';
+import { stream_issue, type radio_station_record } from '../../../api/radio_browser';
+import { use_radio_artwork } from './radio_artwork';
+import { use_radio_playback } from './radio_playback';
 import { useSleepTimer } from './sleep_timer';
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
@@ -62,6 +65,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(queueReducer, initialQueue);
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  const [radio_station, set_radio_station] = useState<radio_station_record | null>(null);
+  const radio_ref = useRef(radio_station);
+  radio_ref.current = radio_station;
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -134,7 +141,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     dismissFinished: dismissSleepTimerFinished
   } = useSleepTimer(audio);
 
-  const current = state.items[state.position] ?? null;
+  const current = radio_station ? null : state.items[state.position] ?? null;
   const currentKey = current?.key ?? null;
   const {
     enabled: autoMixEnabled,
@@ -152,7 +159,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     consumeHandoff: consumeAutoMixHandoff,
     clearPendingMix,
     completePresentation: completeAutoMixPresentation,
-    toggle: toggleAutoMix
+    toggle: toggle_auto_mix_local
   } = useAutoMix({
     audio,
     audioGraph,
@@ -169,11 +176,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     ? state.items.findIndex((item) => item.key === autoMixPresentation.key)
     : -1;
   const displayPosition = presentedPosition >= 0 ? presentedPosition : state.position;
-  const displayCurrent = state.items[displayPosition] ?? null;
-  const displayArtworkUrl =
+  const displayCurrent = radio_station ? null : state.items[displayPosition] ?? null;
+  const radio_artwork = use_radio_artwork(radio_station);
+  const displayArtworkUrl = radio_station ? radio_artwork :
     presentedPosition >= 0 && autoMixPresentation?.artworkReady
       ? autoMixPresentation.artworkUrl
       : artworkUrl;
+
+  const radio_connecting = use_radio_playback(audio, radio_station, setLoadError);
 
   const [justPlayed, setJustPlayed] = useState<QueueItem | null>(null);
   const lastCurrentRef = useRef<QueueItem | null>(null);
@@ -184,10 +194,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const onTime = () => {
+      if (radio_ref.current) return;
       const t = audio.currentTime;
       handleAutoMixTimeUpdate(t);
     };
     const onDuration = () => {
+      if (radio_ref.current) return;
       if (shouldAutoMixHoldDuration()) return;
       setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
     };
@@ -199,6 +211,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setIsPlaying(false);
     };
     const onEnded = () => {
+      if (radio_ref.current) { setIsPlaying(false); return; }
       const s = stateRef.current;
       if (beginAutoMixHandoff()) {
         autoplayRef.current = true;
@@ -253,11 +266,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [audio, volume, ducking]);
 
   useEffect(() => {
-    audio.loop = repeatMode === 'one';
+    audio.loop = !radio_station && repeatMode === 'one';
     saveRepeat(repeatMode);
-  }, [audio, repeatMode]);
+  }, [audio, repeatMode, radio_station]);
 
   useEffect(() => {
+    if (radio_station) {
+      setCurrentTime(0);
+      setDuration(0);
+      return;
+    }
     setLoadError(null);
     if (!current) {
       audio.pause();
@@ -277,7 +295,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const file = await getFileRef.current(track);
-        if (cancelled) return;
+        if (cancelled || radio_ref.current) return;
         const url = URL.createObjectURL(file);
         if (srcUrlRef.current) URL.revokeObjectURL(srcUrlRef.current);
         srcUrlRef.current = url;
@@ -337,10 +355,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [currentKey]);
+  }, [currentKey, radio_station]);
 
   const playNow = useCallback((tracks: TrackMeta[], startIndex = 0) => {
     if (refuseWhenLocked()) return;
+    radio_ref.current = null;
+    set_radio_station(null);
     cancelCrossfade();
     autoplayRef.current = true;
     dispatch({ type: 'SET', items: makeItems(tracks), position: startIndex });
@@ -392,6 +412,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     (index: number) => {
       if (refuseWhenLocked()) return;
       cancelCrossfade();
+      if (radio_ref.current) {
+        radio_ref.current = null;
+        set_radio_station(null);
+        autoplayRef.current = true;
+        dispatch({ type: 'JUMP', index });
+        return;
+      }
       if (index === stateRef.current.position) {
         audio.currentTime = 0;
         audioCtxRef.current?.resume().catch(() => {});
@@ -405,7 +432,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   );
 
   const next = useCallback(() => {
-    if (remoteLockedRef.current) return;
+    if (remoteLockedRef.current || radio_ref.current) return;
     cancelCrossfade();
     const s = stateRef.current;
     autoplayRef.current = !audio.paused;
@@ -423,7 +450,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [audio]);
 
   const prev = useCallback(() => {
-    if (remoteLockedRef.current) return;
+    if (remoteLockedRef.current || radio_ref.current) return;
     cancelCrossfade();
     if (audio.currentTime > 3 || stateRef.current.position <= 0) {
       audio.currentTime = 0;
@@ -433,8 +460,33 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'ADVANCE', delta: -1 });
   }, [audio]);
 
+  const play_radio = useCallback((station: radio_station_record) => {
+    if (refuseWhenLocked()) return;
+    const issue = stream_issue(station);
+    if (issue) { toast.warning(issue); return; }
+    autoplayRef.current = false;
+    cancelCrossfade();
+    clearPendingMix();
+    audio.pause();
+    clearRateGlide();
+    audioCtxRef.current?.resume().catch(() => {});
+    radio_ref.current = station;
+    set_radio_station({ ...station });
+  }, [audio, cancelCrossfade, clearPendingMix, clearRateGlide]);
+
+  const toggleAutoMix = useCallback(() => {
+    if (!radio_ref.current) toggle_auto_mix_local();
+  }, [toggle_auto_mix_local]);
+
   const togglePlay = useCallback(() => {
     if (refuseWhenLocked()) return;
+    if (radio_ref.current) {
+      if (audio.paused) {
+        audioCtxRef.current?.resume().catch(() => {});
+        set_radio_station({ ...radio_ref.current });
+      } else audio.pause();
+      return;
+    }
     if (!stateRef.current.items[stateRef.current.position]) return;
     if (audio.paused) {
       audioCtxRef.current?.resume().catch(() => {});
@@ -447,6 +499,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const seek = useCallback(
     (time: number) => {
+      if (radio_ref.current) return;
       if (remoteLockedRef.current) return;
       cancelCrossfade();
       const target = clamp(time, 0, Number.isFinite(audio.duration) ? audio.duration : time);
@@ -457,7 +510,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   );
 
   const toggleShuffle = useCallback(() => {
-    if (remoteLockedRef.current) return;
+    if (remoteLockedRef.current || radio_ref.current) return;
     const s = stateRef.current;
     if (s.shuffled) {
       dispatch({ type: 'UNSHUFFLE' });
@@ -473,7 +526,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const jumbleQueue = useCallback(() => {
-    if (remoteLockedRef.current) return;
+    if (remoteLockedRef.current || radio_ref.current) return;
     cancelCrossfade();
     dispatch({ type: 'JUMBLE', items: jumble(stateRef.current.items) });
   }, []);
@@ -490,7 +543,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const cycleRepeat = useCallback(() => {
-    if (remoteLockedRef.current) return;
+    if (remoteLockedRef.current || radio_ref.current) return;
     setRepeatMode((mode) => (mode === 'off' ? 'all' : mode === 'all' ? 'one' : 'off'));
   }, []);
 
@@ -511,6 +564,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setRemoteLockedState(locked);
       remoteLockedRef.current = locked;
       if (!locked) return;
+      radio_ref.current = null;
+      set_radio_station(null);
       cancelCrossfade();
       autoplayRef.current = false;
       audio.pause();
@@ -545,6 +600,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       next,
       prev,
       togglePlay,
+      play_radio,
+      radio_station,
+      radio_connecting,
       seek,
       setVolume,
       duckVolume,
@@ -554,7 +612,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       clearQueue,
       clearOthers,
       getAnalyser,
-      autoMixEnabled,
+      autoMixEnabled: !radio_station && autoMixEnabled,
       autoMixPhase,
       autoMixColor,
       autoMixBpm,
@@ -594,6 +652,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       next,
       prev,
       togglePlay,
+      play_radio,
+      radio_station,
+      radio_connecting,
       seek,
       setVolume,
       duckVolume,
