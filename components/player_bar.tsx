@@ -9,6 +9,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { MAX_VOLUME, REMOTE_LOCK_MESSAGE, usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
+import { Spinner } from './spinner';
+import { radio_homepage } from '../utils/radio_station';
 import { ScrollingText } from './scrolling_text';
 import { Scrubber } from './scrubber';
 import { Slider } from './slider';
@@ -108,6 +110,8 @@ export function PlayerBar({
   const navigate = useNavigate();
   const {
     current,
+    radio_station,
+    radio_connecting,
     isPlaying,
     volume,
     shuffled,
@@ -147,6 +151,7 @@ export function PlayerBar({
   const previousScrubberRectRef = useRef<DOMRect | null>(null);
 
   const track = current?.track ?? null;
+  const radio_homepage_url = radio_homepage(radio_station?.homepage);
   const playerAtTop = settings.playerBarPosition === 'top';
   const compact = settings.playerBarLayout === 'compact';
   const hadTrackRef = useRef(Boolean(track));
@@ -154,8 +159,8 @@ export function PlayerBar({
   const boosted = volume > 1;
   const elapsedPercent = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
   const remainingPercent = 100 - elapsedPercent;
-  const elapsedLabel = track ? `${elapsedPercent}%` : '--%';
-  const remainingLabel = track ? `${remainingPercent}%` : '--%';
+  const elapsedLabel = radio_station ? 'LIVE' : track ? `${elapsedPercent}%` : '--%';
+  const remainingLabel = radio_station ? '' : track ? `${remainingPercent}%` : '--%';
   const collapsedTools = collapsedSecondaryTools(
     volumeControlsWidth,
     Boolean(lastfm),
@@ -350,6 +355,7 @@ export function PlayerBar({
             }${autoMixBusy ? ' xe_automix-pill--busy' : ''}${
               autoMixPhase === 'mixing' ? ' xe_automix-pill--mixing' : ''
             }`}
+            disabled={!!radio_station}
             onClick={toggleAutoMix}
             title={`Auto mix is ${autoMixLabel.toLowerCase()}`}
             aria-pressed={autoMixEnabled}
@@ -413,6 +419,7 @@ export function PlayerBar({
               ? `Auto play is on (${AUTO_PLAY_LABELS[settings.autoPlayLevel].toLowerCase()}) - click to turn off`
               : 'Auto play is off - click to keep playing when the queue runs out'
           }
+          disabled={!!radio_station}
           aria-label="Toggle auto play"
           aria-pressed={settings.autoPlay}
         >
@@ -498,7 +505,7 @@ export function PlayerBar({
                 fullscreenOpen ? ' xe_player-bar__art--hidden' : ''
               }`}
               onClick={onToggleFullscreen}
-              disabled={!track}
+              disabled={!track && !radio_station}
               title="Open fullscreen player"
               aria-label="Open fullscreen player"
             >
@@ -506,6 +513,28 @@ export function PlayerBar({
             </button>
           )}
           <div className="xe_player-bar__titles">
+            {radio_station && (
+              <>
+                {radio_homepage_url && settings.playerBarClickAction === 'open' ? (
+                  <a className="xe_player-bar__title" href={radio_homepage_url} target="_blank" rel="noreferrer"
+                    title="Open station website (right-click to copy)"
+                    onContextMenu={event => { event.preventDefault(); copyField('title', radio_station.name); }}>
+                    <ScrollingText text={radio_station.name} title="Open station website (right-click to copy)" />
+                  </a>
+                ) : (
+                  <ScrollingText text={radio_station.name} className="xe_player-bar__title"
+                    title={copiedField === 'title' ? 'Copied' : radio_homepage_url ? 'Copy station name (right-click to open website)' : 'Copy station name'}
+                    onClick={() => copyField('title', radio_station.name)}
+                    onContextMenu={radio_homepage_url ? event => {
+                      event.preventDefault();
+                      window.open(radio_homepage_url, '_blank', 'noopener,noreferrer');
+                    } : undefined} />
+                )}
+                <ScrollingText text={[radio_station.countrycode, radio_station.language, radio_station.bitrate > 0 ? `${radio_station.bitrate} kbps` : ''].filter(Boolean).join(', ')} className="xe_player-bar__subtitle" />
+                <span className="xe_player-bar__subtitle" role="status">{radio_connecting && <Spinner size={12} />}{' '}{radio_connecting ? 'Connecting, one moment...' : isPlaying ? 'Live radio' : 'Radio stopped'}</span>
+                {loadError && <span className="xe_player-bar__error" role="alert">{loadError}</span>}
+              </>
+            )}
             {track && (
               <>
                 <ScrollingText
@@ -561,8 +590,9 @@ export function PlayerBar({
               type="button"
               className="xe_icon-btn xe_icon-btn--primary"
               onClick={togglePlay}
-              title={isPlaying ? 'Pause' : 'Play'}
-              disabled={!track}
+              title={radio_station && (isPlaying || radio_connecting) ? 'Stop radio' : isPlaying ? 'Pause' : 'Play'}
+              aria-label={radio_station && (isPlaying || radio_connecting) ? 'Stop radio' : isPlaying ? 'Pause' : 'Play'}
+              disabled={remoteLocked || (!track && !radio_station)}
             >
               {isPlaying ? <PauseIcon size={22} /> : <PlayIcon size={22} />}
             </button>
