@@ -29,18 +29,18 @@ function snapshot(player: Player): ElectronPlaybackState {
   const track = player.current?.track ?? null;
   const duration = Number.isFinite(player.duration) ? player.duration : 0;
   return {
-    trackId: player.current?.key ?? null,
-    title: track?.title ?? '',
-    artist: track?.artist ?? '',
+    trackId: player.radio_station?.stationuuid ?? player.current?.key ?? null,
+    title: player.radio_station?.name ?? track?.title ?? '',
+    artist: player.radio_station ? 'Live radio' : track?.artist ?? '',
     album: track?.album ?? '',
-    status: track ? (player.isPlaying ? 'playing' : 'paused') : 'stopped',
+    status: (track || player.radio_station) ? (player.isPlaying ? 'playing' : 'paused') : 'stopped',
     durationSeconds: duration,
     currentSeconds: clamp(player.currentTime, 0, duration || player.currentTime),
     volume: player.volume,
     shuffle: player.shuffled,
-    loop: LOOP_BY_MODE[player.repeatMode],
-    canGoNext: player.position < player.queue.length - 1 || player.repeatMode === 'all',
-    canGoPrevious: player.queue.length > 0
+    loop: player.radio_station ? 'None' : LOOP_BY_MODE[player.repeatMode],
+    canGoNext: !player.radio_station && (player.position < player.queue.length - 1 || player.repeatMode === 'all'),
+    canGoPrevious: !player.radio_station && player.queue.length > 0
   };
 }
 
@@ -103,7 +103,7 @@ export function useElectronBridge(): void {
   const playerRef = useRef(player);
   playerRef.current = player;
 
-  const trackId = player.current?.key ?? null;
+  const trackId = player.radio_station?.stationuuid ?? player.current?.key ?? null;
 
   useEffect(() => {
     const bridge = electron;
