@@ -61,7 +61,7 @@ export function CoverModal({ src, alt = '', onClose }: CoverModalProps) {
   const copyCover = async () => {
     try {
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': coverAsPng() })]);
-      toast.success('Copied cover');
+      toast.success('The cover image has been copied to your clipboard');
     } catch {
       toast.error("Couldn't copy the cover");
     }
