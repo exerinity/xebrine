@@ -97,7 +97,7 @@ export const DEFAULT_SETTINGS: Settings = {
   reducedMotion: false,
   announceTrackChanges: false,
   artistPronunciations: [],
-  tagExplicitSongs: false,
+  tagExplicitSongs: true,
   theme: 'adaptive',
   showBackgroundIcon: true,
   searchEngine: 'google',
