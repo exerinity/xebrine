@@ -2,9 +2,9 @@ export function installButtonRipples() {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const active = new Map<HTMLElement, () => void>();
 
-  const onClick = (event: MouseEvent) => {
+  const createRipple = (event: MouseEvent | PointerEvent, fromKeyboard = false) => {
     if (event.button !== 0 || !(event.target instanceof Element)) return;
-    const button = event.target.closest<HTMLElement>('button, a.xe_btn, [role="button"]');
+    const button = event.target.closest<HTMLElement>('button, a.xe_btn, .xe_nav a, [role="button"]');
     if (!button || button.matches(':disabled, [aria-disabled="true"]') ||
         button.closest('[inert], .xe_reduced-motion') || reducedMotion.matches) return;
 
@@ -14,9 +14,9 @@ export function installButtonRipples() {
 
     const scaleX = button.offsetWidth / rect.width;
     const scaleY = button.offsetHeight / rect.height;
-    const x = event.detail === 0 ? button.clientWidth / 2 :
+    const x = fromKeyboard ? button.clientWidth / 2 :
       (event.clientX - rect.left) * scaleX - button.clientLeft;
-    const y = event.detail === 0 ? button.clientHeight / 2 :
+    const y = fromKeyboard ? button.clientHeight / 2 :
       (event.clientY - rect.top) * scaleY - button.clientTop;
     const diameter = Math.max(button.offsetWidth, button.offsetHeight);
     const layer = document.createElement('span');
@@ -35,13 +35,23 @@ export function installButtonRipples() {
       layer.remove();
       active.delete(button);
     };
-    const timer = window.setTimeout(cleanup, 750);
+    const timer = window.setTimeout(cleanup, 550);
     circle.addEventListener('animationend', cleanup, { once: true });
     active.set(button, cleanup);
   };
 
+  const onPointerDown = (event: PointerEvent) => {
+    if (!event.isPrimary || event.button !== 0) return;
+    createRipple(event);
+  };
+  const onClick = (event: MouseEvent) => {
+    if (event.detail === 0) createRipple(event, true);
+  };
+
+  document.addEventListener('pointerdown', onPointerDown, true);
   document.addEventListener('click', onClick, true);
   return () => {
+    document.removeEventListener('pointerdown', onPointerDown, true);
     document.removeEventListener('click', onClick, true);
     active.forEach(cleanup => cleanup());
   };
