@@ -123,10 +123,10 @@ function Shell() {
   const [sidePanelSupported, setSidePanelSupported] = useState(
     () => window.matchMedia(SIDE_PANEL_MEDIA).matches
   );
-  const { current, radio_station, artworkUrl } = usePlayer();
+  const { current, radio_station, artworkUrl, isPlaying } = usePlayer();
   const { settings, update } = useSettings();
   const accent = useAccentColor(artworkUrl);
-  useDynamicFavicon(Boolean(current || radio_station), accent.accent);
+  useDynamicFavicon(Boolean(current || radio_station), accent.accent, isPlaying);
   usePageKeys(settings.pageKeyMode);
   const accentStyle = useMemo(
     () =>

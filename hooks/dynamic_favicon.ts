@@ -6,8 +6,16 @@ interface OriginalFavicon {
   type: string | null;
 }
 
-function faviconDataUrl(color: string): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><svg x="11" y="11" width="78" height="78" viewBox="${XEBRINE_LOGO_VIEW_BOX}"><path fill="${color}" d="${XEBRINE_LOGO_PATH}"/></svg></svg>`;
+function faviconDataUrl(color: string, isPlaying: boolean): string {
+  const playback_icon = isPlaying
+    ? '<path d="M72 68 96 82 72 96Z"/>'
+    : '<rect x="70" y="68" width="6" height="28"/><rect x="89" y="68" width="6" height="28"/>';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <svg x="11" y="11" width="78" height="78" viewBox="${XEBRINE_LOGO_VIEW_BOX}">
+      <path fill="${color}" d="${XEBRINE_LOGO_PATH}"/>
+    </svg>
+    <g fill="#fff">${playback_icon}</g>
+  </svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
@@ -18,7 +26,7 @@ function restoreFavicon(favicon: HTMLLinkElement, original: OriginalFavicon): vo
   else favicon.setAttribute('type', original.type);
 }
 
-export function useDynamicFavicon(active: boolean, color: string): void {
+export function useDynamicFavicon(active: boolean, color: string, isPlaying: boolean): void {
   const faviconRef = useRef<HTMLLinkElement | null>(null);
   const originalRef = useRef<OriginalFavicon | null>(null);
 
@@ -35,12 +43,12 @@ export function useDynamicFavicon(active: boolean, color: string): void {
 
     if (active) {
       favicon.type = 'image/svg+xml';
-      favicon.href = faviconDataUrl(color);
+      favicon.href = faviconDataUrl(color, isPlaying);
       return;
     }
 
     restoreFavicon(favicon, originalRef.current);
-  }, [active, color]);
+  }, [active, color, isPlaying]);
 
   useEffect(
     () => () => {
