@@ -11,24 +11,36 @@ interface ExplicitIconProps {
   expanded?: boolean;
 }
 
-const FLAGGED_WORD_SOURCE = `\\b(?:${PROFANITY_WORDS.join('|')})\\w*`;
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+const FLAGGED_WORD_SOURCE = `(?<![\\p{L}\\p{N}_])(?:${[...PROFANITY_WORDS]
+  .filter(Boolean)
+  .sort((a, b) => b.length - a.length)
+  .map(escapeRegex)
+  .join('|')})(?![\\p{L}\\p{N}_])`;
 
 function HighlightedLine({ text }: { text: string }) {
   const content: ReactNode[] = [];
   let cursor = 0;
 
-  for (const match of text.matchAll(new RegExp(FLAGGED_WORD_SOURCE, 'gi'))) {
+  for (const match of text.matchAll(new RegExp(FLAGGED_WORD_SOURCE, 'giu'))) {
     const index = match.index;
+
     if (index > cursor) content.push(text.slice(cursor, index));
+
     content.push(
       <mark key={index} className="xe_explicit-lyrics__flagged">
         {match[0]}
       </mark>
     );
+
     cursor = index + match[0].length;
   }
 
   if (cursor < text.length) content.push(text.slice(cursor));
+
   return <>{content.length > 0 ? content : text}</>;
 }
 
@@ -38,16 +50,19 @@ function ExplicitLyricsModal({ trackId, onClose }: { trackId: string; onClose():
 
   useEffect(() => {
     let active = true;
+
     setStored(null);
     setStatus('loading');
 
     void dbGet<StoredLyrics>('lyrics', trackId)
       .then((result) => {
         if (!active) return;
+
         if (!result?.lyrics.lines.length) {
           setStatus('empty');
           return;
         }
+
         setStored(result);
         setStatus('ready');
       })
@@ -68,8 +83,10 @@ function ExplicitLyricsModal({ trackId, onClose }: { trackId: string; onClose():
           Loading lyrics...
         </p>
       )}
+
       {status === 'empty' && <p>Lyrics are not available for this track</p>}
       {status === 'error' && <p>Could not load the lyrics</p>}
+
       {status === 'ready' && stored && (
         <div>
           <div>
@@ -118,6 +135,7 @@ export function ExplicitBadge({ trackId }: { trackId: string }) {
   const [open, setOpen] = useState(false);
 
   if (!explicit) return null;
+
   return (
     <>
       <ExplicitIcon expanded={open} onClick={() => setOpen(true)} />
