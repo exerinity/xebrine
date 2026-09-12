@@ -262,11 +262,11 @@ export function LyricsPanel({
       items.push(
         { label: 'Jump to this line', onSelect: () => seek(time) },
         {
-          label: `Jump to ${NUDGE_SECONDS} seconds before this line`,
+          label: `...${NUDGE_SECONDS} seconds before`,
           onSelect: () => seek(time - NUDGE_SECONDS)
         },
         {
-          label: `Jump to ${NUDGE_SECONDS} seconds after this line`,
+          label: `...${NUDGE_SECONDS} seconds after`,
           onSelect: () => seek(time + NUDGE_SECONDS)
         }
       );
