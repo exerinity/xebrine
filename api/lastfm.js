@@ -88,10 +88,13 @@ export function sendScrobbles(sessionKey, scrobbles) {
 
 function firstImage(images) {
   if (!Array.isArray(images)) return null;
+
   const preferred =
-    images.find((i) => i.size === 'extralarge') ?? images.find((i) => i.size === 'large') ?? images[0];
-  const url = preferred?.['#text'];
-  return url ? url : null;
+    images.find((i) => i.size === 'large') ??
+    images.find((i) => i.size === 'medium') ??
+    images.find((i) => i.size === 'small');
+
+  return preferred?.['#text'] || null;
 }
 
 export async function fetchProfile(username) {
