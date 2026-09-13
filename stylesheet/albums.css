@@ -136,7 +136,7 @@
 .xe_album-hero__art {
   width: 140px;
   height: 140px;
-  border-radius: 12px;
+  border-radius: 3px;
   background: var(--panel-2);
   display: flex;
   align-items: center;
