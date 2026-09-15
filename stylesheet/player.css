@@ -1225,7 +1225,7 @@ button.xe_scrubber__time:hover {
   flex-direction: column;
   border: 1px solid color-mix(in srgb, var(--accent-bright) 34%, var(--border));
   border-radius: 8px;
-  background: rgba(7, 0, 7, 0.58);
+  background: color-mix(in srgb, var(--panel) 58%, transparent);
   padding: 16px;
   backdrop-filter: blur(18px);
 }
