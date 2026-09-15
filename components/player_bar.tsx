@@ -487,7 +487,9 @@ export function PlayerBar({
       <footer
         className={`xe_player-bar${collapsed ? ' xe_player-bar--collapsed' : ''}${
           playerAtTop ? ' xe_player-bar--top' : ''
-        }${compact ? ' xe_player-bar--compact' : ''}`}
+        }${compact ? ' xe_player-bar--compact' : ''}${
+          fullscreenOpen ? ' xe_player-bar--fullscreen' : ''
+        }`}
       >
         {visualizerOn && <Visualizer analyser={analyser} />}
         <ScanDrawer />
