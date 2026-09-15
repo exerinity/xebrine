@@ -14,7 +14,6 @@
   box-shadow:
     0 -12px 34px rgba(0, 0, 0, 0.16),
     inset 0 1px rgba(255, 255, 255, 0.07);
-  -webkit-backdrop-filter: blur(22px) saturate(1.35);
   backdrop-filter: blur(22px) saturate(1.35);
   transition:
     transform 320ms cubic-bezier(0.4, 0, 0.2, 1),
@@ -25,7 +24,6 @@
     grid-template-columns 260ms ease,
     background 260ms ease,
     box-shadow 260ms ease,
-    -webkit-backdrop-filter 260ms ease,
     backdrop-filter 260ms ease;
 }
 
@@ -37,7 +35,6 @@
 .xe_player-bar--fullscreen {
   background: none;
   box-shadow: none;
-  -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 
@@ -160,7 +157,15 @@
   transition:
     opacity 180ms ease,
     transform 180ms ease,
-    color 120ms ease;
+    color 120ms ease,
+    background 260ms ease,
+    backdrop-filter 260ms ease;
+}
+
+.xe_player-handle--fullscreen .xe_player-handle__tab {
+  background: color-mix(in srgb, var(--panel) 50%, transparent);
+  backdrop-filter: blur(11px);
+  
 }
 
 .xe_player-handle:hover .xe_player-handle__tab,

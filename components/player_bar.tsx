@@ -474,7 +474,7 @@ export function PlayerBar({
         type="button"
         className={`xe_player-handle${collapsed ? ' xe_player-handle--collapsed' : ''}${
           playerAtTop ? ' xe_player-handle--top' : ''
-        }`}
+        }${fullscreenOpen ? ' xe_player-handle--fullscreen' : ''}`}
         onClick={() => onCollapsedChange?.(!collapsed)}
         title={collapsed ? 'Show the player' : 'Hide the player'}
         aria-label={collapsed ? 'Show the player' : 'Hide the player'}
