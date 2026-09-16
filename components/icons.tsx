@@ -36,6 +36,29 @@ export const PauseIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const NowPlayingIcon = ({ size = 24 }: IconProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+  >
+    <rect x="5.25" y="10" width="1.5" height="10" rx="0.75">
+      <animate attributeName="y" values="10;4;10;7;10" dur="1.2s" repeatCount="indefinite" calcMode="linear" />
+      <animate attributeName="height" values="10;16;10;13;10" dur="1.2s" repeatCount="indefinite" calcMode="linear" />
+    </rect>
+    <rect x="11.25" y="7" width="1.5" height="13" rx="0.75">
+      <animate attributeName="y" values="7;12;5;10;7" dur="1.2s" repeatCount="indefinite" calcMode="linear" />
+      <animate attributeName="height" values="13;8;15;10;13" dur="1.2s" repeatCount="indefinite" calcMode="linear" />
+    </rect>
+    <rect x="17.25" y="11" width="1.5" height="9" rx="0.75">
+      <animate attributeName="y" values="11;6;13;8;11" dur="1.2s" repeatCount="indefinite" calcMode="linear" />
+      <animate attributeName="height" values="9;14;7;12;9" dur="1.2s" repeatCount="indefinite" calcMode="linear" />
+    </rect>
+  </svg>
+);
+
 export const PrevIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M220-240v-480h80v480h-80Zm520 0L380-480l360-240v480Zm-80-240Zm0 90v-180l-136 90 136 90Z" />

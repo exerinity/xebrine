@@ -4,7 +4,7 @@ import { useTrackMenu } from '../hooks/track_menu';
 import { formatTime } from '../utils/format';
 import type { TrackMeta } from '../types';
 import { ContextMenu } from './context_menu';
-import { PauseIcon, PlayIcon, PlayNextIcon, PlusIcon } from './icons';
+import { NowPlayingIcon, PauseIcon, PlayIcon, PlayNextIcon, PlusIcon } from './icons';
 import { ExplicitBadge } from './explicit_badge';
 
 interface TrackListProps {
@@ -47,7 +47,7 @@ export function TrackList({ tracks }: TrackListProps) {
             }}
           >
             <span className="xe_track-table__cell xe_track-table__cell--num">
-              {active ? (isPlaying ? <PlayIcon size={13} /> : <PauseIcon size={13} />) : i + 1}
+              {active ? (isPlaying ? <NowPlayingIcon /> : <PauseIcon size={13} />) : i + 1}
             </span>
             <span className="xe_track-table__cell xe_track-table__cell--title">
               {track.title}
