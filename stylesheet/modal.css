@@ -11,9 +11,9 @@
   align-items: center;
   justify-content: center;
   padding: 32px;
-  background: rgba(0, 0, 0, 0.7);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.2);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(1px);
   animation: cover-modal-in 140ms ease-out;
 }
 
@@ -163,8 +163,9 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.4);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
   animation: xe_modal-overlay-in 140ms ease-out;
 }
 
@@ -343,15 +344,27 @@
 }
 
 @keyframes xe_modal-in {
-  from {
+  0% {
     opacity: 0;
-    transform: translate(var(--xe_modal-x), calc(var(--xe_modal-y) + 8px));
+    transform: translate(var(--xe_modal-x), calc(var(--xe_modal-y) + 8px)) scale(0.9);
   }
 
-  to {
+  60% {
     opacity: 1;
-    transform: translate(var(--xe_modal-x), var(--xe_modal-y));
+    transform: translate(var(--xe_modal-x), var(--xe_modal-y)) scale(1.03);
   }
+
+  80% {
+    transform: translate(var(--xe_modal-x), var(--xe_modal-y)) scale(0.99);
+  }
+
+  100% {
+    transform: translate(var(--xe_modal-x), var(--xe_modal-y)) scale(1);
+  }
+}
+
+.xe_modal {
+  animation: xe_modal-in 340ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes xe_modal-out {
