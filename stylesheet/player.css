@@ -1128,7 +1128,6 @@ button.xe_scrubber__time:hover {
   height: 100%;
   object-fit: cover;
   pointer-events: none;
-  -webkit-user-drag: none;
 }
 
 .xe_fullscreen-player__identity {

@@ -5,6 +5,10 @@ import App from './app';
 import { installButtonRipples } from './utils/button_ripple';
 import './stylesheet/index.css';
 
+document.addEventListener('dragstart', (event) => {
+  if (event.target instanceof HTMLImageElement) event.preventDefault();
+});
+
 const removeButtonRipples = installButtonRipples();
 if (import.meta.hot) import.meta.hot.dispose(removeButtonRipples);
 

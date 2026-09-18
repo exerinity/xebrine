@@ -154,3 +154,7 @@ a:not([class]):focus-visible {
     transform: translateY(0);
   }
 }
+
+img {
+  -webkit-user-drag: none;
+}
