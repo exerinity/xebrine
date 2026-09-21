@@ -29,7 +29,7 @@ const HEADING_MAX = 25;
 const ACCEPTED_LYRICS_FILE = /\.(lrc|srt|vtt)$/i;
 
 const STATUS_TEXT: Record<Exclude<Status, 'idle'>, string> = {
-  waiting: 'Holding off search for a moment...',
+  waiting: 'Standing by, one moment...',
   loading: 'Searching LRCLIB...',
   notfound: 'No lyrics found',
   error: 'LRCLIB request failed - are you online?',
