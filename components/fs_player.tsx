@@ -329,8 +329,8 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
               onPointerMove={deformCover}
               onPointerUp={endCoverDrag}
               onPointerCancel={endCoverDrag}
-              title="Close fullscreen player"
-              aria-label="Close fullscreen player"
+              title="Click to close fullscreen player, drag to deform cover art"
+              aria-label="Click to close fullscreen player, drag to deform cover art"
             >
               {displayArtworkUrl ? <img src={displayArtworkUrl} alt="" draggable={false} /> : <LogoIcon size={88} />}
             </button>
