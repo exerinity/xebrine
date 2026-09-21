@@ -54,6 +54,7 @@ import {
   SEARCH_ENGINES,
   type SearchEngineId
 } from '../utils/search_engine';
+import { Spinner } from '../components/spinner';
 
 type SectionId = 'all' | 'preferences' | 'appearance' | 'library' | 'playback' | 'a11y' | 'toys' | 'share';
 
@@ -1048,6 +1049,10 @@ export function SettingsPage() {
                     Announce
                   </button>
                 </div>
+              </section>
+              <section className="xe_settings__section">
+                <h2>Spinner that does nothing</h2>
+                <Spinner></Spinner>
               </section>
 
               <section className="xe_settings__section">
