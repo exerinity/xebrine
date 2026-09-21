@@ -3,7 +3,6 @@
   flex-shrink: 0;
   color: var(--accent-text);
   vertical-align: -0.125em;
-  animation: xe_spinner-spin 600ms linear infinite;
   transform-origin: center;
   will-change: transform;
 }
@@ -16,12 +15,6 @@
 .xe_spinner__arc {
   stroke: currentColor;
   stroke-dasharray: 42 60;
-}
-
-@keyframes xe_spinner-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .xe_skeleton {
