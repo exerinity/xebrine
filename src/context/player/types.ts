@@ -1,6 +1,7 @@
 import type { radio_station_record } from '../../../api/radio_browser';
 import type { RefObject } from 'react';
 import type { QueueItem, TrackMeta } from '../../../types';
+import type { SleepTimerMode, SleepTimerSelection } from './sleep_timer';
 
 export type RepeatMode = 'off' | 'all' | 'one';
 export type AutoMixPhase = 'idle' | 'analyzing-current' | 'analyzing-next' | 'mixing' | 'switching';
@@ -54,12 +55,11 @@ export interface PlayerContextValue {
   autoMixBpm: AutoMixBpm | null;
   autoMixProgress: number | null;
   toggleAutoMix(): void;
+  sleepTimerMode: SleepTimerMode;
   sleepTimerRemaining: number;
-  sleepTimerPaused: boolean;
+  sleepTimerBatteryLevel: number | null;
   sleepTimerFinished: boolean;
-  addSleepTimer(minutes: number): void;
-  setSleepTimerMinutes(minutes: number): void;
-  togglePauseSleepTimer(): void;
+  setSleepTimer(selection: SleepTimerSelection): void;
   cancelSleepTimer(): void;
   dismissSleepTimerFinished(): void;
   remoteLocked: boolean;
