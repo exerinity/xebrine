@@ -195,17 +195,21 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
           );
         } else {
           let message =
-            mode === 'new'
-              ? `Done searching "${folder.name}" - found ${added} new track${added === 1 ? '' : 's'}.`
-              : `Done scanning "${folder.name}" - found ${found} track${found === 1 ? '' : 's'}.`;
+            mode === 'new' && added === 0
+              ? 'No new files found.'
+              : mode === 'new'
+                ? `Done searching "${folder.name}" - found ${added} new track${added === 1 ? '' : 's'}.`
+                : `Done scanning "${folder.name}" - found ${found} track${found === 1 ? '' : 's'}.`;
           const delta = found - prevCount;
-          if (mode === 'full' && isRescan && delta !== 0) {
+          if (mode !== 'new' && mode === 'full' && isRescan && delta !== 0) {
             message += ` ${Math.abs(delta)} ${delta > 0 ? 'more' : 'less'} found than last scan.`;
           }
-          if (excluded > 0) {
+          if (mode !== 'new' && excluded > 0) {
             message += ` Excluded ${excluded} file${excluded === 1 ? '' : 's'} as per your ignore rules.`;
           }
-          message += ` ${formatLibraryRuntime(libraryRuntime)} runtime, took ${formatScanDuration(performance.now() - startedAt)}`;
+          if (mode !== 'new' || added > 0) {
+            message += ` ${formatLibraryRuntime(libraryRuntime)} runtime, took ${formatScanDuration(performance.now() - startedAt)}`;
+          }
           toast.success(message, 20000);
         }
         if (skipped.length > 0) setScanReport({ folderName: folder.name, skipped });
