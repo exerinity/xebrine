@@ -11,6 +11,13 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '15',
+    date: '2026-09-24',
+    notes: [
+      'Reworked the sleep timer to accept many more times or circumstances'
+    ]
+  },
+  {
     version: '14',
     date: '2026-09-09',
     notes: [
