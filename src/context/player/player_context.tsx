@@ -131,12 +131,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }
 
   const {
+    mode: sleepTimerMode,
     remaining: sleepTimerRemaining,
-    paused: sleepTimerPaused,
+    batteryLevel: sleepTimerBatteryLevel,
     finished: sleepTimerFinished,
-    add: addSleepTimer,
-    setMinutes: setSleepTimerMinutes,
-    togglePaused: togglePauseSleepTimer,
+    setTimer: setSleepTimer,
+    handleSongEnded: handleSleepTimerSongEnded,
     cancel: cancelSleepTimer,
     dismissFinished: dismissSleepTimerFinished
   } = useSleepTimer(audio);
@@ -213,6 +213,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const onEnded = () => {
       if (radio_ref.current) { setIsPlaying(false); return; }
       const s = stateRef.current;
+      if (handleSleepTimerSongEnded(s.position + 1 >= s.items.length)) return;
       if (beginAutoMixHandoff()) {
         autoplayRef.current = true;
         dispatch({ type: 'ADVANCE', delta: 1 });
@@ -248,7 +249,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('ended', onEnded);
     };
-  }, [audio]);
+  }, [audio, handleSleepTimerSongEnded]);
 
   useEffect(() => {
     if (!isPlaying || !settings.preventExit) return;
@@ -618,12 +619,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       autoMixBpm,
       autoMixProgress,
       toggleAutoMix,
+      sleepTimerMode,
       sleepTimerRemaining,
-      sleepTimerPaused,
+      sleepTimerBatteryLevel,
       sleepTimerFinished,
-      addSleepTimer,
-      setSleepTimerMinutes,
-      togglePauseSleepTimer,
+      setSleepTimer,
       cancelSleepTimer,
       dismissSleepTimerFinished,
       remoteLocked,
@@ -670,12 +670,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       autoMixBpm,
       autoMixProgress,
       toggleAutoMix,
+      sleepTimerMode,
       sleepTimerRemaining,
-      sleepTimerPaused,
+      sleepTimerBatteryLevel,
       sleepTimerFinished,
-      addSleepTimer,
-      setSleepTimerMinutes,
-      togglePauseSleepTimer,
+      setSleepTimer,
       cancelSleepTimer,
       dismissSleepTimerFinished,
       remoteLocked,
