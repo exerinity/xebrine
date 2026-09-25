@@ -6,6 +6,7 @@ import { formatTime } from '../utils/format';
 import { LyricsPanel } from './lyrics';
 import { ScrollingText } from './scrolling_text';
 import { TrackPreviewCard } from './track_preview_card';
+import { AutoMixDrawer } from './auto_mix_drawer';
 import { CloseIcon, LogoIcon, PauseIcon, PlayIcon } from './icons';
 
 interface FullscreenPlayerProps {
@@ -31,6 +32,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
     currentTime,
     duration,
     justPlayed,
+    autoMixEnabled,
     jumpTo,
     playNow
   } = usePlayer();
@@ -360,12 +362,12 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
 
         <section
           className="xe_fullscreen-player__panel xe_fullscreen-player__lyrics"
-          aria-label="Lyrics, up next and just played"
+          aria-label={`Lyrics, up next, just played${autoMixEnabled ? ' and auto mix' : ''}`}
         >
           {display_radio ? <p className="xe_empty-note">Live radio</p> : <>
           <h2>Lyrics</h2>
           <LyricsPanel showToolbar={false} variant="fullscreen" />
-          <div className="xe_fullscreen-player__queue" aria-label="Queue preview">
+          <div className={`xe_fullscreen-player__queue${autoMixEnabled ? ' xe_fullscreen-player__queue--auto-mix' : ''}`} aria-label="Queue preview">
             <div className="xe_fullscreen-player__queue-item">
               <h3>Up next</h3>
               {nextItem ? (
@@ -381,6 +383,10 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
               ) : (
                 <p className="xe_empty-note">Nothing yet</p>
               )}
+            </div>
+            <div className="xe_fullscreen-player__queue-item xe_fullscreen-player__auto-mix" aria-hidden={!autoMixEnabled}>
+              <h3>Auto mix</h3>
+              <AutoMixDrawer inline />
             </div>
           </div>
           </>}
