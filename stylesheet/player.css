@@ -1269,6 +1269,7 @@ button.xe_scrubber__time:hover {
 }
 
 .xe_fullscreen-player__track-card {
+  width: 100%;
   min-width: 0;
   display: flex;
   align-items: center;
