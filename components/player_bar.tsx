@@ -347,7 +347,7 @@ export function PlayerBar({
       label: 'Auto mix',
       control: (
         <div className="xe_automix-pill-wrap">
-          <AutoMixDrawer />
+          <AutoMixDrawer hidden={fullscreenOpen} />
           <button
             type="button"
             className={`xe_automix-pill${autoMixEnabled ? ' xe_automix-pill--on' : ''}${
