@@ -21,7 +21,7 @@ type PerformanceWithMemory = Performance & { memory?: PerformanceMemory };
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
-export function AutoMixDrawer() {
+export function AutoMixDrawer({ inline = false, hidden = false }: { inline?: boolean; hidden?: boolean }) {
   const {
     autoMixEnabled,
     autoMixPhase,
@@ -90,11 +90,12 @@ export function AutoMixDrawer() {
   });
 
   const accent = autoMixColor ? ` xe_automix-drawer--${autoMixColor}` : '';
+  const visible = autoMixEnabled && !hidden;
 
   return (
     <div
-      className={`xe_automix-drawer${autoMixEnabled ? ' xe_automix-drawer--open' : ''}${accent}`}
-      aria-hidden={!autoMixEnabled}
+      className={`xe_automix-drawer${visible ? ' xe_automix-drawer--open' : ''}${inline ? ' xe_automix-drawer--inline' : ''}${accent}`}
+      aria-hidden={!visible}
     >
       <div className="xe_automix-drawer__head">
         {status.spinner ? (
