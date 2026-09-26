@@ -554,9 +554,13 @@
 
 .xe_slider {
   padding: 8px 0;
-  cursor: pointer;
+  cursor: grab;
   touch-action: none;
   outline: none;
+}
+
+.xe_slider:active:not(.xe_slider--disabled) {
+  cursor: grabbing;
 }
 
 .xe_slider--disabled {
