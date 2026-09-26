@@ -43,6 +43,7 @@ import { SidePanel } from './components/side_panel';
 import { SleepTimerFinishedModal } from './components/sleep_timer_finished_modal';
 
 const SIDE_PANEL_MEDIA = '(min-width: 1100px)';
+const SIDE_PANEL_EXIT_FALLBACK_MS = 320;
 
 function MediaBridge() {
   useMediaSession();
@@ -127,6 +128,8 @@ function Shell() {
   const { settings, update } = useSettings();
   const sidePanelAvailable = sidePanelSupported && !fullscreenOpen;
   const sidePanelOpen = settings.sidePanelOpen && sidePanelAvailable;
+  const [sidePanelMounted, setSidePanelMounted] = useState(sidePanelOpen);
+  const [sidePanelVisible, setSidePanelVisible] = useState(false);
   const accent = useAccentColor(artworkUrl);
   useDynamicFavicon(Boolean(current || radio_station), accent.accent, isPlaying);
   usePageKeys(settings.pageKeyMode);
@@ -174,6 +177,28 @@ function Shell() {
   }, []);
 
   useEffect(() => {
+    if (sidePanelOpen) {
+      setSidePanelMounted(true);
+      let nextFrame = 0;
+      const firstFrame = window.requestAnimationFrame(() => {
+        nextFrame = window.requestAnimationFrame(() => setSidePanelVisible(true));
+      });
+      return () => {
+        window.cancelAnimationFrame(firstFrame);
+        window.cancelAnimationFrame(nextFrame);
+      };
+    }
+
+    setSidePanelVisible(false);
+    if (!sidePanelSupported || settings.reducedMotion) {
+      setSidePanelMounted(false);
+      return;
+    }
+    const fallback = window.setTimeout(() => setSidePanelMounted(false), SIDE_PANEL_EXIT_FALLBACK_MS);
+    return () => window.clearTimeout(fallback);
+  }, [sidePanelOpen, sidePanelSupported, settings.reducedMotion]);
+
+  useEffect(() => {
     if (!fullscreenOpen || (!current && !radio_station)) return;
     const previous = document.title;
     const { title, artist } = radio_station ? { title: radio_station.name, artist: 'Live radio' } : current!.track;
@@ -218,12 +243,15 @@ function Shell() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
-        {sidePanelOpen && (
+        {sidePanelMounted && (
           <SidePanel
-            open
+            open={sidePanelVisible}
             view={settings.sidePanelView}
             onViewChange={(view) => update({ sidePanelView: view })}
             onClose={() => update({ sidePanelOpen: false })}
+            onHidden={() => {
+              if (!sidePanelOpen) setSidePanelMounted(false);
+            }}
           />
         )}
       </main>
