@@ -216,12 +216,14 @@ function Shell() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
-        <SidePanel
-          open={settings.sidePanelOpen && sidePanelSupported}
-          view={settings.sidePanelView}
-          onViewChange={(view) => update({ sidePanelView: view })}
-          onClose={() => update({ sidePanelOpen: false })}
-        />
+        {settings.sidePanelOpen && sidePanelSupported && (
+          <SidePanel
+            open
+            view={settings.sidePanelView}
+            onViewChange={(view) => update({ sidePanelView: view })}
+            onClose={() => update({ sidePanelOpen: false })}
+          />
+        )}
       </main>
       <FullscreenPlayer
         open={fullscreenOpen}
