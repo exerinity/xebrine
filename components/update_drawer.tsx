@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
-import { RefreshIcon } from './icons';
+import { CloseIcon, RefreshIcon } from './icons';
 import { Spinner } from './spinner';
 
 type UpdatePhase = 'available' | 'downloading' | 'reloading';
@@ -13,6 +13,7 @@ interface UpdateWorkerMessage {
 export function UpdateDrawer() {
   const [phase, setPhase] = useState<UpdatePhase | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dismissed, setDismissed] = useState(false);
   const applyTimerRef = useRef<number | null>(null);
   const reloadTimerRef = useRef<number | null>(null);
   const reloadFallbackRef = useRef<number | null>(null);
@@ -70,7 +71,7 @@ export function UpdateDrawer() {
   );
 
   const visiblePhase = phase ?? (needRefresh ? 'available' : null);
-  const open = visiblePhase !== null;
+  const open = visiblePhase !== null && !dismissed;
   const downloading = visiblePhase === 'downloading';
   const reloading = visiblePhase === 'reloading';
   const title = reloading
@@ -102,6 +103,7 @@ export function UpdateDrawer() {
       className={`xe_scan-drawer xe_update-drawer${open ? ' xe_scan-drawer--open' : ''}`}
       aria-live="polite"
       aria-hidden={!open}
+      inert={!open}
     >
       <div className="xe_scan-drawer__head">
         {downloading || reloading ? <Spinner size={11} /> : <RefreshIcon size={12} />}
@@ -111,6 +113,15 @@ export function UpdateDrawer() {
             Update
           </button>
         )}
+        <button
+          type="button"
+          className="xe_mini-btn"
+          onClick={() => setDismissed(true)}
+          title="Dismiss update notice"
+          aria-label="Dismiss update notice"
+        >
+          <CloseIcon size={14} />
+        </button>
       </div>
       {(downloading || reloading) && (
         <div className="xe_scan-drawer__bar xe_scan-drawer__bar--indeterminate">
