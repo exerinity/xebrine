@@ -125,6 +125,8 @@ function Shell() {
   );
   const { current, radio_station, artworkUrl, isPlaying } = usePlayer();
   const { settings, update } = useSettings();
+  const sidePanelAvailable = sidePanelSupported && !fullscreenOpen;
+  const sidePanelOpen = settings.sidePanelOpen && sidePanelAvailable;
   const accent = useAccentColor(artworkUrl);
   useDynamicFavicon(Boolean(current || radio_station), accent.accent, isPlaying);
   usePageKeys(settings.pageKeyMode);
@@ -216,7 +218,7 @@ function Shell() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
-        {settings.sidePanelOpen && sidePanelSupported && (
+        {sidePanelOpen && (
           <SidePanel
             open
             view={settings.sidePanelView}
@@ -235,10 +237,10 @@ function Shell() {
         fullscreenOpen={fullscreenOpen && Boolean(current || radio_station)}
         onCollapsedChange={setPlayerBarCollapsed}
         onToggleFullscreen={() => setFullscreenOpen((open) => !open)}
-        sidePanelOpen={settings.sidePanelOpen && sidePanelSupported}
-        sidePanelAvailable={sidePanelSupported}
+        sidePanelOpen={sidePanelOpen}
+        sidePanelAvailable={sidePanelAvailable}
         onToggleSidePanel={() => {
-          if (sidePanelSupported) update({ sidePanelOpen: !settings.sidePanelOpen });
+          if (sidePanelAvailable) update({ sidePanelOpen: !settings.sidePanelOpen });
         }}
       />
       <MediaBridge />
