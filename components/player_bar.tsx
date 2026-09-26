@@ -54,6 +54,7 @@ interface PlayerBarProps {
   onToggleFullscreen?: () => void;
   sidePanelOpen?: boolean;
   sidePanelAvailable?: boolean;
+  lyricsSidePanelActive?: boolean;
   onToggleSidePanel?: () => void;
 }
 
@@ -105,6 +106,7 @@ export function PlayerBar({
   onToggleFullscreen,
   sidePanelOpen = false,
   sidePanelAvailable = true,
+  lyricsSidePanelActive = false,
   onToggleSidePanel
 }: PlayerBarProps) {
   const navigate = useNavigate();
@@ -347,7 +349,7 @@ export function PlayerBar({
       label: 'Auto mix',
       control: (
         <div className="xe_automix-pill-wrap">
-          <AutoMixDrawer hidden={fullscreenOpen} />
+          <AutoMixDrawer hidden={fullscreenOpen || lyricsSidePanelActive} />
           <button
             type="button"
             className={`xe_automix-pill${autoMixEnabled ? ' xe_automix-pill--on' : ''}${
