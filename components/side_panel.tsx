@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../src/context/player';
 import type { SidePanelView } from '../context/settings_context';
 import { formatTime } from '../utils/format';
+import { AutoMixDrawer } from './auto_mix_drawer';
 import { LyricsPanel } from './lyrics';
 import { QueueList } from './queue_list';
 import { ScrollingText } from './scrolling_text';
@@ -48,7 +49,7 @@ interface SidePanelProps {
 
 export function SidePanel({ open, view, onViewChange, onClose, onHidden }: SidePanelProps) {
   const navigate = useNavigate();
-  const { queue, position, current, artworkUrl, jumpTo } = usePlayer();
+  const { queue, position, current, artworkUrl, autoMixEnabled, jumpTo } = usePlayer();
   const [query, setQuery] = useState('');
   const [panelWidth, setPanelWidth] = useState(loadWidth);
   const [resizing, setResizing] = useState(false);
@@ -238,12 +239,23 @@ export function SidePanel({ open, view, onViewChange, onClose, onHidden }: SideP
                 </div>
               )}
               <LyricsPanel showToolbar={false} variant="sidebar" />
-              {nextItem && (
-                <section className="xe_side-panel__up-next" aria-label="Up next">
-                  <h3>Up next</h3>
-                  <TrackPreviewCard item={nextItem} onPlay={() => jumpTo(nextPosition)} />
+              <div className="xe_side-panel__footer">
+                {nextItem && (
+                  <section className="xe_side-panel__up-next" aria-label="Up next">
+                    <h3>Up next</h3>
+                    <TrackPreviewCard item={nextItem} onPlay={() => jumpTo(nextPosition)} />
+                  </section>
+                )}
+                <section
+                  className={`xe_side-panel__auto-mix${autoMixEnabled ? ' xe_side-panel__auto-mix--open' : ''}`}
+                  aria-label="Auto mix"
+                  aria-hidden={!autoMixEnabled}
+                  inert={!autoMixEnabled}
+                >
+                  <h3>Auto mix</h3>
+                  <AutoMixDrawer inline />
                 </section>
-              )}
+              </div>
             </div>
           )}
         </div>
