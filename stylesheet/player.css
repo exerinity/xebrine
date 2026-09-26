@@ -1311,7 +1311,8 @@ button.xe_scrubber__time:hover {
     visibility 0s;
 }
 
-.xe_fullscreen-player__auto-mix .xe_automix-drawer--inline {
+.xe_fullscreen-player__auto-mix .xe_automix-drawer--inline,
+.xe_side-panel__auto-mix .xe_automix-drawer--inline {
   position: static;
   width: 100%;
   min-width: 0;
@@ -1327,7 +1328,10 @@ button.xe_scrubber__time:hover {
 
 .xe_fullscreen-player__auto-mix .xe_automix-drawer__head,
 .xe_fullscreen-player__auto-mix .xe_automix-drawer__bar,
-.xe_fullscreen-player__auto-mix .xe_automix-drawer__meta {
+.xe_fullscreen-player__auto-mix .xe_automix-drawer__meta,
+.xe_side-panel__auto-mix .xe_automix-drawer__head,
+.xe_side-panel__auto-mix .xe_automix-drawer__bar,
+.xe_side-panel__auto-mix .xe_automix-drawer__meta {
   min-width: 0;
 }
 
