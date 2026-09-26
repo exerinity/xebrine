@@ -9,7 +9,8 @@ import {
   type LrclibRecord
 } from '../api/lrclib';
 import { parseLyricsFile, toLrc } from '../utils/lyrics';
-import { dbDelete, dbGet, dbPut } from '../management/db';
+import { dbGet } from '../management/db';
+import { deleteLyrics, saveLyrics, subscribeLyricsChanges } from '../management/stored_lyrics';
 import { containsProfanity } from '../utils/profanity';
 import { isExplicitId, markExplicit } from '../utils/explicit_tracks';
 import { openSearch, searchLabel } from '../utils/search_engine';
@@ -98,7 +99,7 @@ export function LyricsPanel({
         if (found) {
           setLyricsResult({ trackId: target.id, lyrics: found });
           setStatus('idle');
-          await dbPut('lyrics', { trackId: target.id, lyrics: found } satisfies StoredLyrics);
+          await saveLyrics(target.id, found);
         } else {
           setLyricsResult(null);
           setStatus('notfound');
@@ -144,6 +145,16 @@ export function LyricsPanel({
       controller.abort();
     };
   }, [track?.id, runSearch]);
+
+  useEffect(() => {
+    return subscribeLyricsChanges(({ trackId, lyrics: changedLyrics }) => {
+      if (trackIdRef.current !== trackId) return;
+      requestAbortRef.current?.abort();
+      requestAbortRef.current = null;
+      setLyricsResult(changedLyrics ? { trackId, lyrics: changedLyrics } : null);
+      setStatus('idle');
+    });
+  }, []);
 
   useEffect(() => {
     if (!track || !lyrics || !settings.tagExplicitSongs || isExplicitId(track.id)) return;
@@ -199,7 +210,7 @@ export function LyricsPanel({
     const found = lyricsFromLrclibRecord(record);
     if (!found) throw new Error('That LRCLIB entry has no usable synced or plain lyrics');
     preferUserLyrics();
-    await dbPut('lyrics', { trackId: targetId, lyrics: found } satisfies StoredLyrics);
+    await saveLyrics(targetId, found);
     if (trackIdRef.current !== targetId) return;
     setLyricsResult({ trackId: targetId, lyrics: found });
     setStatus('idle');
@@ -220,7 +231,7 @@ export function LyricsPanel({
     }
     setLyricsResult({ trackId: track.id, lyrics: parsed });
     setStatus('idle');
-    await dbPut('lyrics', { trackId: track.id, lyrics: parsed } satisfies StoredLyrics);
+    await saveLyrics(track.id, parsed);
   }, [track, preferUserLyrics]);
 
   useEffect(() => {
@@ -238,7 +249,7 @@ export function LyricsPanel({
     }
     setLyricsResult({ trackId: track.id, lyrics: parsed });
     setStatus('idle');
-    await dbPut('lyrics', { trackId: track.id, lyrics: parsed } satisfies StoredLyrics);
+    await saveLyrics(track.id, parsed);
     setPasteOpen(false);
     setPasteText('');
   };
@@ -295,9 +306,8 @@ export function LyricsPanel({
 
   const removeLyrics = async () => {
     if (!track) return;
-    await dbDelete('lyrics', track.id);
-    setLyricsResult(null);
-    setStatus('idle');
+    preferUserLyrics();
+    await deleteLyrics(track.id);
   };
 
   if (!track) {
