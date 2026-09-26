@@ -1,10 +1,12 @@
 import { dbGet, dbPut } from './db';
 import { readCoverArt } from './metadata';
+import { optimizeCoverImage } from '../utils/cover_image';
 import type { TrackMeta } from '../types';
 
 interface StoredCover {
   key: string;
   blob: Blob;
+  optimized?: true;
 }
 
 const memCache = new Map<string, Promise<string | null>>();
@@ -43,10 +45,16 @@ async function load(
 ): Promise<string | null> {
   try {
     const stored = await dbGet<StoredCover>('covers', key);
-    if (stored) return stored.blob.size > 0 ? URL.createObjectURL(stored.blob) : null;
+    if (stored) {
+      if (stored.blob.size === 0) return null;
+      if (stored.optimized) return URL.createObjectURL(stored.blob);
+      const art = await optimizeCoverImage(stored.blob).catch(() => null);
+      await dbPut('covers', { key, blob: art ?? new Blob([]), optimized: true } satisfies StoredCover);
+      return art ? URL.createObjectURL(art) : null;
+    }
     const file = await getFile(sample);
     const art = await readCoverArt(file);
-    await dbPut('covers', { key, blob: art ?? new Blob([]) } satisfies StoredCover);
+    await dbPut('covers', { key, blob: art ?? new Blob([]), optimized: true } satisfies StoredCover);
     return art ? URL.createObjectURL(art) : null;
   } catch {
     memCache.delete(key);
