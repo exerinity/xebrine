@@ -3,6 +3,7 @@ const { contextBridge: context_bridge, ipcRenderer: ipc_renderer } = require("el
 const control_channel = "xebrine:control";
 
 context_bridge.exposeInMainWorld("xebrineShell", {
+  apiVersion: 1,
   platform: process.platform,
   versions: {
     electron: process.versions.electron,
@@ -16,6 +17,15 @@ context_bridge.exposeInMainWorld("xebrineShell", {
     ipc_renderer.invoke("xebrine:read-file", folder_id, relative_path),
   hasDirectory: (folder_id) => ipc_renderer.invoke("xebrine:has-directory", folder_id),
   forgetDirectory: (folder_id) => ipc_renderer.invoke("xebrine:forget-directory", folder_id),
+  scanFolder: (request) => ipc_renderer.invoke("xebrine:scan-folder", request),
+  cancelScan: (request_id) => ipc_renderer.invoke("xebrine:cancel-scan", request_id),
+  onScanProgress: (request_id, callback) => {
+    const listener = (_event, id, progress) => {
+      if (id === request_id) callback(progress);
+    };
+    ipc_renderer.on("xebrine:scan-progress", listener);
+    return () => ipc_renderer.removeListener("xebrine:scan-progress", listener);
+  },
 
   updateState: (state) => ipc_renderer.send("xebrine:state", state),
   setArtwork: (track_id, data_url) => ipc_renderer.send("xebrine:artwork", track_id, data_url),
