@@ -1,4 +1,5 @@
 import { parseBlob, selectCover } from 'music-metadata';
+import { optimizeCoverImage } from '../utils/cover_image';
 
 const MAX_COVER_PARSE_SIZE = 100 * 1024 * 1024;
 
@@ -41,7 +42,7 @@ export async function readCoverArt(file: File): Promise<Blob | null> {
     const meta = await parseBlob(file);
     const cover = selectCover(meta.common.picture);
     if (!cover) return null;
-    return new Blob([cover.data as BlobPart], { type: cover.format });
+    return await optimizeCoverImage(new Blob([cover.data as BlobPart], { type: cover.format }));
   } catch {
     return null;
   }
