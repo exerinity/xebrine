@@ -69,7 +69,8 @@ export function LyricsPanel({
   const navigate = useNavigate();
   const track = current?.track ?? null;
 
-  const [lyrics, setLyrics] = useState<Lyrics | null>(null);
+  const [lyricsResult, setLyricsResult] = useState<StoredLyrics | null>(null);
+  const lyrics = lyricsResult && lyricsResult.trackId === track?.id ? lyricsResult.lyrics : null;
   const [status, setStatus] = useState<Status>('idle');
   const [activeIndex, setActiveIndex] = useState(-1);
   const [lrclibSearchOpen, setLrclibSearchOpen] = useState(false);
@@ -95,16 +96,16 @@ export function LyricsPanel({
         const found = await fetchLyrics(target, settings.lrclibMode, signal);
         if (signal.aborted) return;
         if (found) {
-          setLyrics(found);
+          setLyricsResult({ trackId: target.id, lyrics: found });
           setStatus('idle');
           await dbPut('lyrics', { trackId: target.id, lyrics: found } satisfies StoredLyrics);
         } else {
-          setLyrics(null);
+          setLyricsResult(null);
           setStatus('notfound');
         }
       } catch (error) {
         if (signal.aborted || isAbortError(error)) return;
-        setLyrics(null);
+        setLyricsResult(null);
         setStatus(error instanceof LrclibError && error.status === 429 ? 'ratelimited' : 'error');
       }
     },
@@ -113,7 +114,7 @@ export function LyricsPanel({
 
   useEffect(() => {
     requestAbortRef.current?.abort();
-    setLyrics(null);
+    setLyricsResult(null);
     setStatus('idle');
     setActiveIndex(-1);
     setLrclibSearchOpen(false);
@@ -128,7 +129,7 @@ export function LyricsPanel({
       const stored = await dbGet<StoredLyrics>('lyrics', track.id);
       if (cancelled || controller.signal.aborted) return;
       if (stored) {
-        setLyrics(stored.lyrics);
+        setLyricsResult(stored);
       } else {
         setStatus('waiting');
         timer = window.setTimeout(() => {
@@ -200,7 +201,7 @@ export function LyricsPanel({
     preferUserLyrics();
     await dbPut('lyrics', { trackId: targetId, lyrics: found } satisfies StoredLyrics);
     if (trackIdRef.current !== targetId) return;
-    setLyrics(found);
+    setLyricsResult({ trackId: targetId, lyrics: found });
     setStatus('idle');
     setLrclibSearchOpen(false);
   };
@@ -217,7 +218,7 @@ export function LyricsPanel({
       setStatus('badfile');
       return;
     }
-    setLyrics(parsed);
+    setLyricsResult({ trackId: track.id, lyrics: parsed });
     setStatus('idle');
     await dbPut('lyrics', { trackId: track.id, lyrics: parsed } satisfies StoredLyrics);
   }, [track, preferUserLyrics]);
@@ -235,7 +236,7 @@ export function LyricsPanel({
       setStatus('badfile');
       return;
     }
-    setLyrics(parsed);
+    setLyricsResult({ trackId: track.id, lyrics: parsed });
     setStatus('idle');
     await dbPut('lyrics', { trackId: track.id, lyrics: parsed } satisfies StoredLyrics);
     setPasteOpen(false);
@@ -295,7 +296,7 @@ export function LyricsPanel({
   const removeLyrics = async () => {
     if (!track) return;
     await dbDelete('lyrics', track.id);
-    setLyrics(null);
+    setLyricsResult(null);
     setStatus('idle');
   };
 
