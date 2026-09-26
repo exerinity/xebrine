@@ -267,6 +267,7 @@ function Shell() {
         onToggleFullscreen={() => setFullscreenOpen((open) => !open)}
         sidePanelOpen={sidePanelOpen}
         sidePanelAvailable={sidePanelAvailable}
+        lyricsSidePanelActive={(sidePanelOpen || sidePanelMounted) && settings.sidePanelView === 'lyrics'}
         onToggleSidePanel={() => {
           if (sidePanelAvailable) update({ sidePanelOpen: !settings.sidePanelOpen });
         }}
