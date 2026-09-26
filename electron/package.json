@@ -15,6 +15,7 @@
     "dist:win": "npm run icons && electron-builder --win"
   },
   "dependencies": {
+    "mediainfo.js": "^0.3.8",
     "mpris-service": "^2.1.2"
   },
   "devDependencies": {
@@ -31,6 +32,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "scan_worker.js",
       "mpris.js",
       "package.json"
     ],
