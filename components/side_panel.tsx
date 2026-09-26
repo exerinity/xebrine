@@ -43,9 +43,10 @@ interface SidePanelProps {
   view: SidePanelView;
   onViewChange(view: SidePanelView): void;
   onClose(): void;
+  onHidden(): void;
 }
 
-export function SidePanel({ open, view, onViewChange, onClose }: SidePanelProps) {
+export function SidePanel({ open, view, onViewChange, onClose, onHidden }: SidePanelProps) {
   const navigate = useNavigate();
   const { queue, position, current, artworkUrl, jumpTo } = usePlayer();
   const [query, setQuery] = useState('');
@@ -125,6 +126,11 @@ export function SidePanel({ open, view, onViewChange, onClose }: SidePanelProps)
       aria-label="Queue and lyrics side panel"
       aria-hidden={!open}
       inert={!open}
+      onTransitionEnd={(event) => {
+        if (!open && event.target === event.currentTarget && event.propertyName === 'flex-basis') {
+          onHidden();
+        }
+      }}
     >
       <div className="xe_side-panel__inner">
         {open && (
