@@ -130,7 +130,7 @@ export function CoverModal({ src, alt = '', onClose }: CoverModalProps) {
           className="xe_cover-modal__link"
           onMouseMove={tiltCover}
           onMouseLeave={resetCoverTilt}
-          title="Open original image"
+          title="Open image"
         >
           <img src={src} alt={alt} className="xe_cover-modal__image" />
         </a>
