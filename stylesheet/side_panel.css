@@ -251,14 +251,56 @@
   font-size: 11px;
 }
 
-.xe_side-panel__up-next {
+.xe_side-panel__footer {
   flex-shrink: 0;
+  margin-top: auto;
+}
+
+.xe_side-panel__up-next {
   margin: 0 14px;
   padding: 12px 0 10px;
   border-top: 1px solid var(--border);
 }
 
-.xe_side-panel__up-next h3 {
+.xe_side-panel__auto-mix {
+  flex-shrink: 0;
+  max-height: 0;
+  margin: 0 14px;
+  padding: 0;
+  border-top: 1px solid transparent;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(8px);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    max-height 260ms ease,
+    padding 260ms ease,
+    border-color 260ms ease,
+    opacity 180ms ease,
+    transform 260ms ease,
+    visibility 0s 260ms;
+}
+
+.xe_side-panel__auto-mix--open {
+  max-height: 140px;
+  padding: 12px 0 10px;
+  border-top-color: var(--border);
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    max-height 260ms ease,
+    padding 260ms ease,
+    border-color 260ms ease,
+    opacity 180ms ease,
+    transform 260ms ease,
+    visibility 0s;
+}
+
+.xe_side-panel__up-next h3,
+.xe_side-panel__auto-mix h3 {
   margin: 0 8px 3px;
   color: var(--accent-text);
   font-size: 10px;
