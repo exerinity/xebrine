@@ -41,6 +41,7 @@
 
 /**
  * @typedef {Object} ElectronBridge
+ * @property {number | undefined} [apiVersion]
  * @property {string} platform
  * @property {{ electron: string, chrome: string }} versions
  * @property {() => Promise<ElectronFolder | null>} pickDirectory
@@ -48,6 +49,9 @@
  * @property {(folderId: string, path: string[]) => Promise<ElectronFile>} readFile
  * @property {(folderId: string) => Promise<boolean>} hasDirectory
  * @property {(folderId: string) => Promise<void>} forgetDirectory
+ * @property {(request: import('../management/library').ElectronScanRequest) => Promise<import('../management/library').ScanResult>} [scanFolder]
+ * @property {(requestId: string) => Promise<void>} [cancelScan]
+ * @property {(requestId: string, handler: (progress: import('../management/library').ScanProgressUpdate) => void) => () => void} [onScanProgress]
  * @property {(state: ElectronPlaybackState) => void} updateState
  * @property {(trackId: string | null, dataUrl: string | null) => void} setArtwork
  * @property {(handler: (control: ElectronControl, payload?: number | boolean | string) => void) => void} onControl
@@ -56,8 +60,12 @@
 
 function resolveBridge() {
   if (typeof window === 'undefined') return null;
+  const flagged = new URLSearchParams(window.location.search).get('electron') === 'true';
+  if (flagged) window.sessionStorage.setItem('xebrine-electron', 'true');
+  if (!flagged && window.sessionStorage.getItem('xebrine-electron') !== 'true') return null;
   const bridge = window.xebrineShell;
-  return bridge && typeof bridge.updateState === 'function' ? bridge : null;
+  return bridge && typeof bridge.updateState === 'function'
+    ? bridge : null;
 }
 
 /** @type {ElectronBridge | null} */
