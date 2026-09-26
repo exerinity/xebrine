@@ -78,6 +78,16 @@ export interface ScanResult {
   complete: boolean;
 }
 
+export interface ElectronScanRequest {
+  requestId: string;
+  folderId: string;
+  libraryFolderId: string;
+  folderName: string;
+  mode: ScanMode;
+  rules: IgnoreRules;
+  existingTracks: readonly TrackMeta[];
+}
+
 function isAudioFile(name: string): boolean {
   const extension = name.split('.').pop()?.toLowerCase();
   return extension !== undefined && AUDIO_EXTENSIONS.has(extension);
@@ -197,47 +207,42 @@ async function readElectronFile(folderId: string, relPath: string[]): Promise<Fi
   });
 }
 
-async function* walkElectronFiles(
+async function* walkLegacyElectronFiles(
   folder: Extract<FolderRecord, { electronId: string }>,
   skipped: SkippedFile[],
   state: WalkState,
   signal?: AbortSignal
 ): AsyncGenerator<ScanFile> {
-  if (!electron) throw new Error('Desktop filesystem bridge is unavailable');
   const bridge = electron;
+  if (!bridge) throw new Error('Desktop filesystem bridge is unavailable');
   const directories: string[][] = [[]];
-
   while (directories.length > 0) {
     throwIfAborted(signal);
     const batch = directories.splice(0, DIRECTORY_CONCURRENCY);
-    const listed = await Promise.all(
-      batch.map(async (relPath) => {
-        try {
-          const entries = await withTimeout(
-            bridge.listDirectory(folder.electronId, relPath),
-            DIRECTORY_TIMEOUT_MS,
-            signal
-          );
-          return { relPath, entries };
-        } catch (error) {
-          if (isAbortError(error)) throw error;
-          state.complete = false;
-          skipped.push({
-            path: [folder.name, ...relPath].join('/'),
-            reason: 'folder could not be listed'
-          });
-          return null;
-        }
-      })
-    );
-
+    const listed = await Promise.all(batch.map(async (relPath) => {
+      try {
+        return {
+          relPath,
+          entries: await withTimeout(
+            bridge.listDirectory(folder.electronId, relPath), DIRECTORY_TIMEOUT_MS, signal
+          )
+        };
+      } catch (error) {
+        if (isAbortError(error)) throw error;
+        state.complete = false;
+        skipped.push({
+          path: [folder.name, ...relPath].join('/'),
+          reason: 'folder could not be listed'
+        });
+        return null;
+      }
+    }));
     for (const result of listed) {
       if (!result) continue;
       for (const entry of result.entries) {
         const relPath = [...result.relPath, entry.name];
-        if (entry.kind === 'directory') {
-          directories.push(relPath);
-        } else if (isAudioFile(entry.name)) {
+        if (entry.kind === 'directory') directories.push(relPath);
+        else if (isAudioFile(entry.name)) {
           yield {
             name: entry.name,
             relPath,
@@ -250,15 +255,42 @@ async function* walkElectronFiles(
   }
 }
 
-function walkAudioFiles(
-  folder: FolderRecord,
-  skipped: SkippedFile[],
-  state: WalkState,
-  signal?: AbortSignal
-): AsyncGenerator<ScanFile> {
-  return isElectronFolder(folder)
-    ? walkElectronFiles(folder, skipped, state, signal)
-    : walkBrowserFiles(folder, skipped, state, signal);
+async function scanElectronFolder(
+  folder: Extract<FolderRecord, { electronId: string }>,
+  rules: IgnoreRules,
+  options: ScanOptions
+): Promise<ScanResult> {
+  const bridge = electron;
+  if (!bridge?.scanFolder || !bridge.cancelScan || !bridge.onScanProgress) {
+    throw new Error('Desktop scanner is unavailable');
+  }
+  const requestId = crypto.randomUUID();
+  const request: ElectronScanRequest = {
+    requestId,
+    folderId: folder.electronId,
+    libraryFolderId: folder.id,
+    folderName: folder.name,
+    mode: options.mode ?? 'full',
+    rules,
+    existingTracks: options.existingTracks ?? []
+  };
+  const offProgress = bridge.onScanProgress(requestId, (progress) => options.onProgress?.(progress));
+  const onAbort = () => { void bridge.cancelScan?.(requestId); };
+  options.signal?.addEventListener('abort', onAbort, { once: true });
+  try {
+    if (options.signal?.aborted) {
+      return {
+        tracks: [], changedTracks: [], removedTrackIds: [], skipped: [],
+        excluded: 0, aborted: true, complete: false
+      };
+    }
+    const result = bridge.scanFolder(request);
+    if (options.signal?.aborted) onAbort();
+    return await result;
+  } finally {
+    offProgress();
+    options.signal?.removeEventListener('abort', onAbort);
+  }
 }
 
 export function trackId(folderId: string, relPath: string[]): string {
@@ -270,6 +302,9 @@ export async function scanFolder(
   rules: IgnoreRules,
   options: ScanOptions = {}
 ): Promise<ScanResult> {
+  if (isElectronFolder(folder) && electron?.scanFolder && electron.cancelScan && electron.onScanProgress) {
+    return scanElectronFolder(folder, rules, options);
+  }
   const mode = options.mode ?? 'full';
   const existingTracks = options.existingTracks ?? [];
   const existingById = new Map(existingTracks.map((track) => [track.id, track]));
@@ -374,7 +409,10 @@ export async function scanFolder(
   };
 
   try {
-    for await (const source of walkAudioFiles(folder, skipped, walkState, options.signal)) {
+    const walk = isElectronFolder(folder)
+      ? walkLegacyElectronFiles(folder, skipped, walkState, options.signal)
+      : walkBrowserFiles(folder, skipped, walkState, options.signal);
+    for await (const source of walk) {
       throwIfAborted(options.signal);
       const id = trackId(folder.id, source.relPath);
       if (mode === 'new' && existingById.has(id)) continue;
