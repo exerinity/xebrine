@@ -9,6 +9,7 @@ import { ExplicitBadge } from './explicit_badge';
 
 interface TrackListProps {
   tracks: TrackMeta[];
+  playOnlySelected?: boolean;
 }
 
 interface MenuState {
@@ -18,11 +19,13 @@ interface MenuState {
   index: number;
 }
 
-export function TrackList({ tracks }: TrackListProps) {
+export function TrackList({ tracks, playOnlySelected = false }: TrackListProps) {
   const { current, isPlaying, playNow, enqueueNext, enqueueEnd, remoteLocked } = usePlayer();
   const { buildMenu, goToArtist, goToAlbum } = useTrackMenu();
   const currentTrackId = current?.track.id;
   const [menu, setMenu] = useState<MenuState | null>(null);
+  const startTrack = (track: TrackMeta, index: number) =>
+    playNow(playOnlySelected ? [track] : tracks, playOnlySelected ? 0 : index);
 
   return (
     <div className="xe_track-table">
@@ -40,7 +43,7 @@ export function TrackList({ tracks }: TrackListProps) {
           <div
             key={track.id}
             className={`xe_track-table__row${active ? ' xe_track-table__row--active' : ''}`}
-            onDoubleClick={() => playNow(tracks, i)}
+            onDoubleClick={() => startTrack(track, i)}
             onContextMenu={(e) => {
               e.preventDefault();
               setMenu({ x: e.clientX, y: e.clientY, track, index: i });
@@ -80,9 +83,9 @@ export function TrackList({ tracks }: TrackListProps) {
               <button
                 type="button"
                 className="xe_mini-btn"
-                title={remoteLocked ? REMOTE_LOCK_MESSAGE : 'Play from here'}
+                title={remoteLocked ? REMOTE_LOCK_MESSAGE : playOnlySelected ? 'Play track' : 'Play from here'}
                 disabled={remoteLocked}
-                onClick={() => playNow(tracks, i)}
+                onClick={() => startTrack(track, i)}
               >
                 <PlayIcon size={13} />
               </button>
@@ -112,7 +115,7 @@ export function TrackList({ tracks }: TrackListProps) {
         <ContextMenu
           x={menu.x}
           y={menu.y}
-          items={buildMenu(menu.track, () => playNow(tracks, menu.index))}
+          items={buildMenu(menu.track, () => startTrack(menu.track, menu.index))}
           onClose={() => setMenu(null)}
         />
       )}

@@ -83,7 +83,7 @@ export function SearchPage() {
         <p className="xe_empty-note">No matches for "{query}"...</p>
       ) : (
         <div className="xe_page__scroll">
-          <TrackList tracks={paged} />
+          <TrackList tracks={paged} playOnlySelected />
           {hasMore && <div ref={sentinelRef} className="xe_infinite-sentinel" aria-hidden="true" />}
         </div>
       )}
