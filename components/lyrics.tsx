@@ -24,7 +24,10 @@ import { ContextMenu, type ContextMenuItem } from './context_menu';
 import { DownloadIcon, NoteIcon, SearchIcon, ShareIcon, TrashIcon, UploadIcon } from './icons';
 
 type Status = 'idle' | 'waiting' | 'loading' | 'notfound' | 'error' | 'ratelimited' | 'badfile';
+type RetryStatus = { seconds: number; attempt: number };
 const AUTO_SEARCH_DELAY_MS = 2000;
+const REQUEST_RETRY_DELAY_MS = 2000;
+const MAX_REQUEST_RETRIES = 5;
 const NUDGE_SECONDS = 5;
 const HEADING_MAX = 25;
 const ACCEPTED_LYRICS_FILE = /\.(lrc|srt|vtt)$/i;
@@ -40,6 +43,58 @@ const STATUS_TEXT: Record<Exclude<Status, 'idle'>, string> = {
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError';
+}
+
+function navigatorIsOnline(): boolean {
+  return typeof navigator !== 'undefined' && navigator.onLine;
+}
+
+function isRetryableRequestError(error: unknown): boolean {
+  return !(error instanceof LrclibError) || error.status === 408 || error.status >= 500;
+}
+
+function retryStatusText({ seconds, attempt }: RetryStatus): string {
+  return `Request failed, retrying in ${seconds}... (${attempt}/${MAX_REQUEST_RETRIES} attempts)`;
+}
+
+function waitForRequestRetry(signal: AbortSignal, onCountdown: (seconds: number) => void): Promise<void> {
+  if (signal.aborted) {
+    return Promise.reject(signal.reason ?? new DOMException('The operation was aborted', 'AbortError'));
+  }
+
+  return new Promise((resolve, reject) => {
+    const retryAt = Date.now() + REQUEST_RETRY_DELAY_MS;
+    let lastSeconds = -1;
+    let timeout = 0;
+    let countdown = 0;
+    const cleanup = () => {
+      window.clearTimeout(timeout);
+      window.clearInterval(countdown);
+      signal.removeEventListener('abort', onAbort);
+    };
+    const onAbort = () => {
+      cleanup();
+      reject(signal.reason ?? new DOMException('The operation was aborted', 'AbortError'));
+    };
+    const updateCountdown = () => {
+      const seconds = Math.max(1, Math.ceil((retryAt - Date.now()) / 1000));
+      if (seconds === lastSeconds) return;
+      lastSeconds = seconds;
+      onCountdown(seconds);
+    };
+
+    signal.addEventListener('abort', onAbort, { once: true });
+    if (signal.aborted) {
+      onAbort();
+      return;
+    }
+    updateCountdown();
+    countdown = window.setInterval(updateCountdown, 100);
+    timeout = window.setTimeout(() => {
+      cleanup();
+      resolve();
+    }, REQUEST_RETRY_DELAY_MS);
+  });
 }
 
 function lineHeading(text: string): string {
@@ -73,6 +128,7 @@ export function LyricsPanel({
   const [lyricsResult, setLyricsResult] = useState<StoredLyrics | null>(null);
   const lyrics = lyricsResult && lyricsResult.trackId === track?.id ? lyricsResult.lyrics : null;
   const [status, setStatus] = useState<Status>('idle');
+  const [retryStatus, setRetryStatus] = useState<RetryStatus | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [lrclibSearchOpen, setLrclibSearchOpen] = useState(false);
   const [pasteOpen, setPasteOpen] = useState(false);
@@ -92,10 +148,38 @@ export function LyricsPanel({
 
   const runSearch = useCallback(
     async (target: TrackMeta, signal: AbortSignal) => {
+      const isCurrentRequest = () => !signal.aborted && requestAbortRef.current?.signal === signal;
+      if (!isCurrentRequest()) return;
+      setRetryStatus(null);
       setStatus('loading');
       try {
-        const found = await fetchLyrics(target, settings.lrclibMode, signal);
-        if (signal.aborted) return;
+        let found: Lyrics | null = null;
+        let retries = 0;
+        while (true) {
+          try {
+            found = await fetchLyrics(target, settings.lrclibMode, signal);
+            break;
+          } catch (error) {
+            const rateLimited = error instanceof LrclibError && error.status === 429;
+            if (
+              signal.aborted ||
+              isAbortError(error) ||
+              rateLimited ||
+              !isRetryableRequestError(error) ||
+              !navigatorIsOnline() ||
+              retries >= MAX_REQUEST_RETRIES
+            ) {
+              throw error;
+            }
+            retries += 1;
+            await waitForRequestRetry(signal, (seconds) => {
+              if (isCurrentRequest()) setRetryStatus({ seconds, attempt: retries });
+            });
+            if (isCurrentRequest()) setRetryStatus(null);
+            if (!navigatorIsOnline()) throw error;
+          }
+        }
+        if (!isCurrentRequest()) return;
         if (found) {
           setLyricsResult({ trackId: target.id, lyrics: found });
           setStatus('idle');
@@ -105,7 +189,9 @@ export function LyricsPanel({
           setStatus('notfound');
         }
       } catch (error) {
-        if (signal.aborted || isAbortError(error)) return;
+        if (!isCurrentRequest()) return;
+        setRetryStatus(null);
+        if (isAbortError(error)) return;
         setLyricsResult(null);
         setStatus(error instanceof LrclibError && error.status === 429 ? 'ratelimited' : 'error');
       }
@@ -117,6 +203,7 @@ export function LyricsPanel({
     requestAbortRef.current?.abort();
     setLyricsResult(null);
     setStatus('idle');
+    setRetryStatus(null);
     setActiveIndex(-1);
     setLrclibSearchOpen(false);
     setMenu(null);
@@ -153,6 +240,7 @@ export function LyricsPanel({
       requestAbortRef.current = null;
       setLyricsResult(changedLyrics ? { trackId, lyrics: changedLyrics } : null);
       setStatus('idle');
+      setRetryStatus(null);
     });
   }, []);
 
@@ -202,6 +290,7 @@ export function LyricsPanel({
     requestAbortRef.current?.abort();
     requestAbortRef.current = null;
     setStatus('idle');
+    setRetryStatus(null);
   }, []);
 
   const applyLrclibRecord = async (record: LrclibRecord) => {
@@ -433,7 +522,7 @@ export function LyricsPanel({
         <>
           <p className="xe_lyrics-panel__status">
             <Spinner />
-            {STATUS_TEXT[status]}
+            {retryStatus ? retryStatusText(retryStatus) : STATUS_TEXT[status]}
           </p>
           {status === 'loading' && <LyricsSkeleton />}
         </>
