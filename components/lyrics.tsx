@@ -4,6 +4,7 @@ import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
 import {
   fetchLyrics,
+  INSTRUMENTAL_LYRICS_NOTICE,
   LrclibError,
   lyricsFromLrclibRecord,
   type LrclibRecord
@@ -55,6 +56,16 @@ function isRetryableRequestError(error: unknown): boolean {
 
 function retryStatusText({ seconds, attempt }: RetryStatus): string {
   return `Request failed, retrying in ${seconds}... (${attempt}/${MAX_REQUEST_RETRIES} attempts)`;
+}
+
+function isInstrumentalLyrics(lyrics: Lyrics | null): boolean {
+  return (
+    lyrics?.instrumental === true ||
+    (lyrics?.source === 'lrclib' &&
+      lyrics.lines.length === 1 &&
+      lyrics.lines[0]?.time === null &&
+      lyrics.lines[0]?.text === INSTRUMENTAL_LYRICS_NOTICE)
+  );
 }
 
 function waitForRequestRetry(signal: AbortSignal, onCountdown: (seconds: number) => void): Promise<void> {
@@ -112,13 +123,15 @@ interface LyricsPanelProps {
   variant?: 'page' | 'fullscreen' | 'sidebar';
   droppedFile?: File | null;
   onDroppedFileHandled?(): void;
+  onInstrumentalChange?(instrumental: boolean): void;
 }
 
 export function LyricsPanel({
   showToolbar = true,
   variant = 'page',
   droppedFile = null,
-  onDroppedFileHandled
+  onDroppedFileHandled,
+  onInstrumentalChange
 }: LyricsPanelProps) {
   const { current, seek, audioRef } = usePlayer();
   const { settings } = useSettings();
@@ -127,6 +140,7 @@ export function LyricsPanel({
 
   const [lyricsResult, setLyricsResult] = useState<StoredLyrics | null>(null);
   const lyrics = lyricsResult && lyricsResult.trackId === track?.id ? lyricsResult.lyrics : null;
+  const instrumental = isInstrumentalLyrics(lyrics);
   const [status, setStatus] = useState<Status>('idle');
   const [retryStatus, setRetryStatus] = useState<RetryStatus | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -145,6 +159,10 @@ export function LyricsPanel({
 
   menuOpenRef.current = menu !== null;
   trackIdRef.current = track?.id;
+
+  useEffect(() => {
+    onInstrumentalChange?.(instrumental);
+  }, [instrumental, onInstrumentalChange]);
 
   const runSearch = useCallback(
     async (target: TrackMeta, signal: AbortSignal) => {
