@@ -69,6 +69,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
   });
   const snapshotRef = useRef<{
     track: NonNullable<typeof track>;
+    trackId: string | null;
     radio: boolean;
     queue: typeof queue;
     position: number;
@@ -79,7 +80,18 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
     justPlayed: typeof justPlayed;
   } | null>(null);
   if (track) {
-    snapshotRef.current = { radio: !!radio_station, track, queue, position, isPlaying, artworkUrl, currentTime, duration, justPlayed };
+    snapshotRef.current = {
+      radio: !!radio_station,
+      track,
+      trackId: radio_station ? null : current?.track.id ?? null,
+      queue,
+      position,
+      isPlaying,
+      artworkUrl,
+      currentTime,
+      duration,
+      justPlayed
+    };
   }
 
   useEffect(() => {
@@ -128,6 +140,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
   const {
     radio: display_radio,
     track: displayTrack,
+    trackId: displayTrackId,
     queue: displayQueue,
     position: displayPosition,
     isPlaying: displayPlaying,
@@ -330,6 +343,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
         <FullscreenMinimalPlayer
           artworkUrl={displayArtworkUrl}
           radio={display_radio}
+          trackId={displayTrackId}
           coverRef={coverRef}
           coverHandlers={coverHandlers}
         />
