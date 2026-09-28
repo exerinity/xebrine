@@ -5,6 +5,7 @@ const BASE = 'https://lrclib.net/api';
 const CLIENT_HEADER = 'Xebrine v10.0 (https://xebrine.com)';
 const REQUEST_GAP_MS = 300;
 const DEFAULT_RETRY_AFTER_MS = 30_000;
+export const INSTRUMENTAL_LYRICS_NOTICE = 'This song is an instrumental';
 
 let requestQueue: Promise<void> = Promise.resolve();
 let lastRequestCompletedAt: number | null = null;
@@ -238,17 +239,25 @@ export async function getLyricsById(id: number, signal?: AbortSignal): Promise<L
 export function lyricsFromLrclibRecord(record: LrclibRecord): Lyrics | null {
   if (record.syncedLyrics) {
     const lines = parseLrc(record.syncedLyrics);
-    if (lines.length > 0) return { synced: true, source: 'lrclib', lines };
+    if (lines.length > 0) {
+      return { synced: true, source: 'lrclib', instrumental: record.instrumental, lines };
+    }
   }
   if (record.plainLyrics) {
     const lines = record.plainLyrics.split(/\r?\n/).map((text) => ({ time: null, text: text.trim() }));
-    return { synced: false, source: 'lrclib', lines };
+    return {
+      synced: false,
+      source: 'lrclib',
+      instrumental: record.instrumental,
+      lines
+    };
   }
   if (record.instrumental) {
     return {
       synced: false,
       source: 'lrclib',
-      lines: [{ time: null, text: 'This song is an instrumental' }]
+      instrumental: true,
+      lines: [{ time: null, text: INSTRUMENTAL_LYRICS_NOTICE }]
     };
   }
   return null;
