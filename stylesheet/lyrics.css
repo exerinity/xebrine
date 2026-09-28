@@ -433,6 +433,10 @@
   scrollbar-width: thin;
 }
 
+.xe_lyrics-panel--fullscreen {
+  container-type: inline-size;
+}
+
 .xe_lyrics-panel--fullscreen .xe_lyrics-panel__lines {
   padding: 10px 0 18px;
 }
@@ -457,9 +461,12 @@
 
 .xe_lyrics-panel--fullscreen .xe_lyrics-line {
   max-width: none;
-  font-size: 17px;
-  padding-left: 10px;
-  padding-right: 10px;
+  flex-shrink: 0;
+  font-size: clamp(22px, calc(16px + 1.6cqi), 34px);
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 7px 10px;
+  overflow-wrap: anywhere;
 }
 
 .xe_lyrics-line:hover:not(.xe_lyrics-line--static) {
