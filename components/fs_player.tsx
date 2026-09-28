@@ -8,6 +8,7 @@ import { ScrollingText } from './scrolling_text';
 import { TrackPreviewCard } from './track_preview_card';
 import { AutoMixDrawer } from './auto_mix_drawer';
 import { CloseIcon, LogoIcon, PauseIcon, PlayIcon } from './icons';
+import { FullscreenMinimalPlayer } from './fs_minimal';
 
 interface FullscreenPlayerProps {
   open: boolean;
@@ -37,6 +38,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
     playNow
   } = usePlayer();
   const { settings } = useSettings();
+  const minimal = settings.fsPlayerStyle === 'minimal';
   const track = radio_station ? { title: radio_station.name, artist: 'Live radio' } : current?.track ?? null;
   const visible = open && Boolean(track);
   const [rendered, setRendered] = useState(visible);
@@ -115,6 +117,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
     washRef,
     rendered &&
       Boolean(snapshotRef.current?.artworkUrl) &&
+      !minimal &&
       settings.fsKenBurns &&
       !settings.reducedMotion,
     settings.fsKenBurnsIntensity
@@ -135,6 +138,7 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
   } = snapshotRef.current;
   const nextItem = displayQueue[displayPosition + 1] ?? null;
   const progress = displayDuration > 0 ? Math.min(100, (displayCurrentTime / displayDuration) * 100) : 0;
+  const backgroundBlur = minimal ? Math.max(settings.fsBlur, 80) : settings.fsBlur;
 
   const backToJustPlayed = () => {
     if (!displayJustPlayed) return;
@@ -289,19 +293,29 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
     event.currentTarget.style.setProperty('--cover-shine-y', '18%');
   };
 
+  const coverHandlers = {
+    onClick: activateCover,
+    onMouseMove: tiltCover,
+    onMouseLeave: resetCoverTilt,
+    onPointerDown: beginCoverDrag,
+    onPointerMove: deformCover,
+    onPointerUp: endCoverDrag,
+    onPointerCancel: endCoverDrag
+  };
+
   return (
     <section
-      className={`xe_fullscreen-player${leaving ? ' xe_fullscreen-player--leaving' : ''}`}
+      className={`xe_fullscreen-player xe_fullscreen-player--${minimal ? 'minimal' : 'maximal'}${leaving ? ' xe_fullscreen-player--leaving' : ''}`}
       role="dialog"
       aria-label="Now playing"
     >
       {displayArtworkUrl && (
         <div
           ref={washRef}
-          className="xe_fullscreen-player__wash"
+          className={`xe_fullscreen-player__wash${minimal ? ' xe_fullscreen-player__wash--minimal' : ''}`}
           style={{
             backgroundImage: `url(${displayArtworkUrl})`,
-            filter: `blur(${settings.fsBlur}px) saturate(${settings.fsSaturate})`
+            filter: `blur(${backgroundBlur}px) saturate(${settings.fsSaturate})`
           }}
           aria-hidden="true"
         />
@@ -312,86 +326,89 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
         </button>
       </div>
 
-      <div className="xe_fullscreen-player__layout">
-        <section className="xe_fullscreen-player__hero" aria-label="Current track">
-          <span className="xe_fullscreen-player__eyebrow">
-            <LogoIcon size={14} />
-            {displayPlaying ? 'Now playing' : 'Now paused'}
-          </span>
-          <div className="xe_fullscreen-player__cover-wrap">
-            <div className="xe_fullscreen-player__cover-glow" aria-hidden="true" />
-            <button
-              ref={coverRef}
-              type="button"
-              className="xe_fullscreen-player__cover"
-              onClick={activateCover}
-              onMouseMove={tiltCover}
-              onMouseLeave={resetCoverTilt}
-              onPointerDown={beginCoverDrag}
-              onPointerMove={deformCover}
-              onPointerUp={endCoverDrag}
-              onPointerCancel={endCoverDrag}
-              title="Click to close fullscreen player, drag to deform cover art"
-              aria-label="Click to close fullscreen player, drag to deform cover art"
-            >
-              {displayArtworkUrl ? <img src={displayArtworkUrl} alt="" draggable={false} /> : <LogoIcon size={88} />}
-            </button>
-          </div>
-          <div className="xe_fullscreen-player__identity">
-            <div
-              className={`xe_fullscreen-player__state${
-                playerBarCollapsed ? '' : ' xe_fullscreen-player__state--hidden'
-              }`}
-              aria-hidden={!playerBarCollapsed}
-            >
-              {displayPlaying ? <PlayIcon size={14} /> : <PauseIcon size={14} />}
-              <span>{display_radio ? 'LIVE' : `${formatTime(displayCurrentTime)} / ${formatTime(displayDuration)}`}</span>
+      {minimal ? (
+        <FullscreenMinimalPlayer
+          artworkUrl={displayArtworkUrl}
+          radio={display_radio}
+          coverRef={coverRef}
+          coverHandlers={coverHandlers}
+        />
+      ) : (
+        <div className="xe_fullscreen-player__layout">
+          <section className="xe_fullscreen-player__hero" aria-label="Current track">
+            <span className="xe_fullscreen-player__eyebrow">
+              <LogoIcon size={14} />
+              {displayPlaying ? 'Now playing' : 'Now paused'}
+            </span>
+            <div className="xe_fullscreen-player__cover-wrap">
+              <div className="xe_fullscreen-player__cover-glow" aria-hidden="true" />
+              <button
+                ref={coverRef}
+                type="button"
+                className="xe_fullscreen-player__cover"
+                {...coverHandlers}
+                title="Click to close fullscreen player, drag to deform cover art"
+                aria-label="Click to close fullscreen player, drag to deform cover art"
+              >
+                {displayArtworkUrl ? <img src={displayArtworkUrl} alt="" draggable={false} /> : <LogoIcon size={88} />}
+              </button>
             </div>
-            <ScrollingText text={displayTrack.title} className="xe_fullscreen-player__title" />
-            <ScrollingText text={displayTrack.artist} className="xe_fullscreen-player__artist" />
-            <div
-              className={`xe_fullscreen-player__progress${
-                playerBarCollapsed ? '' : ' xe_fullscreen-player__progress--hidden'
-              }`}
-              aria-hidden="true"
-            >
-              <span style={{ width: `${progress}%` }} />
+            <div className="xe_fullscreen-player__identity">
+              <div
+                className={`xe_fullscreen-player__state${
+                  playerBarCollapsed ? '' : ' xe_fullscreen-player__state--hidden'
+                }`}
+                aria-hidden={!playerBarCollapsed}
+              >
+                {displayPlaying ? <PlayIcon size={14} /> : <PauseIcon size={14} />}
+                <span>{display_radio ? 'LIVE' : `${formatTime(displayCurrentTime)} / ${formatTime(displayDuration)}`}</span>
+              </div>
+              <ScrollingText text={displayTrack.title} className="xe_fullscreen-player__title" />
+              <ScrollingText text={displayTrack.artist} className="xe_fullscreen-player__artist" />
+              <div
+                className={`xe_fullscreen-player__progress${
+                  playerBarCollapsed ? '' : ' xe_fullscreen-player__progress--hidden'
+                }`}
+                aria-hidden="true"
+              >
+                <span style={{ width: `${progress}%` }} />
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section
-          className="xe_fullscreen-player__panel xe_fullscreen-player__lyrics"
-          aria-label={`Lyrics, up next, just played${autoMixEnabled ? ' and auto mix' : ''}`}
-        >
-          {display_radio ? <p className="xe_empty-note">Live radio</p> : <>
-          <h2>Lyrics</h2>
-          <LyricsPanel showToolbar={false} variant="fullscreen" />
-          <div className={`xe_fullscreen-player__queue${autoMixEnabled ? ' xe_fullscreen-player__queue--auto-mix' : ''}`} aria-label="Queue preview">
-            <div className="xe_fullscreen-player__queue-item">
-              <h3>Up next</h3>
-              {nextItem ? (
-                <TrackPreviewCard item={nextItem} onPlay={() => jumpTo(displayPosition + 1)} />
-              ) : (
-                <p className="xe_empty-note">Nothing up next</p>
-              )}
+          <section
+            className="xe_fullscreen-player__panel xe_fullscreen-player__lyrics"
+            aria-label={`Lyrics, up next, just played${autoMixEnabled ? ' and auto mix' : ''}`}
+          >
+            {display_radio ? <p className="xe_empty-note">Live radio</p> : <>
+            <h2>Lyrics</h2>
+            <LyricsPanel showToolbar={false} variant="fullscreen" />
+            <div className={`xe_fullscreen-player__queue${autoMixEnabled ? ' xe_fullscreen-player__queue--auto-mix' : ''}`} aria-label="Queue preview">
+              <div className="xe_fullscreen-player__queue-item">
+                <h3>Up next</h3>
+                {nextItem ? (
+                  <TrackPreviewCard item={nextItem} onPlay={() => jumpTo(displayPosition + 1)} />
+                ) : (
+                  <p className="xe_empty-note">Nothing up next</p>
+                )}
+              </div>
+              <div className="xe_fullscreen-player__queue-item">
+                <h3>Just played</h3>
+                {displayJustPlayed ? (
+                  <TrackPreviewCard item={displayJustPlayed} onPlay={backToJustPlayed} title="Back to this track" />
+                ) : (
+                  <p className="xe_empty-note">Nothing yet</p>
+                )}
+              </div>
+              <div className="xe_fullscreen-player__queue-item xe_fullscreen-player__auto-mix" aria-hidden={!autoMixEnabled}>
+                <h3>Auto mix</h3>
+                <AutoMixDrawer inline />
+              </div>
             </div>
-            <div className="xe_fullscreen-player__queue-item">
-              <h3>Just played</h3>
-              {displayJustPlayed ? (
-                <TrackPreviewCard item={displayJustPlayed} onPlay={backToJustPlayed} title="Back to this track" />
-              ) : (
-                <p className="xe_empty-note">Nothing yet</p>
-              )}
-            </div>
-            <div className="xe_fullscreen-player__queue-item xe_fullscreen-player__auto-mix" aria-hidden={!autoMixEnabled}>
-              <h3>Auto mix</h3>
-              <AutoMixDrawer inline />
-            </div>
-          </div>
-          </>}
-        </section>
-      </div>
+            </>}
+          </section>
+        </div>
+      )}
     </section>
   );
 }
