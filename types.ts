@@ -41,6 +41,7 @@ export interface LyricLine {
 export interface Lyrics {
   synced: boolean;
   source: 'lrclib' | 'file';
+  instrumental?: boolean;
   lines: LyricLine[];
 }
 
