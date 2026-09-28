@@ -24,7 +24,6 @@ export function Scrubber() {
   const submitSeek = () => {
     if (parsedSeek === null) return;
     seek(parsedSeek);
-    setSeekModalOpen(false);
   };
   const toggleTimeMode = () => {
     const mode: TimeMode = timeMode === 'elapsed' ? 'remaining' : 'elapsed';
