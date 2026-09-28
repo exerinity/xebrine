@@ -11,6 +11,19 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '16',
+    date: '2026-09-29',
+    notes: [
+      'Added a new type of fullscreen player, minimal, inspired by TIDAL',
+      'LRCLIB requests will now retry up to 5 times after 2 seconds if a request fails',
+      'Side panel is now unmounted instead of hidden when not used',
+      'The auto mix drawer now shows in more adaptive places: in fullscreen, it shows aside just played, or in the side panel, in lyrics, below up next',
+      'Selecting a track from search results no longer enqueues the entire list of results',
+      'QOL work to the Electron wrapper; scanning is done by the wrapper',
+      'Lyrics in maximal fullscreen player have been enlarged',
+    ]
+  },
+  {
     version: '15',
     date: '2026-09-24',
     notes: [
@@ -28,7 +41,7 @@ const RELEASES: Release[] = [
     version: '13',
     date: '2026-09-04',
     notes: [
-      'Added a new sidebar which can show either lyrics or the queue',
+      'Added a new side panel which can show either lyrics or the queue',
       'Items in the player bar are now collapsed into a flyout if your screen is too small'
     ]
   },
