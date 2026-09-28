@@ -46,6 +46,11 @@
     inset 0 -1px rgba(255, 255, 255, 0.07);
 }
 
+.xe_player-bar--top.xe_player-bar--fullscreen {
+  border-bottom: none;
+  box-shadow: none;
+}
+
 .xe_player-bar--top.xe_player-bar--collapsed {
   transform: translateY(-100%);
   margin-top: calc(var(--player-height) * -1);
@@ -563,7 +568,7 @@
   box-shadow: 0 0 0 2px var(--accent-text);
 }
 
-.xe_player-bar__art--hidden {
+.xe_player-bar__art.xe_player-bar__art--hidden {
   width: 0;
   margin-right: -12px;
   opacity: 0;
@@ -1069,6 +1074,14 @@ button.xe_scrubber__time:hover {
   height: calc(100% - 54px);
   min-height: 0;
   margin: 0 auto;
+  transition:
+    grid-template-columns 460ms cubic-bezier(0.22, 0.8, 0.2, 1),
+    gap 460ms cubic-bezier(0.22, 0.8, 0.2, 1);
+}
+
+.xe_fullscreen-player__minimal-layout--instrumental {
+  grid-template-columns: minmax(260px, min(42vw, 620px)) minmax(0, 0px);
+  gap: 0;
 }
 
 .xe_fullscreen-player__minimal-artwork {
@@ -1078,6 +1091,7 @@ button.xe_scrubber__time:hover {
   min-width: 0;
   min-height: 0;
   perspective: 1100px;
+  transition: left 460ms cubic-bezier(0.22, 0.8, 0.2, 1);
 }
 
 .xe_fullscreen-player__minimal-cover.xe_fullscreen-player__cover {
@@ -1104,6 +1118,19 @@ button.xe_scrubber__time:hover {
   align-self: stretch;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
+  transition:
+    opacity 160ms ease,
+    translate 460ms cubic-bezier(0.22, 0.8, 0.2, 1),
+    visibility 0s;
+}
+
+.xe_fullscreen-player__minimal-layout--instrumental .xe_fullscreen-player__minimal-lyrics {
+  opacity: 0;
+  translate: 24px 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition-delay: 0s, 0s, 460ms;
 }
 
 .xe_fullscreen-player__minimal-lyrics .xe_lyrics-panel {
@@ -1144,6 +1171,10 @@ button.xe_scrubber__time:hover {
   .xe_fullscreen-player__minimal-artwork {
     position: relative;
     left: clamp(-40px, -2vw, -20px);
+  }
+
+  .xe_fullscreen-player__minimal-layout--instrumental .xe_fullscreen-player__minimal-artwork {
+    left: 0;
   }
 
   .xe_fullscreen-player--minimal .xe_lyrics-panel--fullscreen .xe_lyrics-line {
@@ -1540,6 +1571,18 @@ button.xe_scrubber__time:hover {
     min-height: 100%;
   }
 
+  .xe_fullscreen-player__minimal-layout--instrumental {
+    grid-template-columns: 1fr;
+    align-content: center;
+    gap: 0;
+    height: calc(100% - 54px);
+    min-height: 0;
+  }
+
+  .xe_fullscreen-player__minimal-layout--instrumental .xe_fullscreen-player__minimal-artwork {
+    min-height: 0;
+  }
+
   .xe_fullscreen-player__minimal-artwork {
     min-height: min(52vh, 440px);
   }
@@ -1550,6 +1593,11 @@ button.xe_scrubber__time:hover {
 
   .xe_fullscreen-player__minimal-lyrics {
     height: clamp(360px, 52vh, 560px);
+  }
+
+  .xe_fullscreen-player__minimal-layout--instrumental .xe_fullscreen-player__minimal-lyrics {
+    height: 0;
+    min-height: 0;
   }
 
   .xe_fullscreen-player__layout {
@@ -1765,6 +1813,12 @@ button.xe_scrubber__time:hover {
     animation: none;
     transform: scale(1.36);
   }
+
+  .xe_fullscreen-player__minimal-layout,
+  .xe_fullscreen-player__minimal-artwork,
+  .xe_fullscreen-player__minimal-lyrics {
+    transition: none;
+  }
 }
 
 .xe_reduced-motion .xe_fullscreen-player__cover {
@@ -1774,4 +1828,10 @@ button.xe_scrubber__time:hover {
 .xe_reduced-motion .xe_fullscreen-player__wash--minimal {
   animation: none;
   transform: scale(1.36);
+}
+
+.xe_reduced-motion .xe_fullscreen-player__minimal-layout,
+.xe_reduced-motion .xe_fullscreen-player__minimal-artwork,
+.xe_reduced-motion .xe_fullscreen-player__minimal-lyrics {
+  transition: none;
 }
