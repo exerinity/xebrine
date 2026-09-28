@@ -1116,6 +1116,17 @@ button.xe_scrubber__time:hover {
   padding: 2vh 0;
 }
 
+.xe_fullscreen-player--minimal,
+.xe_fullscreen-player--minimal .xe_lyrics-panel--fullscreen .xe_lyrics-panel__lines {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.xe_fullscreen-player--minimal::-webkit-scrollbar,
+.xe_fullscreen-player--minimal .xe_lyrics-panel--fullscreen .xe_lyrics-panel__lines::-webkit-scrollbar {
+  display: none;
+}
+
 .xe_fullscreen-player--minimal .xe_lyrics-panel--fullscreen .xe_lyrics-line {
   padding-left: 0;
   padding-right: 0;
