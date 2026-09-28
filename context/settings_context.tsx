@@ -26,6 +26,7 @@ export type PlayerBarClickAction = 'copy' | 'open';
 export type PlayerBarPosition = 'top' | 'bottom';
 export type PlayerBarSliderPosition = 'above' | 'below';
 export type PlayerBarLayout = 'compact' | 'comfortable';
+export type FullscreenPlayerStyle = 'maximal' | 'minimal';
 export type SidePanelView = 'queue' | 'lyrics';
 
 export interface Settings {
@@ -44,6 +45,7 @@ export interface Settings {
   playerBarPosition: PlayerBarPosition;
   playerBarSliderPosition: PlayerBarSliderPosition;
   playerBarLayout: PlayerBarLayout;
+  fsPlayerStyle: FullscreenPlayerStyle;
   sidePanelOpen: boolean;
   sidePanelView: SidePanelView;
   fsBlur: number;
@@ -88,6 +90,7 @@ export const DEFAULT_SETTINGS: Settings = {
   playerBarPosition: 'bottom',
   playerBarSliderPosition: 'below',
   playerBarLayout: 'comfortable',
+  fsPlayerStyle: 'maximal',
   sidePanelOpen: false,
   sidePanelView: 'queue',
   fsBlur: 0,
@@ -129,6 +132,7 @@ function loadSettings(): Settings {
       playerBarPosition: merged.playerBarPosition === 'top' ? 'top' : 'bottom',
       playerBarSliderPosition: merged.playerBarSliderPosition === 'above' ? 'above' : 'below',
       playerBarLayout: merged.playerBarLayout === 'compact' ? 'compact' : 'comfortable',
+      fsPlayerStyle: merged.fsPlayerStyle === 'minimal' ? 'minimal' : 'maximal',
       sidePanelOpen:
         typeof stored.sidePanelOpen === 'boolean'
           ? stored.sidePanelOpen
