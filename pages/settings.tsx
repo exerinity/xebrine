@@ -576,6 +576,28 @@ export function SettingsPage() {
               </section>
 
               <section className="xe_settings__section">
+                <h2>Fullscreen player style</h2>
+                <label className="xe_settings__radio">
+                  <input
+                    type="radio"
+                    name="fullscreen-player-style"
+                    checked={settings.fsPlayerStyle === 'maximal'}
+                    onChange={() => update({ fsPlayerStyle: 'maximal' })}
+                  />
+                  <span><strong>Maximal</strong> shows artwork, lyrics, queue, just played, and auto mix</span>
+                </label>
+                <label className="xe_settings__radio">
+                  <input
+                    type="radio"
+                    name="fullscreen-player-style"
+                    checked={settings.fsPlayerStyle === 'minimal'}
+                    onChange={() => update({ fsPlayerStyle: 'minimal' })}
+                  />
+                  <span><strong>Minimal</strong> just the artwork and lyrics</span>
+                </label>
+              </section>
+
+              <section className="xe_settings__section">
                 <h2>Fullscreen player background</h2>
                 <p className="xe_settings__hint">Right-click a slider to reset it to default</p>
                 <div className="xe_settings__chip-row">
