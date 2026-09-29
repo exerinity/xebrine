@@ -13,6 +13,7 @@ import { ContextMenu, type ContextMenuItem } from '../components/context_menu';
 import { ScanStatusBanner } from '../components/scan_status_banner';
 import { SortSelect, type SortDirection, type SortOption } from '../components/sort_select';
 import { toSlugParam } from '../utils/slug';
+import { toast } from '../utils/toast';
 import { useScrollRestoration } from '../hooks/scroll_restoration';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { usePageTitle } from '../hooks/page_title';
@@ -66,6 +67,15 @@ export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void
           settings.searchEngine,
           settings.customSearchUrl
         )
+    },
+    {
+      label: 'Copy name',
+      onSelect: () => {
+        navigator.clipboard
+          .writeText(`${album.album} by ${album.artist}`)
+          .then(() => toast.success('Copied the album name'))
+          .catch(() => toast.error("Couldn't copy the album name"));
+      }
     },
     {
       label: 'Enqueue this album',

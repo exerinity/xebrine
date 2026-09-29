@@ -324,6 +324,11 @@
 
 .xe_lyrics-panel--sidebar .xe_lyrics-panel__lines {
   padding: 12px 0 18px;
+  scrollbar-width: none;
+}
+
+.xe_lyrics-panel--sidebar .xe_lyrics-panel__lines::-webkit-scrollbar {
+  display: none;
 }
 
 .xe_lyrics-panel--sidebar .xe_lyrics-line {
