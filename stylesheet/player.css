@@ -1486,6 +1486,13 @@ button.xe_scrubber__time:hover {
   pointer-events: auto;
 }
 
+.xe_fullscreen-player__auto-mix .xe_automix-drawer--inline:not(.xe_automix-drawer--open),
+.xe_side-panel__auto-mix .xe_automix-drawer--inline:not(.xe_automix-drawer--open) {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
 .xe_fullscreen-player__auto-mix .xe_automix-drawer__head,
 .xe_fullscreen-player__auto-mix .xe_automix-drawer__bar,
 .xe_fullscreen-player__auto-mix .xe_automix-drawer__meta,
