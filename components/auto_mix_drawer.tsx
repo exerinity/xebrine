@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
+import { use_drawer_presence } from '../hooks/drawer_presence';
 import { formatTime } from '../utils/format';
 import { AutoMixIcon, CheckIcon } from './icons';
 import { Spinner } from './spinner';
@@ -91,11 +92,16 @@ export function AutoMixDrawer({ inline = false, hidden = false }: { inline?: boo
 
   const accent = autoMixColor ? ` xe_automix-drawer--${autoMixColor}` : '';
   const visible = autoMixEnabled && !hidden;
+  const drawer_presence = use_drawer_presence(visible);
+
+  if (!drawer_presence.mounted) return null;
 
   return (
     <div
-      className={`xe_automix-drawer${visible ? ' xe_automix-drawer--open' : ''}${inline ? ' xe_automix-drawer--inline' : ''}${accent}`}
+      ref={drawer_presence.drawer_ref}
+      className={`xe_automix-drawer${drawer_presence.open ? ' xe_automix-drawer--open' : ''}${inline ? ' xe_automix-drawer--inline' : ''}${accent}`}
       aria-hidden={!visible}
+      inert={!visible}
     >
       <div className="xe_automix-drawer__head">
         {status.spinner ? (
