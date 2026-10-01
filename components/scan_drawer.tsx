@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLibrary } from '../context/library_context';
+import { use_drawer_presence } from '../hooks/drawer_presence';
 import { formatEta, formatRate, useScanStats } from '../hooks/scan_eta';
 import { formatDurationShort } from '../utils/format';
 import { CheckIcon } from './icons';
@@ -44,6 +45,7 @@ export function ScanDrawer() {
 
   const report = scanning === null ? (scanReport ?? shownReport) : null;
   const open = scanning !== null || scanReport !== null;
+  const drawer_presence = use_drawer_presence(open);
   const info = scanning ?? shown;
   const waitingForFiles = !info || info.total <= 0;
   const indeterminate = waitingForFiles || info.discovering;
@@ -65,11 +67,18 @@ export function ScanDrawer() {
     const observer = new ResizeObserver(measure);
     observer.observe(line);
     return () => observer.disconnect();
-  }, [currentFilePath]);
+  }, [currentFilePath, drawer_presence.mounted]);
+
+  if (!drawer_presence.mounted) return null;
 
   return (
     <>
-      <div className={`xe_scan-drawer${open ? ' xe_scan-drawer--open' : ''}`} aria-hidden={!open}>
+      <div
+        ref={drawer_presence.drawer_ref}
+        className={`xe_scan-drawer${drawer_presence.open ? ' xe_scan-drawer--open' : ''}`}
+        aria-hidden={!open}
+        inert={!open}
+      >
         <div className="xe_scan-drawer__head">
           {report ? <CheckIcon size={11} /> : <Spinner size={11} />}
           <span className="xe_scan-drawer__title">
