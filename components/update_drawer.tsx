@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { use_drawer_presence } from '../hooks/drawer_presence';
 import { CloseIcon, RefreshIcon } from './icons';
 import { Spinner } from './spinner';
 
@@ -72,6 +73,7 @@ export function UpdateDrawer() {
 
   const visiblePhase = phase ?? (needRefresh ? 'available' : null);
   const open = visiblePhase !== null && !dismissed;
+  const drawer_presence = use_drawer_presence(open);
   const downloading = visiblePhase === 'downloading';
   const reloading = visiblePhase === 'reloading';
   const title = reloading
@@ -98,9 +100,12 @@ export function UpdateDrawer() {
     }
   };
 
+  if (!drawer_presence.mounted) return null;
+
   return (
     <div
-      className={`xe_scan-drawer xe_update-drawer${open ? ' xe_scan-drawer--open' : ''}`}
+      ref={drawer_presence.drawer_ref}
+      className={`xe_scan-drawer xe_update-drawer${drawer_presence.open ? ' xe_scan-drawer--open' : ''}`}
       aria-live="polite"
       aria-hidden={!open}
       inert={!open}
