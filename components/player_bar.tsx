@@ -535,7 +535,9 @@ export function PlayerBar({
                     } : undefined} />
                 )}
                 <ScrollingText text={[radio_station.countrycode, radio_station.language, radio_station.bitrate > 0 ? `${radio_station.bitrate} kbps` : ''].filter(Boolean).join(', ')} className="xe_player-bar__subtitle" />
-                <span className="xe_player-bar__subtitle" role="status">{radio_connecting && <Spinner size={12} />}{' '}{radio_connecting ? 'Connecting, one moment...' : isPlaying ? 'Live radio' : 'Radio stopped'}</span>
+                {(!compact || radio_connecting || !isPlaying) && (
+                  <span className="xe_player-bar__subtitle" role="status">{radio_connecting && <Spinner size={12} />}{' '}{radio_connecting ? 'Connecting, one moment...' : isPlaying ? 'Live radio' : 'Radio stopped'}</span>
+                )}
                 {loadError && <span className="xe_player-bar__error" role="alert">{loadError}</span>}
               </>
             )}
