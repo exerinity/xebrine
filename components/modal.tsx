@@ -21,7 +21,7 @@ interface ModalProps {
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-const EXIT_DURATION_MS = 140;
+const EXIT_DURATION_MS = 150;
 
 export function Modal({ title = 'Xebrine', fullscreen = false, wide = false, onClose, children }: ModalProps) {
   const titleId = useId();
