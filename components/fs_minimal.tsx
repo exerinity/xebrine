@@ -23,7 +23,7 @@ export function FullscreenMinimalPlayer({
   coverHandlers
 }: FullscreenMinimalPlayerProps) {
   const [instrumental, setInstrumental] = useState(false);
-  const hideLyrics = instrumental && !radio;
+  const hide_lyrics = instrumental || radio;
 
   useEffect(() => {
     setInstrumental(false);
@@ -32,7 +32,7 @@ export function FullscreenMinimalPlayer({
   return (
     <div
       className={`xe_fullscreen-player__minimal-layout${
-        hideLyrics ? ' xe_fullscreen-player__minimal-layout--instrumental' : ''
+        hide_lyrics ? ' xe_fullscreen-player__minimal-layout--instrumental' : ''
       }`}
     >
       <section className="xe_fullscreen-player__minimal-artwork" aria-label="Current track artwork">
@@ -50,12 +50,10 @@ export function FullscreenMinimalPlayer({
       <section
         className="xe_fullscreen-player__minimal-lyrics"
         aria-label="Lyrics"
-        aria-hidden={hideLyrics}
-        inert={hideLyrics}
+        aria-hidden={hide_lyrics}
+        inert={hide_lyrics}
       >
-        {radio ? (
-          <p className="xe_empty-note">Live radio</p>
-        ) : (
+        {!radio && (
           <LyricsPanel showToolbar={false} variant="fullscreen" onInstrumentalChange={setInstrumental} />
         )}
       </section>
