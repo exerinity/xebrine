@@ -258,7 +258,7 @@ export function AboutPage() {
                   <div>
                     <h2 className="xe_about__name">Xebrine {LATEST_VERSION}</h2>
                     {isElectron && (
-                      <p className="xe_about__version">You are running Electron ({electronVersion()})</p>
+                      <p className="xe_about__version">You are running Xebrine in its Electron wrapper (electron v{electronVersion()})</p>
                     )}
                   </div>
                 </div>
