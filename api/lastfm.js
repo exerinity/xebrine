@@ -2,6 +2,9 @@ const BASE = '/i/services/lastfm';
 const trendingCache = new Map();
 const topTracksCache = new Map();
 const geoTracksCache = new Map();
+const trendingRequests = new Map();
+const topTracksRequests = new Map();
+const geoTracksRequests = new Map();
 
 /**
  * @typedef {import('../utils/scrobble_rules').ScrobblePayload & { timestamp: number }} ScrobbleEntry
@@ -42,6 +45,22 @@ function post(path, body) {
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body)
   });
+}
+
+function cachedChart(cache, requests, key, load) {
+  if (cache.has(key)) return Promise.resolve(cache.get(key));
+
+  const pending = requests.get(key);
+  if (pending) return pending;
+
+  const request = load()
+    .then((tracks) => {
+      cache.set(key, tracks);
+      return tracks;
+    })
+    .finally(() => requests.delete(key));
+  requests.set(key, request);
+  return request;
 }
 
 export function connectLastfm() {
@@ -146,56 +165,48 @@ export async function fetchRecentTracks(username, limit = 25) {
   });
 }
 
-export async function fetchTrendingTracks(limit, signal) {
-  const cached = trendingCache.get(limit);
-  if (cached && Date.now() - cached.time < 5 * 60 * 1000) return cached.tracks;
-  const data = await request(`/chart/tracks?limit=${encodeURIComponent(limit)}`, { signal });
-  const raw = data.tracks?.track;
-  const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
-  const tracks = list.map((track) => ({
-    title: String(track.name ?? ''),
-    artist: String(track.artist?.name ?? track.artist?.['#text'] ?? ''),
-    image: firstImage(track.image)
-  })).filter((track) => track.title && track.artist);
-  trendingCache.set(limit, { tracks, time: Date.now() });
-  return tracks;
+export function fetchTrendingTracks(limit) {
+  return cachedChart(trendingCache, trendingRequests, limit, async () => {
+    const data = await request(`/chart/tracks?limit=${encodeURIComponent(limit)}`);
+    const raw = data.tracks?.track;
+    const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
+    return list.map((track) => ({
+      title: String(track.name ?? ''),
+      artist: String(track.artist?.name ?? track.artist?.['#text'] ?? ''),
+      image: firstImage(track.image)
+    })).filter((track) => track.title && track.artist);
+  });
 }
 
-export async function fetchUserTopTracks(username, period, signal) {
+export function fetchUserTopTracks(username, period) {
   const key = `${username}\u0000${period}`;
-  const cached = topTracksCache.get(key);
-  if (cached && Date.now() - cached.time < 5 * 60 * 1000) return cached.tracks;
-  const data = await request(
-    `/top/tracks?username=${encodeURIComponent(username)}&period=${encodeURIComponent(period)}`,
-    { signal }
-  );
-  const raw = data.toptracks?.track;
-  const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
-  const tracks = list.map((track) => ({
-    title: String(track.name ?? ''),
-    artist: String(track.artist?.name ?? track.artist?.['#text'] ?? ''),
-    image: firstImage(track.image),
-    playcount: Number(track.playcount ?? 0)
-  })).filter((track) => track.title && track.artist);
-  topTracksCache.set(key, { tracks, time: Date.now() });
-  return tracks;
+  return cachedChart(topTracksCache, topTracksRequests, key, async () => {
+    const data = await request(
+      `/top/tracks?username=${encodeURIComponent(username)}&period=${encodeURIComponent(period)}`
+    );
+    const raw = data.toptracks?.track;
+    const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
+    return list.map((track) => ({
+      title: String(track.name ?? ''),
+      artist: String(track.artist?.name ?? track.artist?.['#text'] ?? ''),
+      image: firstImage(track.image),
+      playcount: Number(track.playcount ?? 0)
+    })).filter((track) => track.title && track.artist);
+  });
 }
 
-export async function fetchGeoTrendingTracks(country, limit, signal) {
+export function fetchGeoTrendingTracks(country, limit) {
   const key = `${country}\u0000${limit}`;
-  const cached = geoTracksCache.get(key);
-  if (cached && Date.now() - cached.time < 5 * 60 * 1000) return cached.tracks;
-  const data = await request(
-    `/geo/tracks?country=${encodeURIComponent(country)}&limit=${encodeURIComponent(limit)}`,
-    { signal }
-  );
-  const raw = data.tracks?.track;
-  const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
-  const tracks = list.map((track) => ({
-    title: String(track.name ?? ''),
-    artist: String(track.artist?.name ?? track.artist?.['#text'] ?? ''),
-    image: firstImage(track.image)
-  })).filter((track) => track.title && track.artist);
-  geoTracksCache.set(key, { tracks, time: Date.now() });
-  return tracks;
+  return cachedChart(geoTracksCache, geoTracksRequests, key, async () => {
+    const data = await request(
+      `/geo/tracks?country=${encodeURIComponent(country)}&limit=${encodeURIComponent(limit)}`
+    );
+    const raw = data.tracks?.track;
+    const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
+    return list.map((track) => ({
+      title: String(track.name ?? ''),
+      artist: String(track.artist?.name ?? track.artist?.['#text'] ?? ''),
+      image: firstImage(track.image)
+    })).filter((track) => track.title && track.artist);
+  });
 }
