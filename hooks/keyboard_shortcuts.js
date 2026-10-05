@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MAX_VOLUME, usePlayer } from '../src/context/player';
-import { formatTime } from '../utils/format';
 import { dismissToast, toast } from '../utils/toast';
 import { isTypingTarget } from '../utils/keyboard';
 
@@ -50,21 +49,17 @@ export function useKeyboardShortcuts({ toggleFullscreen } = {}) {
         const dur = duration();
         const target = Math.max(0, Math.min(dur || audio.currentTime + amount, audio.currentTime + amount));
         seek(target);
-        const pct = dur ? Math.round((target / dur) * 100) : 0;
-        status(`Scrubbing to ${formatTime(target)} / ${formatTime(dur)} (${amount >= 0 ? '+' : ''}${amount}s, ${pct}%)`);
       };
 
       const jumpToPercent = (percent) => {
         const dur = duration();
         const target = dur * percent;
         seek(target);
-        status(`Jumping to ${Math.round(percent * 100)}% (${formatTime(target)} / ${formatTime(dur)})`);
       };
 
       const changeVolume = (delta) => {
         const level = Math.max(0, Math.min(MAX_VOLUME, ref.current.volume + delta));
         setVolume(level);
-        status(`Volume: ${Math.round(level * 100)}%`);
       };
 
       switch (e.code) {
