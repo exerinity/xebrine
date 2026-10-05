@@ -6,7 +6,7 @@ import { matchTrendingTracks, type TrendingTrack } from '../utils/lastfm_trendin
 import { LastfmTrackCard } from './trending_tracks';
 import { Spinner } from './spinner';
 
-function TopTracksSection({
+export function TopTracksSection({
   title,
   period,
   displayLimit
