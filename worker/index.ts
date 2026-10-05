@@ -2,10 +2,15 @@ import { route_radio } from './radio';
 import { LastfmError, type ScrobbleItem } from './types';
 import {
   authUrl,
+  getChartTopTracks,
+  getGeoTopTracks,
   getRecentTracks,
   getSession,
+  getTrackLoveStatus,
+  getUserTopTracks,
   getUserInfo,
   scrobble,
+  setTrackLoved,
   updateNowPlaying
 } from './lastfm';
 import { isValidPin, normalizePin } from '../utils/remote_protocol';
@@ -120,6 +125,50 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
   if (path.startsWith('/i/services/radio/')) return route_radio(request, url);
 
   if (path.startsWith(REMOTE_PREFIX)) return routeRemote(request, env, path, url);
+
+  if (path === `${PREFIX}/chart/tracks` && request.method === 'GET') {
+    const requestedLimit = Number(url.searchParams.get('limit'));
+    const limit = Number.isFinite(requestedLimit)
+      ? Math.min(500, Math.max(15, Math.round(requestedLimit / 5) * 5))
+      : 50;
+    return json(await getChartTopTracks(env, limit));
+  }
+
+  if (path === `${PREFIX}/geo/tracks` && request.method === 'GET') {
+    const country = url.searchParams.get('country')?.trim();
+    const requestedLimit = Number(url.searchParams.get('limit'));
+    const limit = Number.isFinite(requestedLimit)
+      ? Math.min(500, Math.max(15, Math.round(requestedLimit / 5) * 5))
+      : 50;
+    if (!country) return json({ error: 'Missing country' }, 400);
+    return json(await getGeoTopTracks(env, country, limit));
+  }
+
+  if (path === `${PREFIX}/top/tracks` && request.method === 'GET') {
+    const username = url.searchParams.get('username');
+    const period = url.searchParams.get('period') === '7day' ? '7day' : 'overall';
+    if (!username) return json({ error: 'Missing username' }, 400);
+    return json(await getUserTopTracks(env, username, period));
+  }
+
+  if (path === `${PREFIX}/love/status` && request.method === 'GET') {
+    const username = url.searchParams.get('username')?.trim();
+    const artist = url.searchParams.get('artist')?.trim();
+    const track = url.searchParams.get('track')?.trim();
+    if (!username || !artist || !track) return json({ error: 'Missing username, artist, or track' }, 400);
+    return json(await getTrackLoveStatus(env, username, artist, track));
+  }
+
+  if (path === `${PREFIX}/love` && request.method === 'POST') {
+    const body = await readBody(request);
+    const sessionKey = sessionKeyOf(body);
+    const artist = typeof body.artist === 'string' ? body.artist.trim() : '';
+    const track = typeof body.track === 'string' ? body.track.trim() : '';
+    const loved = body.loved === true;
+    if (!sessionKey || !artist || !track) return json({ error: 'Missing session, artist, or track' }, 400);
+    await setTrackLoved(env, sessionKey, artist, track, loved);
+    return json({ ok: true, loved });
+  }
 
   if (path === `${PREFIX}/auth/start`) {
     return Response.redirect(authUrl(env, `${url.origin}${PREFIX}/auth/callback`), 302);
