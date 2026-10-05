@@ -92,16 +92,19 @@ export function TrendingTracks({
   const [chart, setChart] = useState<TrendingTrack[] | null>(null);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
     onMatchedTracks(null);
     setChart(null);
-    fetchTrendingTracks(searchLimit, controller.signal)
-      .then(setChart)
+    fetchTrendingTracks(searchLimit)
+      .then((tracks: TrendingTrack[]) => {
+        if (active) setChart(tracks);
+      })
       .catch(() => {
-        if (controller.signal.aborted) return;
-        setChart([]);
+        if (active) setChart([]);
       });
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, [searchLimit, onMatchedTracks]);
 
   const matches = useMemo(
