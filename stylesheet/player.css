@@ -618,7 +618,7 @@
 
 .xe_player-bar__love--active,
 .xe_player-bar__love--active:hover:not(:disabled) {
-  color: var(--accent);
+  color: var(--accent-bright);
 }
 
 .xe_player-bar__titles > .xe_scroll-text {
