@@ -8,6 +8,7 @@ export type SearchEngineId =
   | 'ytmusic'
   | 'spotify'
   | 'tidal'
+  | 'lastfm'
   | 'applemusic'
   | 'beatport'
   | 'chatgpt'
@@ -38,6 +39,7 @@ export const SEARCH_ENGINES: { id: SearchEngineId; label: string; template: stri
   },
   { id: 'spotify', label: 'Spotify', template: `https://open.spotify.com/search/${QUERY_TOKEN}` },
   { id: 'tidal', label: 'TIDAL', template: `https://tidal.com/search?q=${QUERY_TOKEN}` },
+  { id: 'lastfm', label: 'Last.fm', template: `https://www.last.fm/search?q=${QUERY_TOKEN}` },
   {
     id: 'applemusic',
     label: 'Apple Music',
@@ -46,10 +48,10 @@ export const SEARCH_ENGINES: { id: SearchEngineId; label: string; template: stri
   { id: 'beatport', label: 'Beatport', template: `https://www.beatport.com/search?q=${QUERY_TOKEN}` },
   { id: 'chatgpt', label: 'ChatGPT', template: `https://chatgpt.com/?prompt=${QUERY_TOKEN}` },
   { id: 'grok', label: 'Grok', template: `https://grok.com/?q=${QUERY_TOKEN}` },
-  { id: 'groktw', label: 'Grok on Twitter', template: `https://twitter.com/i/grok?text=${QUERY_TOKEN}` },
+  { id: 'groktw', label: 'Grok on X', template: `https://twitter.com/i/grok?text=${QUERY_TOKEN}` },
   { id: 'claude', label: 'Claude', template: `https://claude.ai/new?q=${QUERY_TOKEN}`},
   
-  { id: 'twitter', label: 'Twitter', template: `https://twitter.com/search?q=${QUERY_TOKEN}` },
+  { id: 'twitter', label: 'X', template: `https://twitter.com/search?q=${QUERY_TOKEN}` },
   { id: 'tunebat', label: 'Tunebat', template: `https://tunebat.com/Search?q=${QUERY_TOKEN}`},
   { id: 'custom', label: 'Custom', template: '' }
 ];
@@ -63,6 +65,7 @@ const MUSIC_ENGINES = new Set<SearchEngineId>([
   'ytmusic',
   'spotify',
   'tidal',
+  'lastfm',
   'applemusic',
   'beatport'
 ]);
