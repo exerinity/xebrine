@@ -86,7 +86,8 @@
   z-index: 1;
 }
 
-.xe_trending-card__playcount {
+.xe_trending-card__playcount,
+.xe_trending-card__rank {
   position: absolute;
   top: 8px;
   left: 8px;
