@@ -1,4 +1,7 @@
 const BASE = '/i/services/lastfm';
+const trendingCache = new Map();
+const topTracksCache = new Map();
+const geoTracksCache = new Map();
 
 /**
  * @typedef {import('../utils/scrobble_rules').ScrobblePayload & { timestamp: number }} ScrobbleEntry
@@ -86,6 +89,16 @@ export function sendScrobbles(sessionKey, scrobbles) {
   return post('/scrobble', { sessionKey, scrobbles });
 }
 
+export async function fetchLovedStatus(username, artist, track, signal) {
+  const query = new URLSearchParams({ username, artist, track });
+  const data = await request(`/love/status?${query}`, { signal });
+  return data.loved === true;
+}
+
+export function setLovedTrack(sessionKey, artist, track, loved) {
+  return post('/love', { sessionKey, artist, track, loved });
+}
+
 function firstImage(images) {
   if (!Array.isArray(images)) return null;
 
@@ -131,4 +144,58 @@ export async function fetchRecentTracks(username, limit = 25) {
       playedAt: date?.uts ? Number(date.uts) : null
     };
   });
+}
+
+export async function fetchTrendingTracks(limit, signal) {
+  const cached = trendingCache.get(limit);
+  if (cached && Date.now() - cached.time < 5 * 60 * 1000) return cached.tracks;
+  const data = await request(`/chart/tracks?limit=${encodeURIComponent(limit)}`, { signal });
+  const raw = data.tracks?.track;
+  const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const tracks = list.map((track) => ({
+    title: String(track.name ?? ''),
+    artist: String(track.artist?.name ?? track.artist?.['#text'] ?? ''),
+    image: firstImage(track.image)
+  })).filter((track) => track.title && track.artist);
+  trendingCache.set(limit, { tracks, time: Date.now() });
+  return tracks;
+}
+
+export async function fetchUserTopTracks(username, period, signal) {
+  const key = `${username}\u0000${period}`;
+  const cached = topTracksCache.get(key);
+  if (cached && Date.now() - cached.time < 5 * 60 * 1000) return cached.tracks;
+  const data = await request(
+    `/top/tracks?username=${encodeURIComponent(username)}&period=${encodeURIComponent(period)}`,
+    { signal }
+  );
+  const raw = data.toptracks?.track;
+  const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const tracks = list.map((track) => ({
+    title: String(track.name ?? ''),
+    artist: String(track.artist?.name ?? track.artist?.['#text'] ?? ''),
+    image: firstImage(track.image),
+    playcount: Number(track.playcount ?? 0)
+  })).filter((track) => track.title && track.artist);
+  topTracksCache.set(key, { tracks, time: Date.now() });
+  return tracks;
+}
+
+export async function fetchGeoTrendingTracks(country, limit, signal) {
+  const key = `${country}\u0000${limit}`;
+  const cached = geoTracksCache.get(key);
+  if (cached && Date.now() - cached.time < 5 * 60 * 1000) return cached.tracks;
+  const data = await request(
+    `/geo/tracks?country=${encodeURIComponent(country)}&limit=${encodeURIComponent(limit)}`,
+    { signal }
+  );
+  const raw = data.tracks?.track;
+  const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const tracks = list.map((track) => ({
+    title: String(track.name ?? ''),
+    artist: String(track.artist?.name ?? track.artist?.['#text'] ?? ''),
+    image: firstImage(track.image)
+  })).filter((track) => track.title && track.artist);
+  geoTracksCache.set(key, { tracks, time: Date.now() });
+  return tracks;
 }
