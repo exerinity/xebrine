@@ -15,7 +15,8 @@ const RELEASES: Release[] = [
     date: '2026-10-05',
     notes: [
       'Added "Last.fm amenities" which will show trending tracks and your top tracks on the home page',
-      'Added the ability to love/unlove tracks on Last.fm from the player bar'
+      'Added the ability to love/unlove tracks on Last.fm from the player bar',
+      'Sections in the home page can now be reordered, removed, and added in the settings page or quickly by double-clicking the section header'
     ]
   },
   {
