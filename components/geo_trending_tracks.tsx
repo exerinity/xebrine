@@ -25,14 +25,17 @@ export function GeoTrendingTracks({
 
   useEffect(() => {
     if (!country) return;
-    const controller = new AbortController();
-    fetchGeoTrendingTracks(country, searchLimit, controller.signal)
-      .then(setChart)
+    let active = true;
+    fetchGeoTrendingTracks(country, searchLimit)
+      .then((tracks: TrendingTrack[]) => {
+        if (active) setChart(tracks);
+      })
       .catch(() => {
-        if (controller.signal.aborted) return;
-        setChart([]);
+        if (active) setChart([]);
       });
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, [country, searchLimit]);
 
   const matches = useMemo(() => {
