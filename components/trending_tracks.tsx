@@ -13,11 +13,13 @@ import { Spinner } from './spinner';
 export function LastfmTrackCard({
   entry,
   track,
-  showPlaycount = false
+  showPlaycount = false,
+  showRank = false
 }: {
   entry: TrendingTrack;
   track: TrackMeta;
   showPlaycount?: boolean;
+  showRank?: boolean;
 }) {
   const { playNow, enqueueEnd, remoteLocked } = usePlayer();
   const { buildMenu } = useTrackMenu();
@@ -46,6 +48,9 @@ export function LastfmTrackCard({
           <span className="xe_trending-card__playcount">
             {entry.playcount!.toLocaleString()} {entry.playcount === 1 ? 'play' : 'plays'}
           </span>
+        )}
+        {showRank && Number.isFinite(entry.rank) && (
+          <span className="xe_trending-card__rank">#{entry.rank}</span>
         )}
         <div className="xe_album-card__actions">
           <button
@@ -127,7 +132,7 @@ export function TrendingTracks({
         <div className="xe_home-carousel">
           {matches.map(({ entry, track }) => (
             <div className="xe_home-carousel__item" key={`${entry.artist}-${entry.title}`}>
-              <LastfmTrackCard entry={entry} track={track} />
+              <LastfmTrackCard entry={entry} track={track} showRank />
             </div>
           ))}
         </div>
