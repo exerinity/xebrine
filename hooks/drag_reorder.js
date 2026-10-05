@@ -16,6 +16,8 @@ export function useDragReorder(onMove) {
   const [dragging, setDragging] = /** @type {[DragState | null, (v: DragState | null) => void]} */ (
     useState(null)
   );
+  const didDragRef = useRef(false);
+  const draggedSizeRef = useRef({ height: 0, gap: 0 });
   const onMoveRef = useRef(onMove);
   onMoveRef.current = onMove;
 
@@ -26,18 +28,42 @@ export function useDragReorder(onMove) {
         const list = listRef.current;
         if (!list) return;
         e.preventDefault();
-        const rowCount = list.children.length;
-        const rowHeight = list.children[index]?.offsetHeight || 1;
+        const items = Array.from(list.children);
+        const item = items[index];
+        if (!(item instanceof HTMLElement)) return;
+        const itemRects = items.map((child) => child.getBoundingClientRect());
+        const itemRect = itemRects[index];
+        const listRect = list.getBoundingClientRect();
+        const gap = Number.parseFloat(getComputedStyle(list).rowGap) || 0;
         const startY = e.clientY;
         const handle = e.currentTarget;
         handle.setPointerCapture(e.pointerId);
+        didDragRef.current = false;
+        draggedSizeRef.current = { height: itemRect.height, gap };
 
         let latest = { from: index, to: index, dy: 0 };
         setDragging(latest);
 
         const onPointerMove = (ev) => {
-          const dy = ev.clientY - startY;
-          const to = clamp(index + Math.round(dy / rowHeight), 0, rowCount - 1);
+          const dy = clamp(
+            ev.clientY - startY,
+            listRect.top - itemRect.top,
+            listRect.bottom - itemRect.bottom
+          );
+          if (Math.abs(dy) > 3) didDragRef.current = true;
+          const top = itemRect.top + dy;
+          let to = index;
+          let nearest = Math.abs(dy);
+          for (let next = 0; next < itemRects.length; next += 1) {
+            if (next === index) continue;
+            const rect = itemRects[next];
+            const slotTop = next < index ? rect.top : rect.bottom - itemRect.height;
+            const distance = Math.abs(top - slotTop);
+            if (distance < nearest) {
+              nearest = distance;
+              to = next;
+            }
+          }
           latest = { from: index, to, dy };
           setDragging(latest);
         };
@@ -59,7 +85,7 @@ export function useDragReorder(onMove) {
     /** @returns {import('react').CSSProperties} */
     (index) => {
       if (!dragging) return {};
-      const rowHeight = listRef.current?.children[dragging.from]?.offsetHeight || 0;
+      const distance = draggedSizeRef.current.height + draggedSizeRef.current.gap;
       if (index === dragging.from) {
         return {
           transform: `translateY(${dragging.dy}px)`,
@@ -69,15 +95,15 @@ export function useDragReorder(onMove) {
         };
       }
       if (dragging.to > dragging.from && index > dragging.from && index <= dragging.to) {
-        return { transform: `translateY(${-rowHeight}px)`, transition: 'transform 120ms ease' };
+        return { transform: `translateY(${-distance}px)`, transition: 'transform 120ms ease' };
       }
       if (dragging.to < dragging.from && index >= dragging.to && index < dragging.from) {
-        return { transform: `translateY(${rowHeight}px)`, transition: 'transform 120ms ease' };
+        return { transform: `translateY(${distance}px)`, transition: 'transform 120ms ease' };
       }
       return { transition: 'transform 120ms ease' };
     },
     [dragging]
   );
 
-  return { listRef, dragging, handleProps, itemStyle };
+  return { listRef, dragging, handleProps, itemStyle, didDragRef };
 }
