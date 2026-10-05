@@ -36,6 +36,14 @@
   margin: 0;
 }
 
+.xe_home-section__loading {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+}
+
 .xe_home-carousel {
   display: flex;
   gap: 18px;
@@ -53,6 +61,49 @@
 .xe_home-carousel__item .xe_album-card {
   width: 100%;
   min-width: 0;
+}
+
+.xe_trending-card {
+  cursor: default;
+}
+
+.xe_trending-card__art-play {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.xe_trending-card__art-play:disabled {
+  cursor: default;
+}
+
+.xe_trending-card .xe_album-card__actions {
+  z-index: 1;
+}
+
+.xe_trending-card__playcount {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.5);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.xe_trending-card:focus-within .xe_album-card__actions {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .xe_home-song-card {
