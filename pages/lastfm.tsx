@@ -3,7 +3,7 @@ import { LastfmWordmark } from '../components/icons';
 import { usePageTitle } from '../hooks/page_title';
 
 export function LastfmPage() {
-  usePageTitle('Last.fm scrobbling');
+  usePageTitle('Last.fm');
 
   return (
     <div className="xe_page">
