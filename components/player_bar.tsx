@@ -24,6 +24,7 @@ import {
   AutoPlayIcon,
   ChevronRightIcon,
   ExternalLinkIcon,
+  HeartIcon,
   NextIcon,
   PauseIcon,
   PlayIcon,
@@ -42,6 +43,7 @@ import { useScrobbleStatus } from '../hooks/scrobble_status';
 import { SCROBBLE_STATUS_LABEL } from '../utils/scrobble_status';
 import { AUTO_PLAY_LABELS } from '../queue/auto_play';
 import { ExplicitBadge } from './explicit_badge';
+import { fetchLovedStatus, setLovedTrack } from '../api/lastfm';
 import { ScanDrawer } from './scan_drawer';
 import { AutoMixDrawer } from './auto_mix_drawer';
 import { SleepTimerControl } from './sleep_timer';
@@ -151,6 +153,11 @@ export function PlayerBar({
   const [volumeControlsWidth, setVolumeControlsWidth] = useState(0);
   const scrubberSlotRef = useRef<HTMLDivElement | null>(null);
   const previousScrubberRectRef = useRef<DOMRect | null>(null);
+  const [trackLoved, setTrackLoved] = useState(false);
+  const [loveKnown, setLoveKnown] = useState(false);
+  const [loveLoading, setLoveLoading] = useState(false);
+  const [loveSaving, setLoveSaving] = useState(false);
+  const loveRequestRef = useRef(0);
 
   const track = current?.track ?? null;
   const radio_homepage_url = radio_homepage(radio_station?.homepage);
@@ -224,6 +231,34 @@ export function PlayerBar({
     if (hasTrack && !hadTrackRef.current) setNowEntering(true);
     hadTrackRef.current = hasTrack;
   }, [track]);
+
+  useEffect(() => {
+    const requestId = ++loveRequestRef.current;
+    if (!track || !lastfm || !settings.lastfmLovedTracks) {
+      setTrackLoved(false);
+      setLoveKnown(false);
+      setLoveLoading(false);
+      setLoveSaving(false);
+      return;
+    }
+    const controller = new AbortController();
+    setLoveKnown(false);
+    setLoveLoading(true);
+    setLoveSaving(false);
+    fetchLovedStatus(lastfm.username, track.artist, track.title, controller.signal)
+      .then((loved) => {
+        if (requestId !== loveRequestRef.current) return;
+        setTrackLoved(loved);
+        setLoveKnown(true);
+        setLoveLoading(false);
+      })
+      .catch(() => {
+        if (controller.signal.aborted || requestId !== loveRequestRef.current) return;
+        setLoveKnown(false);
+        setLoveLoading(false);
+      });
+    return () => controller.abort();
+  }, [lastfm?.sessionKey, lastfm?.username, settings.lastfmLovedTracks, track?.artist, track?.id, track?.title]);
 
   useLayoutEffect(() => {
     const slot = scrubberSlotRef.current;
@@ -303,6 +338,24 @@ export function PlayerBar({
       if (!on) setAnalyser(getAnalyser());
       return !on;
     });
+  };
+
+  const toggleTrackLoved = () => {
+    if (!track || !lastfm || !loveKnown || loveSaving) return;
+    const requestId = ++loveRequestRef.current;
+    const nextLoved = !trackLoved;
+    setTrackLoved(nextLoved);
+    setLoveSaving(true);
+    setLovedTrack(lastfm.sessionKey, track.artist, track.title, nextLoved)
+      .catch((error: unknown) => {
+        if (requestId !== loveRequestRef.current) return;
+        setTrackLoved(!nextLoved);
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        toast.error(`${message}`);
+      })
+      .finally(() => {
+        if (requestId === loveRequestRef.current) setLoveSaving(false);
+      });
   };
 
   const autoMixLabel = autoMixEnabled ? 'On' : 'Off';
@@ -543,14 +596,35 @@ export function PlayerBar({
             )}
             {track && (
               <>
-                <ScrollingText
-                  text={track.title}
-                  className="xe_player-bar__title"
-                  title={fieldTooltip('title', track.title)}
-                  suffix={<ExplicitBadge trackId={track.id} />}
-                  onClick={() => handleFieldClick('title', track.title)}
-                  onContextMenu={(e) => handleFieldContextMenu(e, 'title', track.title)}
-                />
+                <div className="xe_player-bar__title-row">
+                  <ScrollingText
+                    text={track.title}
+                    className="xe_player-bar__title"
+                    title={fieldTooltip('title', track.title)}
+                    onClick={() => handleFieldClick('title', track.title)}
+                    onContextMenu={(e) => handleFieldContextMenu(e, 'title', track.title)}
+                  />
+                  <ExplicitBadge trackId={track.id} />
+                  {lastfm && settings.lastfmLovedTracks && (
+                    loveLoading ? (
+                      <span className="xe_player-bar__love-loading" role="status" aria-label="Loading loved status">
+                        <Spinner size={14} />
+                      </span>
+                    ) : loveKnown && (
+                      <button
+                        type="button"
+                        className={`xe_icon-btn xe_player-bar__love${trackLoved ? ' xe_player-bar__love--active' : ''}`}
+                        onClick={toggleTrackLoved}
+                        disabled={loveSaving}
+                        title={trackLoved ? 'Remove from loved tracks on Last.fm' : 'Add to loved tracks on Last.fm'}
+                        aria-label={trackLoved ? 'Remove from loved tracks on Last.fm' : 'Add to loved tracks on Last.fm'}
+                        aria-pressed={trackLoved}
+                      >
+                        <HeartIcon size={14} filled={trackLoved} />
+                      </button>
+                    )
+                  )}
+                </div>
                 <ScrollingText
                   text={track.artist}
                   className="xe_player-bar__subtitle"
