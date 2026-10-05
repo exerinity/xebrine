@@ -21,15 +21,18 @@ function TopTracksSection({
 
   useEffect(() => {
     if (!session) return;
-    const controller = new AbortController();
+    let active = true;
     setChart(null);
-    fetchUserTopTracks(session.username, period, controller.signal)
-      .then(setChart)
+    fetchUserTopTracks(session.username, period)
+      .then((tracks: TrendingTrack[]) => {
+        if (active) setChart(tracks);
+      })
       .catch(() => {
-        if (controller.signal.aborted) return;
-        setChart([]);
+        if (active) setChart([]);
       });
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, [period, session?.username]);
 
   const matches = useMemo(
