@@ -111,7 +111,7 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
 
   return (
     <nav className={`xe_nav${collapsed ? ' xe_nav--collapsed' : ''}`} style={{ width }}>
-      <Link to="/i" className="xe_nav__logo" title="About Xebrine">
+      <Link to="/i" className="xe_nav__logo" title="About Xebrine" draggable={false}>
         <LogoIcon size={22} />
         {!collapsed && <span>Xebrine</span>}
       </Link>
@@ -132,6 +132,7 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
                 ? link.label
                 : undefined
           }
+          draggable={false}
         >
           <span className="xe_nav__link-content">
             <link.icon size={16} />
