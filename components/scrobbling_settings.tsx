@@ -20,6 +20,9 @@ import type { ScrobbleIgnoreRules } from '../utils/scrobble_rules';
 import { toast } from '../utils/toast';
 import { LastfmIcon, LogoIcon, RefreshIcon } from './icons';
 import { Spinner } from './spinner';
+import { Slider } from './slider';
+import { LASTFM_COUNTRIES } from '../utils/countries';
+import { estimateCountryFromTimezone } from '../utils/timezone_country';
 
 function stamp(unix: number | null): string {
   if (!unix) return '';
@@ -32,6 +35,7 @@ function stamp(unix: number | null): string {
 export function ScrobblingSettings() {
   const { settings, update } = useSettings();
   const session = useLastfmSession();
+  const estimatedCountry = estimateCountryFromTimezone();
   const [profile, setProfile] = useState<LastfmProfile | null>(null);
   const [recent, setRecent] = useState<RecentTrack[]>([]);
   const [pending, setPending] = useState<PendingScrobble[]>([]);
@@ -185,6 +189,106 @@ export function ScrobblingSettings() {
             </button>
           </>
         )}
+      </section>
+
+      <section className="xe_settings__section">
+        <h2>Loved tracks</h2>
+        <label className="xe_settings__radio">
+          <input
+            type="checkbox"
+            checked={settings.lastfmLovedTracks}
+            disabled={!session}
+            onChange={(event) => update({ lastfmLovedTracks: event.target.checked })}
+          />
+          <span>Show and update loved tracks from the player bar</span>
+        </label>
+        <p className="xe_settings__hint">
+          Xebrine checks whether the current track is loved, then lets you love or unlove it on Last.fm
+        </p>
+      </section>
+
+      <section className="xe_settings__section">
+        <h2>Last.fm amenities</h2>
+        <label className="xe_settings__radio">
+          <input
+            type="checkbox"
+            checked={settings.lastfmAmenities}
+            onChange={(event) => update({ lastfmAmenities: event.target.checked })}
+          />
+          <span>Add Last.fm features to the home page</span>
+        </label>
+        <label className="xe_settings__radio">
+          <input
+            type="checkbox"
+            checked={settings.lastfmGeoAmenities}
+            disabled={!settings.lastfmAmenities}
+            onChange={(event) => update({ lastfmGeoAmenities: event.target.checked })}
+          />
+          <span>Share my country to power the geo trending section</span>
+        </label>
+        <label className="xe_settings__geo-country">
+          <span>If you don't want to send your country, you can select any here:</span>
+          <select
+            className="xe_eq__select"
+            value={settings.lastfmGeoCountry}
+            disabled={!settings.lastfmAmenities}
+            onChange={(event) => update({ lastfmGeoCountry: event.target.value })}
+          >
+            <option value="">
+              Estimate from timezone{estimatedCountry ? ` (${estimatedCountry})` : ''}
+            </option>
+            {LASTFM_COUNTRIES.map((country) => (
+              <option value={country.code} key={country.code}>{country.name}</option>
+            ))}
+          </select>
+        </label>
+        <div className="xe_settings__geo-limit">
+          <span>Trending chart search depth</span>
+          <div className="xe_settings__slider-row">
+            <Slider
+              value={settings.lastfmTrendingLimit}
+              min={15}
+              max={500}
+              wheelStep={5}
+              resetTo={50}
+              disabled={!settings.lastfmAmenities}
+              onChange={(value) => update({ lastfmTrendingLimit: Math.round(value / 5) * 5 })}
+              ariaLabel="Trending chart search depth"
+            />
+            <span className="xe_settings__slider-value">{settings.lastfmTrendingLimit}</span>
+          </div>
+          <p className="xe_settings__hint">
+            Search further down the worldwide and country charts when your library is large and matching tracks are buried below the top results
+          </p>
+        </div>
+        <div className="xe_settings__geo-limit">
+          <span>Tracks shown in each amenity</span>
+          <div className="xe_settings__slider-row">
+            <Slider
+              value={settings.lastfmAmenitiesDisplayLimit}
+              min={1}
+              max={50}
+              wheelStep={1}
+              resetTo={9}
+              disabled={!settings.lastfmAmenities}
+              onChange={(value) => update({ lastfmAmenitiesDisplayLimit: Math.round(value) })}
+              ariaLabel="Tracks shown in each Last.fm amenity"
+            />
+            <span className="xe_settings__slider-value">{settings.lastfmAmenitiesDisplayLimit}</span>
+          </div>
+          <p className="xe_settings__hint">
+            This caps the cards shown in every Last.fm amenity on Home without changing how far down the charts Xebrine searches
+          </p>
+        </div>
+        <label className="xe_settings__radio">
+          <input
+            type="checkbox"
+            checked={settings.lastfmGeoHideWorldwideDuplicates}
+            disabled={!settings.lastfmAmenities}
+            onChange={(event) => update({ lastfmGeoHideWorldwideDuplicates: event.target.checked })}
+          />
+          <span>Hide tracks already shown in worldwide Trending</span>
+        </label>
       </section>
 
       <section className="xe_settings__section">
