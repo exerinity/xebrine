@@ -58,7 +58,7 @@ export function GeoTrendingTracks({
         <div className="xe_home-carousel">
           {matches.map(({ entry, track }) => (
             <div className="xe_home-carousel__item" key={`${entry.artist}-${entry.title}`}>
-              <LastfmTrackCard entry={entry} track={track} />
+              <LastfmTrackCard entry={entry} track={track} showRank />
             </div>
           ))}
         </div>

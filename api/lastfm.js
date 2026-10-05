@@ -204,10 +204,11 @@ export function fetchGeoTrendingTracks(country, limit) {
     );
     const raw = data.tracks?.track;
     const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
-    return list.map((track) => ({
+    return list.map((track, index) => ({
       title: String(track.name ?? ''),
       artist: String(track.artist?.name ?? track.artist?.['#text'] ?? ''),
-      image: firstImage(track.image)
+      image: firstImage(track.image),
+      rank: Number(track['@attr']?.rank ?? index + 1)
     })).filter((track) => track.title && track.artist);
   });
 }
