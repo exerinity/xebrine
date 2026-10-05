@@ -39,6 +39,35 @@
   color: var(--text);
 }
 
+.xe_settings__geo-country {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0 2px 26px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.xe_settings__geo-country .xe_eq__select {
+  width: fit-content;
+  min-width: 220px;
+}
+
+.xe_settings__geo-limit {
+  padding: 14px 0 0 26px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.xe_settings__geo-limit .xe_settings__slider-row {
+  margin-top: 7px;
+}
+
+.xe_settings__geo-limit .xe_settings__hint {
+  max-width: 540px;
+  margin-bottom: 0;
+}
+
 .xe_settings__hint {
   color: var(--text-dim);
   margin: 6px 0 12px;
