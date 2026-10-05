@@ -19,10 +19,42 @@
   padding-top: 28px;
 }
 
+.xe_home-sections {
+  display: flex;
+  flex-direction: column;
+}
+
+.xe_home-section-slot {
+  position: relative;
+  border-radius: var(--radius);
+}
+
+.xe_home-section-slot--editing {
+  outline: 3px dashed var(--accent-text);
+}
+
+.xe_home-section-slot--editing .xe_home-section__header,
+.xe_home-section-slot--editing > .xe_home-section > .xe_home-section__title {
+  cursor: grab;
+  user-select: none;
+}
+
+.xe_home-section-slot--editing:active .xe_home-section__header,
+.xe_home-section-slot--editing:active > .xe_home-section > .xe_home-section__title {
+  cursor: grabbing;
+}
+
+.xe_home-section-slot--dragging {
+  z-index: 2;
+  background: var(--bg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.38);
+}
+
 .xe_home-section__title {
   font-size: 16px;
   font-weight: 500;
   margin: 0 0 12px;
+  cursor: pointer;
 }
 
 .xe_home-section__header {
