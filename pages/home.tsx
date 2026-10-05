@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
+import { useSettings } from '../context/settings_context';
 import { usePlayer } from '../src/context/player';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
@@ -11,6 +12,9 @@ import { toSlugParam } from '../utils/slug';
 import { AlbumCard } from './albums';
 import { ContextMenu } from '../components/context_menu';
 import { ScanStatusBanner } from '../components/scan_status_banner';
+import { TrendingTracks } from '../components/trending_tracks';
+import { GeoTrendingTracks } from '../components/geo_trending_tracks';
+import { TopTracks } from '../components/top_tracks';
 import {
   FolderIcon,
   KeyIcon,
@@ -93,13 +97,23 @@ function RandomSongCard({ track, onAnother }: { track: TrackMeta; onAnother(): v
 export function HomePage() {
   const { tracks, permissionNeeded, supported, addFolder, restoreAccess } = useLibrary();
   const { playNow, remoteLocked } = usePlayer();
+  const { settings } = useSettings();
   const navigate = useNavigate();
   const needsSetup = !localStorage.getItem('hai');
 
   const [randomTrack, setRandomTrack] = useState<TrackMeta | null>(null);
+  const [worldwideTrackIds, setWorldwideTrackIds] = useState<string[] | null>(null);
   useEffect(() => {
     setRandomTrack(pickRandom(tracks));
   }, [tracks.length]);
+
+  useEffect(() => {
+    setWorldwideTrackIds(null);
+  }, [settings.lastfmAmenities, settings.lastfmTrendingLimit]);
+
+  const handleWorldwideMatches = useCallback((trackIds: string[] | null) => {
+    setWorldwideTrackIds(trackIds);
+  }, []);
 
   const [albumSeed, setAlbumSeed] = useState(0);
   const albums = useMemo(() => groupAlbums(tracks), [tracks]);
@@ -228,6 +242,27 @@ export function HomePage() {
                   onAnother={() => setRandomTrack((prev) => pickRandom(tracks, prev?.id))}
                 />
               </section>
+            )}
+
+            {settings.lastfmAmenities && (
+              <>
+                <TrendingTracks
+                  searchLimit={settings.lastfmTrendingLimit}
+                  displayLimit={settings.lastfmAmenitiesDisplayLimit}
+                  onMatchedTracks={handleWorldwideMatches}
+                />
+                {(settings.lastfmGeoAmenities || settings.lastfmGeoCountry) && (
+                  <GeoTrendingTracks
+                    selectedCountry={settings.lastfmGeoCountry}
+                    searchLimit={settings.lastfmTrendingLimit}
+                    displayLimit={settings.lastfmAmenitiesDisplayLimit}
+                    excludedTrackIds={
+                      settings.lastfmGeoHideWorldwideDuplicates ? worldwideTrackIds : []
+                    }
+                  />
+                )}
+                <TopTracks displayLimit={settings.lastfmAmenitiesDisplayLimit} />
+              </>
             )}
           </>
         )}
