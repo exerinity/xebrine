@@ -5,6 +5,7 @@ export interface TrendingTrack {
   artist: string;
   image: string | null;
   playcount?: number;
+  rank?: number;
 }
 
 function normalize(value: string): string {
