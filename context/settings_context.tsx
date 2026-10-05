@@ -22,6 +22,11 @@ import {
   type ScrobbleIgnoreRules,
   type ScrobbleMode
 } from '../utils/scrobble_rules';
+import {
+  DEFAULT_HOME_SECTIONS,
+  normalizeHomeSections,
+  type HomeSectionId
+} from '../utils/home_sections';
 
 export type PlayerBarClickAction = 'copy' | 'open';
 export type PlayerBarPosition = 'top' | 'bottom';
@@ -73,6 +78,7 @@ export interface Settings {
   lastfmTrendingLimit: number;
   lastfmGeoHideWorldwideDuplicates: boolean;
   lastfmAmenitiesDisplayLimit: number;
+  homeSections: HomeSectionId[];
 }
 
 interface SettingsContextValue {
@@ -124,7 +130,8 @@ export const DEFAULT_SETTINGS: Settings = {
   lastfmGeoCountry: '',
   lastfmTrendingLimit: 50,
   lastfmGeoHideWorldwideDuplicates: true,
-  lastfmAmenitiesDisplayLimit: 9
+  lastfmAmenitiesDisplayLimit: 9,
+  homeSections: [...DEFAULT_HOME_SECTIONS]
 };
 
 function normalizeLastfmTrendingLimit(value: unknown): number {
@@ -187,7 +194,8 @@ function loadSettings(): Settings {
       lastfmGeoHideWorldwideDuplicates: merged.lastfmGeoHideWorldwideDuplicates !== false,
       lastfmAmenitiesDisplayLimit: normalizeLastfmAmenitiesDisplayLimit(
         merged.lastfmAmenitiesDisplayLimit
-      )
+      ),
+      homeSections: normalizeHomeSections(stored.homeSections)
     };
   } catch {
     return DEFAULT_SETTINGS;
