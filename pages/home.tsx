@@ -1,4 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+  type PointerEvent,
+  type ReactNode
+} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
 import { useSettings } from '../context/settings_context';
@@ -8,13 +18,18 @@ import { getRecentIds } from '../queue/history';
 import { groupAlbums, albumKey } from '../utils/groups';
 import { useAlbumArt } from '../hooks/album_art';
 import { useTrackMenu } from '../hooks/track_menu';
+import { useDragReorder } from '../hooks/drag_reorder';
 import { toSlugParam } from '../utils/slug';
 import { AlbumCard } from './albums';
 import { ContextMenu } from '../components/context_menu';
 import { ScanStatusBanner } from '../components/scan_status_banner';
 import { TrendingTracks } from '../components/trending_tracks';
 import { GeoTrendingTracks } from '../components/geo_trending_tracks';
-import { TopTracks } from '../components/top_tracks';
+import { TopTracksSection } from '../components/top_tracks';
+import {
+  moveHomeSection,
+  type HomeSectionId
+} from '../utils/home_sections';
 import {
   FolderIcon,
   KeyIcon,
@@ -94,15 +109,106 @@ function RandomSongCard({ track, onAnother }: { track: TrackMeta; onAnother(): v
   );
 }
 
+function headerFromEvent(target: EventTarget | null, container: HTMLElement): Element | null {
+  if (!(target instanceof Element)) return null;
+  if (target.closest('button, a, input, select, textarea')) return null;
+  const header = target.closest('.xe_home-section__header, .xe_home-section__title');
+  return header && container.contains(header) ? header : null;
+}
+
+function HomeSectionSlot({
+  sectionId,
+  editing,
+  dragging,
+  style,
+  didDragRef,
+  onEdit,
+  onStopEditing,
+  onContextMenu,
+  onPointerDown,
+  children
+}: {
+  sectionId: HomeSectionId;
+  editing: boolean;
+  dragging: boolean;
+  style: CSSProperties;
+  didDragRef: { current: boolean };
+  onEdit(): void;
+  onStopEditing(): void;
+  onContextMenu(event: MouseEvent<HTMLDivElement>): void;
+  onPointerDown(event: PointerEvent<HTMLDivElement>): void;
+  children: ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!editing) return;
+    const stopOutside = (event: globalThis.MouseEvent) => {
+      if (!ref.current?.contains(event.target as Node)) onStopEditing();
+    };
+    document.addEventListener('mousedown', stopOutside);
+    return () => document.removeEventListener('mousedown', stopOutside);
+  }, [editing, onStopEditing]);
+
+  return (
+    <div
+      ref={ref}
+      className={`xe_home-section-slot${editing ? ' xe_home-section-slot--editing' : ''}${
+        dragging ? ' xe_home-section-slot--dragging' : ''
+      }`}
+      data-home-section={sectionId}
+      style={style}
+      onPointerDownCapture={(event) => {
+        if (editing && headerFromEvent(event.target, event.currentTarget)) onPointerDown(event);
+      }}
+      onPointerUpCapture={(event) => {
+        if (
+          editing &&
+          !didDragRef.current &&
+          headerFromEvent(event.target, event.currentTarget)
+        ) {
+          onStopEditing();
+        }
+      }}
+      onClickCapture={(event) => {
+        if (didDragRef.current) {
+          didDragRef.current = false;
+          return;
+        }
+        if (editing && headerFromEvent(event.target, event.currentTarget)) onStopEditing();
+      }}
+      onDoubleClickCapture={(event) => {
+        if (!headerFromEvent(event.target, event.currentTarget)) return;
+        event.preventDefault();
+        onEdit();
+      }}
+      onContextMenuCapture={(event) => {
+        if (!headerFromEvent(event.target, event.currentTarget)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        onContextMenu(event);
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function HomePage() {
   const { tracks, permissionNeeded, supported, addFolder, restoreAccess } = useLibrary();
   const { playNow, remoteLocked } = usePlayer();
-  const { settings } = useSettings();
+  const { settings, update } = useSettings();
   const navigate = useNavigate();
   const needsSetup = !localStorage.getItem('hai');
 
   const [randomTrack, setRandomTrack] = useState<TrackMeta | null>(null);
   const [worldwideTrackIds, setWorldwideTrackIds] = useState<string[] | null>(null);
+  const [editingSection, setEditingSection] = useState<HomeSectionId | null>(null);
+  const [sectionMenu, setSectionMenu] = useState<{
+    sectionId: HomeSectionId;
+    x: number;
+    y: number;
+  } | null>(null);
   useEffect(() => {
     setRandomTrack(pickRandom(tracks));
   }, [tracks.length]);
@@ -114,6 +220,7 @@ export function HomePage() {
   const handleWorldwideMatches = useCallback((trackIds: string[] | null) => {
     setWorldwideTrackIds(trackIds);
   }, []);
+  const stopEditing = useCallback(() => setEditingSection(null), []);
 
   const [albumSeed, setAlbumSeed] = useState(0);
   const albums = useMemo(() => groupAlbums(tracks), [tracks]);
@@ -121,10 +228,178 @@ export function HomePage() {
     () => intelligentShuffle(albums, (a) => ({ id: a.key, artist: a.artist })).slice(0, 9),
     [albums.length, albumSeed]
   );
+  const visibleSections = useMemo(
+    () =>
+      settings.homeSections.filter((sectionId) => {
+        if (sectionId === 'random-song') return Boolean(randomTrack);
+        if (sectionId === 'trending-worldwide') return settings.lastfmAmenities;
+        if (sectionId === 'trending-country') {
+          return (
+            settings.lastfmAmenities &&
+            (settings.lastfmGeoAmenities || Boolean(settings.lastfmGeoCountry))
+          );
+        }
+        if (sectionId === 'top-tracks-week' || sectionId === 'top-tracks-all-time') {
+          return settings.lastfmAmenities;
+        }
+        return true;
+      }),
+    [
+      randomTrack,
+      settings.homeSections,
+      settings.lastfmAmenities,
+      settings.lastfmGeoAmenities,
+      settings.lastfmGeoCountry
+    ]
+  );
+  const {
+    listRef: homeSectionsRef,
+    dragging: homeSectionDragging,
+    handleProps: homeSectionHandleProps,
+    itemStyle: homeSectionItemStyle,
+    didDragRef: homeSectionDidDragRef
+  } = useDragReorder((from, to) => {
+    const source = visibleSections[from];
+    const target = visibleSections[to];
+    if (!source || !target) return;
+    update({
+      homeSections: moveHomeSection(settings.homeSections, source, target, to > from)
+    });
+  });
 
   const shuffleAll = () => {
     const order = intelligentShuffle(tracks, (t) => ({ id: t.id, artist: t.artist }), getRecentIds());
     playNow(order, 0);
+  };
+
+  const removeSection = (sectionId: HomeSectionId) => {
+    update({ homeSections: settings.homeSections.filter((id) => id !== sectionId) });
+    if (editingSection === sectionId) setEditingSection(null);
+    setSectionMenu(null);
+  };
+
+  const renderSection = (sectionId: HomeSectionId, index: number) => {
+    let content: ReactNode = null;
+    switch (sectionId) {
+      case 'random-albums':
+        content = (
+          <section className="xe_home-section">
+            <div className="xe_home-section__header">
+              <h2 className="xe_home-section__title">Pick some random albums</h2>
+              <button
+                type="button"
+                className="xe_btn xe_btn--quiet"
+                onClick={() => setAlbumSeed((seed) => seed + 1)}
+                disabled={albums.length <= 1}
+              >
+                <RefreshIcon size={14} />
+                Reshuffle
+              </button>
+            </div>
+            <div className="xe_home-carousel">
+              {randomAlbums.map((album) => (
+                <div className="xe_home-carousel__item" key={album.key}>
+                  <AlbumCard
+                    album={album}
+                    onOpen={() =>
+                      navigate(`/albums/by:${toSlugParam(album.artist)}/${toSlugParam(album.album)}`, {
+                        state: { from: '/' }
+                      })
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+        break;
+      case 'random-song':
+        if (randomTrack) {
+          content = (
+            <section className="xe_home-section">
+              <h2 className="xe_home-section__title">Choose a random song</h2>
+              <RandomSongCard
+                track={randomTrack}
+                onAnother={() => setRandomTrack((prev) => pickRandom(tracks, prev?.id))}
+              />
+            </section>
+          );
+        }
+        break;
+      case 'trending-worldwide':
+        if (settings.lastfmAmenities) {
+          content = (
+            <TrendingTracks
+              searchLimit={settings.lastfmTrendingLimit}
+              displayLimit={settings.lastfmAmenitiesDisplayLimit}
+              onMatchedTracks={handleWorldwideMatches}
+            />
+          );
+        }
+        break;
+      case 'trending-country':
+        if (
+          settings.lastfmAmenities &&
+          (settings.lastfmGeoAmenities || settings.lastfmGeoCountry)
+        ) {
+          const worldwideVisible = settings.homeSections.includes('trending-worldwide');
+          content = (
+            <GeoTrendingTracks
+              selectedCountry={settings.lastfmGeoCountry}
+              searchLimit={settings.lastfmTrendingLimit}
+              displayLimit={settings.lastfmAmenitiesDisplayLimit}
+              excludedTrackIds={
+                settings.lastfmGeoHideWorldwideDuplicates && worldwideVisible
+                  ? worldwideTrackIds
+                  : []
+              }
+            />
+          );
+        }
+        break;
+      case 'top-tracks-week':
+        if (settings.lastfmAmenities) {
+          content = (
+            <TopTracksSection
+              title="Your top tracks this week"
+              period="7day"
+              displayLimit={settings.lastfmAmenitiesDisplayLimit}
+            />
+          );
+        }
+        break;
+      case 'top-tracks-all-time':
+        if (settings.lastfmAmenities) {
+          content = (
+            <TopTracksSection
+              title="Your top tracks of all time"
+              period="overall"
+              displayLimit={settings.lastfmAmenitiesDisplayLimit}
+            />
+          );
+        }
+        break;
+    }
+    if (!content) return null;
+
+    return (
+      <HomeSectionSlot
+        key={sectionId}
+        sectionId={sectionId}
+        editing={editingSection === sectionId}
+        dragging={homeSectionDragging?.from === index}
+        style={homeSectionItemStyle(index)}
+        didDragRef={homeSectionDidDragRef}
+        onEdit={() => setEditingSection(sectionId)}
+        onStopEditing={stopEditing}
+        onContextMenu={(event) =>
+          setSectionMenu({ sectionId, x: event.clientX, y: event.clientY })
+        }
+        onPointerDown={homeSectionHandleProps(index).onPointerDown}
+      >
+        {content}
+      </HomeSectionSlot>
+    );
   };
 
   if (!supported) {
@@ -204,69 +479,28 @@ export function HomePage() {
         {tracks.length === 0 ? (
           <p className="xe_empty-note">Your library is empty!</p>
         ) : (
-          <>
-            <section className="xe_home-section">
-              <div className="xe_home-section__header">
-                <h2 className="xe_home-section__title">Pick some random albums</h2>
-                <button
-                  type="button"
-                  className="xe_btn xe_btn--quiet"
-                  onClick={() => setAlbumSeed((seed) => seed + 1)}
-                  disabled={albums.length <= 1}
-                >
-                  <RefreshIcon size={14} />
-                  Reshuffle
-                </button>
-              </div>
-              <div className="xe_home-carousel">
-                {randomAlbums.map((album) => (
-                  <div className="xe_home-carousel__item" key={album.key}>
-                    <AlbumCard
-                      album={album}
-                      onOpen={() =>
-                        navigate(`/albums/by:${toSlugParam(album.artist)}/${toSlugParam(album.album)}`, {
-                          state: { from: '/' }
-                        })
-                      }
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {randomTrack && (
-              <section className="xe_home-section">
-                <h2 className="xe_home-section__title">...or a random song</h2>
-                <RandomSongCard
-                  track={randomTrack}
-                  onAnother={() => setRandomTrack((prev) => pickRandom(tracks, prev?.id))}
-                />
-              </section>
-            )}
-
-            {settings.lastfmAmenities && (
-              <>
-                <TrendingTracks
-                  searchLimit={settings.lastfmTrendingLimit}
-                  displayLimit={settings.lastfmAmenitiesDisplayLimit}
-                  onMatchedTracks={handleWorldwideMatches}
-                />
-                {(settings.lastfmGeoAmenities || settings.lastfmGeoCountry) && (
-                  <GeoTrendingTracks
-                    selectedCountry={settings.lastfmGeoCountry}
-                    searchLimit={settings.lastfmTrendingLimit}
-                    displayLimit={settings.lastfmAmenitiesDisplayLimit}
-                    excludedTrackIds={
-                      settings.lastfmGeoHideWorldwideDuplicates ? worldwideTrackIds : []
-                    }
-                  />
-                )}
-                <TopTracks displayLimit={settings.lastfmAmenitiesDisplayLimit} />
-              </>
-            )}
-          </>
+          <div className="xe_home-sections" ref={homeSectionsRef}>
+            {visibleSections.map(renderSection)}
+          </div>
         )}
       </div>
+      {sectionMenu && (
+        <ContextMenu
+          x={sectionMenu.x}
+          y={sectionMenu.y}
+          items={[
+            {
+              label: 'Enable editing for this section',
+              onSelect: () => setEditingSection(sectionMenu.sectionId)
+            },
+            {
+              label: 'Remove this section',
+              onSelect: () => removeSection(sectionMenu.sectionId)
+            }
+          ]}
+          onClose={() => setSectionMenu(null)}
+        />
+      )}
     </div>
   );
 }
