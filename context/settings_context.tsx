@@ -15,6 +15,7 @@ import { isThemeId, type ThemeId } from '../utils/themes';
 import { isSearchEngineId, type SearchEngineId } from '../utils/search_engine';
 import { isPageKeyMode, type PageKeyMode } from '../utils/page_keys';
 import { isAutoPlayLevel, type AutoPlayLevel } from '../queue/auto_play';
+import { isLastfmCountry } from '../utils/countries';
 import {
   DEFAULT_SCROBBLE_IGNORE_RULES,
   normalizeScrobbleIgnoreRules,
@@ -65,6 +66,13 @@ export interface Settings {
   scrobbleNowPlaying: boolean;
   scrobbleMode: ScrobbleMode;
   scrobbleIgnoreRules: ScrobbleIgnoreRules;
+  lastfmLovedTracks: boolean;
+  lastfmAmenities: boolean;
+  lastfmGeoAmenities: boolean;
+  lastfmGeoCountry: string;
+  lastfmTrendingLimit: number;
+  lastfmGeoHideWorldwideDuplicates: boolean;
+  lastfmAmenitiesDisplayLimit: number;
 }
 
 interface SettingsContextValue {
@@ -109,8 +117,27 @@ export const DEFAULT_SETTINGS: Settings = {
   scrobbleEnabled: true,
   scrobbleNowPlaying: true,
   scrobbleMode: 'strict',
-  scrobbleIgnoreRules: DEFAULT_SCROBBLE_IGNORE_RULES
+  scrobbleIgnoreRules: DEFAULT_SCROBBLE_IGNORE_RULES,
+  lastfmLovedTracks: false,
+  lastfmAmenities: false,
+  lastfmGeoAmenities: false,
+  lastfmGeoCountry: '',
+  lastfmTrendingLimit: 50,
+  lastfmGeoHideWorldwideDuplicates: true,
+  lastfmAmenitiesDisplayLimit: 9
 };
+
+function normalizeLastfmTrendingLimit(value: unknown): number {
+  const limit = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(limit)) return 50;
+  return Math.min(500, Math.max(15, Math.round(limit / 5) * 5));
+}
+
+function normalizeLastfmAmenitiesDisplayLimit(value: unknown): number {
+  const limit = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(limit)) return 9;
+  return Math.min(50, Math.max(1, Math.round(limit)));
+}
 
 function loadSettings(): Settings {
   try {
@@ -119,6 +146,7 @@ function loadSettings(): Settings {
     const merged = { ...DEFAULT_SETTINGS, ...stored };
     const legacySidePanelOpen = localStorage.getItem('xebrine.sidePanelOpen');
     const legacySidePanelView = localStorage.getItem('xebrine.sidePanelView');
+    const storedTrendingLimit = stored.lastfmTrendingLimit ?? stored.lastfmGeoTrendingLimit;
     return {
       ...merged,
       eqBands: normalize_bands(merged.eqBands),
@@ -147,7 +175,19 @@ function loadSettings(): Settings {
               : 'queue',
       autoPlayLevel: isAutoPlayLevel(merged.autoPlayLevel) ? merged.autoPlayLevel : 1,
       scrobbleMode: merged.scrobbleMode === 'lax' ? 'lax' : 'strict',
-      scrobbleIgnoreRules: normalizeScrobbleIgnoreRules(merged.scrobbleIgnoreRules)
+      scrobbleIgnoreRules: normalizeScrobbleIgnoreRules(merged.scrobbleIgnoreRules),
+      lastfmLovedTracks: merged.lastfmLovedTracks === true,
+      lastfmAmenities: merged.lastfmAmenities === true,
+      lastfmGeoAmenities: merged.lastfmGeoAmenities === true,
+      lastfmGeoCountry:
+        typeof merged.lastfmGeoCountry === 'string' && isLastfmCountry(merged.lastfmGeoCountry)
+          ? merged.lastfmGeoCountry
+          : '',
+      lastfmTrendingLimit: normalizeLastfmTrendingLimit(storedTrendingLimit),
+      lastfmGeoHideWorldwideDuplicates: merged.lastfmGeoHideWorldwideDuplicates !== false,
+      lastfmAmenitiesDisplayLimit: normalizeLastfmAmenitiesDisplayLimit(
+        merged.lastfmAmenitiesDisplayLimit
+      )
     };
   } catch {
     return DEFAULT_SETTINGS;
