@@ -98,6 +98,32 @@ export async function scrobble(env: Env, sessionKey: string, items: ScrobbleItem
   return { accepted: attr?.accepted ?? items.length, ignored: attr?.ignored ?? 0 };
 }
 
+export async function getTrackLoveStatus(env: Env, username: string, artist: string, track: string) {
+  const data = (await call(
+    env,
+    { method: 'track.getInfo', username, artist, track },
+    false,
+    'GET'
+  )) as { track?: { userloved?: string | number | boolean } };
+  const loved = data.track?.userloved;
+  return { loved: loved === true || loved === 1 || loved === '1' };
+}
+
+export async function setTrackLoved(
+  env: Env,
+  sessionKey: string,
+  artist: string,
+  track: string,
+  loved: boolean
+) {
+  await call(
+    env,
+    { method: loved ? 'track.love' : 'track.unlove', sk: sessionKey, artist, track },
+    true,
+    'POST'
+  );
+}
+
 export function getUserInfo(env: Env, username: string) {
   return call(env, { method: 'user.getInfo', user: username }, false, 'GET');
 }
@@ -106,6 +132,28 @@ export function getRecentTracks(env: Env, username: string, limit: number) {
   return call(
     env,
     { method: 'user.getRecentTracks', user: username, limit: String(limit) },
+    false,
+    'GET'
+  );
+}
+
+export function getChartTopTracks(env: Env, limit: number) {
+  return call(env, { method: 'chart.getTopTracks', limit: String(limit) }, false, 'GET');
+}
+
+export function getUserTopTracks(env: Env, username: string, period: '7day' | 'overall') {
+  return call(
+    env,
+    { method: 'user.getTopTracks', user: username, period, limit: '15' },
+    false,
+    'GET'
+  );
+}
+
+export function getGeoTopTracks(env: Env, country: string, limit: number) {
+  return call(
+    env,
+    { method: 'geo.getTopTracks', country: country.toLowerCase(), limit: String(limit) },
     false,
     'GET'
   );
