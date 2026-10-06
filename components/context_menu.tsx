@@ -134,6 +134,11 @@ export function ContextMenu({ x, y, items, onClose, scrollRoot }: ContextMenuPro
               item.onSelect();
               onClose();
             }}
+            onContextMenu={(event) => {
+              event.preventDefault();
+              item.onSelect();
+              onClose();
+            }}
           >
             {item.label}
             {item.icon && <span className="xe_context-menu__icon">{item.icon}</span>}
