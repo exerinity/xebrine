@@ -56,6 +56,10 @@
   gap: 18px;
 }
 
+.xe_remote__control > .xe_btn {
+  align-self: flex-start;
+}
+
 .xe_remote__pin-card {
   padding: 22px;
   border: 1px solid var(--border);
