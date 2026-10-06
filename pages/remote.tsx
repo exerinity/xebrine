@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RemoteControlPanel } from '../components/remote_control';
 import { RemoteHostPanel } from '../components/remote_host';
@@ -14,10 +14,21 @@ export function RemotePage() {
   const remote = useRemote();
   const invited = normalizePin(searchParams.get('connect') ?? '');
   const autoPin = isValidPin(invited) ? invited : '';
-  const [role, setRole] = useState<Role>(autoPin ? 'controlling' : 'none');
+  const requestedRole = searchParams.get('role');
+  const [role, setRole] = useState<Role>(
+    autoPin || requestedRole === 'control' ? 'controlling' : requestedRole === 'host' ? 'playing' : 'none'
+  );
   const hosting = remote.phase === 'live' || remote.phase === 'connecting';
   const active: Role = hosting ? 'playing' : role;
   usePageTitle('Remote');
+
+  useEffect(() => {
+    if (autoPin || requestedRole === 'control') {
+      setRole('controlling');
+      return;
+    }
+    if (requestedRole === 'host') setRole('playing');
+  }, [autoPin, requestedRole]);
 
   const leaveRole = () => {
     setRole('none');
@@ -55,7 +66,7 @@ export function RemotePage() {
                   <QueueIcon size={26} />
                   <strong>Controlling</strong>
                   <span>
-                    Enter a PIN from another device to control
+                    Enter a PIN to control
                   </span>
                 </button>
               </div>
