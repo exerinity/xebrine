@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRemoteControl, type RemoteControl } from '../hooks/remote_control';
-import { isValidPin, normalizePin, PIN_LENGTH } from '../utils/remote_protocol';
+import { isValidPin, normalizePin } from '../utils/remote_protocol';
 import { formatTime } from '../utils/format';
 import { Slider } from './slider';
 import { Spinner } from './spinner';
@@ -47,9 +47,6 @@ function PinEntry({ onSubmit }: { onSubmit(pin: string): void }) {
         value={pin.replace(/(\d{3})(?=\d)/g, '$1 ')}
         onChange={(event) => setPin(normalizePin(event.target.value))}
       />
-      <p className="xe_remote__hint">
-        {`The playing device shows a ${PIN_LENGTH} digit PIN. It has to approve this device before the remote works.`}
-      </p>
       <button type="submit" className="xe_btn xe_btn--accent" disabled={!isValidPin(pin)}>
         Connect
       </button>
