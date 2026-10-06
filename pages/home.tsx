@@ -496,6 +496,10 @@ export function HomePage() {
             {
               label: 'Remove this section',
               onSelect: () => removeSection(sectionMenu.sectionId)
+            },
+            {
+              label: 'Go to home layout settings',
+              onSelect: () => navigate('/settings/home')
             }
           ]}
           onClose={() => setSectionMenu(null)}
