@@ -4,6 +4,10 @@ import { use_drawer_presence } from '../hooks/drawer_presence';
 import { CloseIcon, RefreshIcon } from './icons';
 import { Spinner } from './spinner';
 
+// TODO: if this pops up amidst a song playing, xebrine will remember what song was playing and its time
+// and resume where it left off after the update
+// that could be pretty onerous because it assumes the user has given xebrine autoplay perms, which is usually not the case, so automatic playback will obviously fail
+
 type UpdatePhase = 'available' | 'downloading' | 'reloading';
 
 interface UpdateWorkerMessage {
@@ -79,13 +83,13 @@ export function UpdateDrawer() {
   const title = reloading
     ? 'Xebrine is updating...'
     : downloading
-      ? 'Downloading Xebrine update...'
+      ? 'Retrieving update...'
       : 'New Xebrine update available';
   const description = reloading
     ? 'Reloading to apply...'
     : downloading
-      ? 'Downloading update...'
-      : error ?? 'Would you like to download it?';
+      ? 'One moment, please...'
+      : error ?? 'Would you like to update?';
 
   const download = async () => {
     setError(null);
