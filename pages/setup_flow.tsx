@@ -183,8 +183,10 @@ export function SetupFlowPage() {
                 <span className="xe_setup__step-label">Step 4/5</span>
                 <h2>Got Last.fm?</h2>
                 <p>
-                  Keep the scrobbling going by connecting Xebrine to Last.fm. You can adjust the scrobbler
-                  behavior in the Last.fm settings.
+                  By connecting Xebrine to Last.fm, you can scrobble your tracks and also see your top tracks on the home page (if you enable that). You can also see what's trending on Last.fm without logging in.
+                </p>
+                <p>
+                  Amenities do not show bare chart information, they will only show the tracks that you have in your library through a basic regex filter. You can adjust all of this in the Last.fm settings.
                 </p>
                 {lastfm ? (
                   <div className="xe_setup__success">
@@ -201,6 +203,7 @@ export function SetupFlowPage() {
                     {connecting ? 'Waiting for Last.fm...' : 'Connect Last.fm'}
                   </button>
                 )}
+                
               </>
             )}
 
