@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { usePlayer } from '../src/context/player';
 import { useRemote } from '../context/remote_context';
 import { clamp } from '../utils/format';
@@ -18,6 +18,7 @@ import {
   SearchIcon,
   SettingsIcon
 } from './icons';
+import { ContextMenu } from './context_menu';
 
 export const NAV_LINKS = [
   { path: '/', label: 'Home', icon: HomeIcon },
@@ -40,6 +41,17 @@ const DEFAULT_WIDTH = 200;
 const COLLAPSE_AT = 124;
 const RAIL_WIDTH = 62;
 const SMALL_SCREEN = 560;
+const SETTINGS_SECTIONS = [
+  { id: 'preferences', label: 'Main preferences' },
+  { id: 'appearance', label: 'Appearance' },
+  { id: 'home', label: 'Home layout' },
+  { id: 'library', label: 'Library settings' },
+  { id: 'playback', label: 'Playback settings' },
+  { id: 'a11y', label: 'Accessibility' },
+  { id: 'toys', label: 'Toys' },
+  { id: 'share', label: 'Share settings' },
+  { id: 'settings', label: 'All settings' }
+];
 
 function loadWidth(): number {
   const raw = localStorage.getItem(WIDTH_KEY);
@@ -52,17 +64,19 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onOpenFullscreen }: SidebarProps) {
+  const navigate = useNavigate();
   const { queue, current, radio_station } = usePlayer();
   const remote = useRemote();
   const remoteWaiting = remote.pending.length;
-  const remoteRunning = remote.phase === 'live' || remote.phase === 'connecting';
-  const remoteState = remoteWaiting > 0 ? 'waiting' : remoteRunning ? 'live' : '';
+  const hasRemoteStatus = remoteWaiting > 0 || remote.phase === 'live' || remote.phase === 'connecting';
   const [navWidth, setNavWidth] = useState(loadWidth);
   const navWidthRef = useRef(navWidth);
   navWidthRef.current = navWidth;
   const [smallScreen, setSmallScreen] = useState(
     () => window.matchMedia(`(max-width: ${SMALL_SCREEN}px)`).matches
   );
+  const [settingsMenu, setSettingsMenu] = useState<{ x: number; y: number } | null>(null);
+  const [remoteMenu, setRemoteMenu] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia(`(max-width: ${SMALL_SCREEN}px)`);
@@ -119,12 +133,9 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
         <NavLink
           key={link.path}
           to={link.path}
-          className={({ isActive }) =>
-            `xe_nav__link${isActive ? ' xe_nav__link--active' : ''}${link.path === '/remote' && remoteState ? ` xe_nav__link--remote-${remoteState}` : ''
-            }`
-          }
+          className={({ isActive }) => `xe_nav__link${isActive ? ' xe_nav__link--active' : ''}`}
           title={
-            link.path === '/remote' && remoteState
+            link.path === '/remote' && hasRemoteStatus
               ? remoteWaiting > 0
                 ? `${remoteWaiting} device${remoteWaiting === 1 ? '' : 's'} waiting for approval`
                 : `Remote session running (${remote.controllers.length} connected)`
@@ -133,6 +144,16 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
                 : undefined
           }
           draggable={false}
+          onContextMenu={(event) => {
+            if (link.path === '/remote') {
+              event.preventDefault();
+              setRemoteMenu({ x: event.clientX, y: event.clientY });
+              return;
+            }
+            if (link.path !== '/settings') return;
+            event.preventDefault();
+            setSettingsMenu({ x: event.clientX, y: event.clientY });
+          }}
         >
           <span className="xe_nav__link-content">
             <link.icon size={16} />
@@ -146,7 +167,7 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
               <span className="xe_nav__badge">{queue.length}</span>
             ))}
           {link.path === '/remote' &&
-            remoteState &&
+            hasRemoteStatus &&
             (collapsed ? (
               <span className="xe_nav__dot" />
             ) : (
@@ -181,6 +202,28 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
           aria-orientation="vertical"
           aria-label="Resize sidebar"
           title="Drag to resize, right-click to reset"
+        />
+      )}
+      {settingsMenu && (
+        <ContextMenu
+          x={settingsMenu.x}
+          y={settingsMenu.y}
+          items={SETTINGS_SECTIONS.map((section) => ({
+            label: section.label,
+            onSelect: () => navigate(`/settings/${section.id}`)
+          }))}
+          onClose={() => setSettingsMenu(null)}
+        />
+      )}
+      {remoteMenu && (
+        <ContextMenu
+          x={remoteMenu.x}
+          y={remoteMenu.y}
+          items={[
+            { label: 'Host', onSelect: () => navigate('/remote?role=host') },
+            { label: 'Control', onSelect: () => navigate('/remote?role=control') }
+          ]}
+          onClose={() => setRemoteMenu(null)}
         />
       )}
     </nav>
