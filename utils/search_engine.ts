@@ -1,5 +1,6 @@
 export type SearchEngineId =
   | 'google'
+  | 'google_ai'
   | 'ddg'
   | 'yahoo'
   | 'kagi'
@@ -23,6 +24,7 @@ export const QUERY_TOKEN = '%s';
 
 export const SEARCH_ENGINES: { id: SearchEngineId; label: string; template: string }[] = [
   { id: 'google', label: 'Google', template: `https://www.google.com/search?q=${QUERY_TOKEN}` },
+  { id: 'google_ai', label: 'Google AI Mode', template: `https://www.google.com/search?udm=50&q=${QUERY_TOKEN}` },
   { id: 'ddg', label: 'DuckDuckGo', template: `https://duckduckgo.com/?q=${QUERY_TOKEN}` },
   { id: 'yahoo', label: 'Yahoo', template: `https://search.yahoo.com/search?p=${QUERY_TOKEN}` },
   { id: 'kagi', label: 'Kagi', template: `https://kagi.com/search?q=${QUERY_TOKEN}` },
@@ -58,7 +60,7 @@ export const SEARCH_ENGINES: { id: SearchEngineId; label: string; template: stri
 
 export type SearchEngineKind = 'search' | 'music' | 'ai' | 'more';
 
-const AI_ENGINES = new Set<SearchEngineId>(['chatgpt', 'grok', 'groktw', 'claude']);
+const AI_ENGINES = new Set<SearchEngineId>(['google_ai', 'chatgpt', 'grok', 'groktw', 'claude']);
 
 const MUSIC_ENGINES = new Set<SearchEngineId>([
   'youtube',
@@ -73,7 +75,7 @@ const MUSIC_ENGINES = new Set<SearchEngineId>([
 export const ENGINE_GROUPS: { kind: SearchEngineKind; label: string }[] = [
   { kind: 'search', label: 'Traditional search engines' },
   { kind: 'music', label: 'Music sites' },
-  { kind: 'ai', label: 'AI chatbots' },
+  { kind: 'ai', label: 'AI search and chatbots' },
   { kind: 'more', label: 'More' }
 ];
 
