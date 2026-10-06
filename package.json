@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "vite",
     "stage": "wrangler types && tsc --noEmit && tsc -p worker --noEmit && vite build --mode stage && vite preview --strictPort",
-    "dev:worker": "wrangler dev",
+    "dev:worker": "wrangler types && tsc --noEmit && tsc -p worker --noEmit && vite build --mode stage && wrangler dev",
     "types": "wrangler types",
     "build": "wrangler types && tsc --noEmit && tsc -p worker --noEmit && vite build",
     "preview": "vite preview",
