@@ -506,11 +506,10 @@ export function SettingsPage() {
                       <div
                         key={id}
                         role="listitem"
-                        className={`xe_settings__home-item${
-                          homeSectionDragging?.from === index
+                        className={`xe_settings__home-item${homeSectionDragging?.from === index
                             ? ' xe_settings__home-item--dragging'
                             : ''
-                        }`}
+                          }`}
                         style={homeSectionItemStyle(index)}
                       >
                         <div className="xe_settings__home-item-head">
@@ -841,8 +840,8 @@ export function SettingsPage() {
                       {formatBytes(settings.ignoreRules.maxSizeBytes)}
                       <span
                         className={`xe_settings__quip${settings.ignoreRules.maxSizeBytes > SIZE_QUIP_THRESHOLD_BYTES
-                            ? ' xe_settings__quip--shown'
-                            : ''
+                          ? ' xe_settings__quip--shown'
+                          : ''
                           }`}
                       >
                         {' '}
@@ -902,8 +901,8 @@ export function SettingsPage() {
                         <button
                           type="button"
                           className={`xe_btn xe_settings__folder-remove${confirmRemoveId === folder.id
-                              ? ' xe_settings__folder-remove--armed'
-                              : ''
+                            ? ' xe_settings__folder-remove--armed'
+                            : ''
                             }`}
                           onClick={() => requestRemoveFolder(folder.id)}
                           aria-label={
@@ -989,36 +988,41 @@ export function SettingsPage() {
                 <p className="xe_settings__hint">
                   Auto mix is an experimental automatic mixing subsystem. It works by analyzing the BPM of the currently playing track and the next enqueued track then calculates the BPM difference and ease of crossfading while beat-matching
                 </p>
-                <p className="xe_settings__hint">
-                  This is <strong>extremely</strong> broken and will not work for most tracks. If you just queue every song on your drive expecting smooth transitions, you'll not get that.
-                  I tuned this (and am still vigorously tuning it) basically for very long progressive house tracks like deadmau5 (especially the At Play series), with super long 128 bpm intro and outros. This feature is <strong>incompatible</strong> for pretty much any other kind of music.
-                </p>
-                <p className="xe_settings__hint">
-                  You may notice skips or gaps between or during mixing. This is expected as - by normal, Xebrine uses - and attempts to cleanly transition playback from - a traditional HTML5 audio element to play music. However, during mixing, Xebrine uses the Web Audio API to process the audio and crossfade it. I've made efforts to mitigate / eliminate that gap, but you may still notice it.
-                </p>
-                <p className="xe_settings__hint">
-                  If you notice that during mixing, the next track sounds slowed down or sped up, that's... because it is. Xebrine will attempt to match the BPM of the next track to the current track, and if the next track is too far off in BPM, it will be sped up or slowed down to match. This is also expected and intended - I don't really have any better solutions yet.
-                </p>
-                <p className="xe_settings__hint">
-                  Xebrine uses a completely homegrown BPM detection algorithm I wrote myself. No
-                  libraries, not even for the FFT. It runs in a Web Worker so it never chokes the
-                  UI, and caches the last 40 tracks. The track gets decoded to mono, cut into
-                  overlapping frames and turned into an onset curve - how much energy is
-                  <em> appearing</em> at each moment, with the bass weighted up because kick drums
-                  are what you actually beat-match to. Autocorrelating that curve against a comb
-                  filter finds the tempo, then a dynamic programming pass finds where the beats
-                  actually land, and a line fitted through those beats gives the final BPM and tells
-                  Xebrine exactly when the next beat arrives.
-                </p>
-                <p className="xe_settings__hint">
-                  The confidence percentage combines how far the winning tempo stood out, how many
-                  parts of the track agreed on it, and how tightly the beats hug the fitted grid. A
-                  low reading usually means the algorithm suspects it landed on the wrong octave -
-                  half-time hip hop reading as 170, drum and bass reading as 87. No algorithm is perfect, and this certainly isn't an exception.
-                </p>
-                <p className="xe_settings__hint">
-                  There is still a lot to do, at the forefront; key and harmonic mixing. Because, many songs can be 128 bpm but be wildly different and an auto mix betwen those would sound like a walkie-talkie explosion. As a programmer (and amateur DJ who has played a few times at stupid parties), I'm trying really hard to make this DJ software-like, bear with me...
-                </p>
+                <details className="xe_settings__details">
+                  <summary>Read me...</summary>
+                  <div className="xe_settings__details-content">
+                    <p className="xe_settings__hint">
+                      This is <strong>extremely</strong> broken and will not work for most tracks. If you just queue every song on your drive expecting smooth transitions, you'll not get that.
+                      I tuned this (and am still vigorously tuning it) basically for very long progressive house tracks like deadmau5 (especially the At Play series), with super long 128 bpm intro and outros. This feature is <strong>incompatible</strong> for pretty much any other kind of music.
+                    </p>
+                    <p className="xe_settings__hint">
+                      You may notice skips or gaps between or during mixing. This is expected as - by normal, Xebrine uses - and attempts to cleanly transition playback from - a traditional HTML5 audio element to play music. However, during mixing, Xebrine uses the Web Audio API to process the audio and crossfade it. I've made efforts to mitigate / eliminate that gap, but you may still notice it.
+                    </p>
+                    <p className="xe_settings__hint">
+                      If you notice that during mixing, the next track sounds slowed down or sped up, that's... because it is. Xebrine will attempt to match the BPM of the next track to the current track, and if the next track is too far off in BPM, it will be sped up or slowed down to match. This is also expected and intended - I don't really have any better solutions yet.
+                    </p>
+                    <p className="xe_settings__hint">
+                      Xebrine uses a completely homegrown BPM detection algorithm I wrote myself. No
+                      libraries, not even for the FFT. It runs in a Web Worker so it never chokes the
+                      UI, and caches the last 40 tracks. The track gets decoded to mono, cut into
+                      overlapping frames and turned into an onset curve - how much energy is
+                      <em> appearing</em> at each moment, with the bass weighted up because kick drums
+                      are what you actually beat-match to. Autocorrelating that curve against a comb
+                      filter finds the tempo, then a dynamic programming pass finds where the beats
+                      actually land, and a line fitted through those beats gives the final BPM and tells
+                      Xebrine exactly when the next beat arrives.
+                    </p>
+                    <p className="xe_settings__hint">
+                      The confidence percentage combines how far the winning tempo stood out, how many
+                      parts of the track agreed on it, and how tightly the beats hug the fitted grid. A
+                      low reading usually means the algorithm suspects it landed on the wrong octave -
+                      half-time hip hop reading as 170, drum and bass reading as 87. No algorithm is perfect, and this certainly isn't an exception.
+                    </p>
+                    <p className="xe_settings__hint">
+                      There is still a lot to do, at the forefront; key and harmonic mixing. Because, many songs can be 128 bpm but be wildly different and an auto mix betwen those would sound like a walkie-talkie explosion. Like, Yelawolf's "Till It's Gone" is 129 bpm but Martin Garrix's "Proxy" is 128, but they are probably the last songs you'd try mixing.
+                    </p>
+                  </div>
+                </details>
                 <h2>How long should a crossfade be?</h2>
                 <div className="xe_settings__slider-row">
                   <Slider
@@ -1033,12 +1037,11 @@ export function SettingsPage() {
                   <span className="xe_settings__slider-value">{settings.autoMixDuration}s</span>
                 </div>
                 <p className="xe_settings__hint">
-                  <small><i>What do the pills mean?</i></small><br></br>
-                  A <span style={{ color: '#3ddc84' }}>Green</span> pill means the current and next track BPMs are compatible for a mix
+                  A <span style={{ color: '#3ddc84' }}>Green</span> pill means the current and next track BPMs are compatible for a mix and should work well
                   <br></br>
                   An <span style={{ color: '#f5a623' }}>Orange</span> pill means the BPMs are less-than-optimal but Xebrine will try mixing them anyway
                   <br></br>
-                  A <span style={{ color: '#f5524a' }}>Red</span> pill means the BPMs are way too incompatible for mixing and they will just simply crossfade without processing
+                  A <span style={{ color: '#f5524a' }}>Red</span> pill means the BPMs are too out-of-range for mixing and they will just simply crossfade without processing
                 </p>
               </section>
 
