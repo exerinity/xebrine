@@ -48,6 +48,16 @@
   --danger: #ff5c5c;
 }
 
+:root[data-theme='fullylo'] {
+  --bg: #000000;
+  --panel: #000000;
+  --panel-2: #030202;
+  --border: #222222;
+  --text: #f1f1f1;
+  --text-dim: #cfcfcf;
+  --danger: #ff5c5c;
+}
+
 :root[data-theme='high-contrast'] {
   --bg: #000000;
   --panel: #000000;
