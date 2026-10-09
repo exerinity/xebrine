@@ -144,6 +144,7 @@ export function LyricsPanel({
   const [status, setStatus] = useState<Status>('idle');
   const [retryStatus, setRetryStatus] = useState<RetryStatus | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [following, setFollowing] = useState(true);
   const [lrclibSearchOpen, setLrclibSearchOpen] = useState(false);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteText, setPasteText] = useState('');
@@ -153,6 +154,7 @@ export function LyricsPanel({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const lineRefs = useRef<(HTMLElement | null)[]>([]);
   const userScrollUntil = useRef(0);
+  const followTimerRef = useRef(0);
   const requestAbortRef = useRef<AbortController | null>(null);
   const menuOpenRef = useRef(false);
   const trackIdRef = useRef(track?.id);
@@ -163,6 +165,8 @@ export function LyricsPanel({
   useEffect(() => {
     onInstrumentalChange?.(instrumental);
   }, [instrumental, onInstrumentalChange]);
+
+  useEffect(() => () => window.clearTimeout(followTimerRef.current), []);
 
   const runSearch = useCallback(
     async (target: TrackMeta, signal: AbortSignal) => {
@@ -302,6 +306,10 @@ export function LyricsPanel({
 
   const markUserScroll = () => {
     userScrollUntil.current = Date.now() + 4000;
+    if (variant !== 'fullscreen') return;
+    setFollowing(false);
+    window.clearTimeout(followTimerRef.current);
+    followTimerRef.current = window.setTimeout(() => setFollowing(true), 4000);
   };
 
   const preferUserLyrics = useCallback(() => {
@@ -422,7 +430,7 @@ export function LyricsPanel({
   }
 
   return (
-    <div className={`xe_lyrics-panel xe_lyrics-panel--${variant}`}>
+    <div className={`xe_lyrics-panel xe_lyrics-panel--${variant}`} data-instrumental={variant === 'fullscreen' && instrumental ? '' : undefined}>
       {showToolbar && (
         <div className="xe_lyrics-panel__toolbar">
           <button
@@ -553,8 +561,10 @@ export function LyricsPanel({
           className="xe_lyrics-panel__lines"
           ref={containerRef}
           data-context-menu-scroll-root
+          data-following={variant === 'fullscreen' && lyrics.synced && following ? '' : undefined}
           onWheel={markUserScroll}
           onTouchMove={markUserScroll}
+          onPointerDown={variant === 'fullscreen' ? markUserScroll : undefined}
         >
           {lyrics.lines.map((line, i) => {
             const clickable = line.time !== null;
@@ -568,6 +578,7 @@ export function LyricsPanel({
                 className={`xe_lyrics-line${i === activeIndex ? ' xe_lyrics-line--active' : ''}${
                   clickable ? '' : ' xe_lyrics-line--static'
                 }`}
+                data-distance={variant === 'fullscreen' && activeIndex >= 0 ? Math.min(Math.abs(i - activeIndex), 3) : undefined}
                 onClick={clickable ? () => seek(line.time as number) : undefined}
                 onContextMenu={(e) => {
                   e.preventDefault();

@@ -58,6 +58,8 @@ export interface Settings {
   fsSaturate: number;
   fsKenBurns: boolean;
   fsKenBurnsIntensity: number;
+  fsMinimalBlur: number;
+  fsMinimalRotationSpeed: number;
   reducedMotion: boolean;
   announceTrackChanges: boolean;
   artistPronunciations: ArtistPronunciation[];
@@ -111,6 +113,8 @@ export const DEFAULT_SETTINGS: Settings = {
   fsSaturate: 1,
   fsKenBurns: true,
   fsKenBurnsIntensity: KEN_BURNS_DEFAULT_INTENSITY,
+  fsMinimalBlur: 80,
+  fsMinimalRotationSpeed: 1,
   reducedMotion: false,
   announceTrackChanges: false,
   artistPronunciations: [],
@@ -168,6 +172,12 @@ function loadSettings(): Settings {
       playerBarSliderPosition: merged.playerBarSliderPosition === 'above' ? 'above' : 'below',
       playerBarLayout: merged.playerBarLayout === 'compact' ? 'compact' : 'comfortable',
       fsPlayerStyle: merged.fsPlayerStyle === 'minimal' ? 'minimal' : 'maximal',
+      fsMinimalBlur: Number.isFinite(merged.fsMinimalBlur)
+        ? Math.min(120, Math.max(0, Math.round(merged.fsMinimalBlur)))
+        : DEFAULT_SETTINGS.fsMinimalBlur,
+      fsMinimalRotationSpeed: Number.isFinite(merged.fsMinimalRotationSpeed)
+        ? Math.min(4, Math.max(0, Math.round(merged.fsMinimalRotationSpeed * 10) / 10))
+        : DEFAULT_SETTINGS.fsMinimalRotationSpeed,
       sidePanelOpen:
         typeof stored.sidePanelOpen === 'boolean'
           ? stored.sidePanelOpen

@@ -18,6 +18,7 @@ interface FullscreenPlayerProps {
 
 const EXIT_DURATION_MS = 200;
 const DRAG_THRESHOLD_PX = 4;
+const MINIMAL_ROTATION_BASE_SECONDS = 220;
 type CoverDeformation = [number, number, number, number, number, number];
 
 const RESTING_DEFORMATION: CoverDeformation = [1, 0, 0, 1, 0, 0];
@@ -151,7 +152,11 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
   } = snapshotRef.current;
   const nextItem = displayQueue[displayPosition + 1] ?? null;
   const progress = displayDuration > 0 ? Math.min(100, (displayCurrentTime / displayDuration) * 100) : 0;
-  const backgroundBlur = minimal ? Math.max(settings.fsBlur, 80) : settings.fsBlur;
+  const backgroundBlur = minimal ? settings.fsMinimalBlur : settings.fsBlur;
+  const backgroundSaturate = minimal ? 1 : settings.fsSaturate;
+  const minimal_rotation_speed = minimal && Number.isFinite(settings.fsMinimalRotationSpeed)
+    ? Math.min(4, Math.max(0, settings.fsMinimalRotationSpeed))
+    : 0;
 
   const backToJustPlayed = () => {
     if (!displayJustPlayed) return;
@@ -325,10 +330,11 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
       {displayArtworkUrl && (
         <div
           ref={washRef}
-          className={`xe_fullscreen-player__wash${minimal ? ' xe_fullscreen-player__wash--minimal' : ''}`}
+          className={`xe_fullscreen-player__wash${minimal ? ' xe_fullscreen-player__wash--minimal' : ''}${minimal_rotation_speed > 0 ? ' xe_fullscreen-player__wash--rotating' : ''}`}
           style={{
             backgroundImage: `url(${displayArtworkUrl})`,
-            filter: `blur(${backgroundBlur}px) saturate(${settings.fsSaturate})`
+            filter: `blur(${backgroundBlur}px) saturate(${backgroundSaturate})`,
+            animationDuration: minimal_rotation_speed > 0 ? `${MINIMAL_ROTATION_BASE_SECONDS / minimal_rotation_speed}s` : undefined
           }}
           aria-hidden="true"
         />
@@ -350,10 +356,6 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
       ) : (
         <div className="xe_fullscreen-player__layout">
           <section className="xe_fullscreen-player__hero" aria-label="Current track">
-            <span className="xe_fullscreen-player__eyebrow">
-              <LogoIcon size={14} />
-              {displayPlaying ? 'Now playing' : 'Now paused'}
-            </span>
             <div className="xe_fullscreen-player__cover-wrap">
               <div className="xe_fullscreen-player__cover-glow" aria-hidden="true" />
               <button

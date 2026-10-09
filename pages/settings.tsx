@@ -706,7 +706,7 @@ export function SettingsPage() {
               </section>
 
               <section className="xe_settings__section">
-                <h2>Fullscreen player background</h2>
+                <h2>Maximal fullscreen player background</h2>
                 <p className="xe_settings__hint">Right-click a slider to reset it to default</p>
                 <div className="xe_settings__chip-row">
                   {FS_BG_PRESETS.map((preset) => {
@@ -726,12 +726,12 @@ export function SettingsPage() {
                 </div>
                 <h2>Blur</h2>
                 <div className="xe_settings__slider-row">
-                  <Slider value={settings.fsBlur} min={0} max={120} wheelStep={1} resetTo={56} onChange={(v) => update({ fsBlur: Math.round(v) })} ariaLabel="Fullscreen player background blur" />
+                  <Slider value={settings.fsBlur} min={0} max={120} wheelStep={1} resetTo={56} onChange={(v) => update({ fsBlur: Math.round(v) })} ariaLabel="Maximal fullscreen player background blur" />
                   <span className="xe_settings__slider-value">{settings.fsBlur}px</span>
                 </div>
                 <h2>Saturation</h2>
                 <div className="xe_settings__slider-row">
-                  <Slider value={settings.fsSaturate} min={0} max={3} wheelStep={0.05} resetTo={1.35} onChange={(v) => update({ fsSaturate: Math.round(v * 100) / 100 })} ariaLabel="Fullscreen player background saturation" />
+                  <Slider value={settings.fsSaturate} min={0} max={3} wheelStep={0.05} resetTo={1.35} onChange={(v) => update({ fsSaturate: Math.round(v * 100) / 100 })} ariaLabel="Maximal fullscreen player background saturation" />
                   <span className="xe_settings__slider-value">{settings.fsSaturate.toFixed(2)}x</span>
                 </div>
                 <h2>Ken Burns</h2>
@@ -746,6 +746,22 @@ export function SettingsPage() {
                   </div>
                 )}
                 <p className="xe_settings__hint">{settings.reducedMotion ? 'Reduced motion is on...' : 'Higher is faster'}</p>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>Minimal fullscreen player background</h2>
+                <p className="xe_settings__hint">Right-click a slider to reset it to default</p>
+                <h2>Blur</h2>
+                <div className="xe_settings__slider-row">
+                  <Slider value={settings.fsMinimalBlur} min={0} max={120} wheelStep={1} resetTo={80} onChange={(v) => update({ fsMinimalBlur: Math.round(v) })} ariaLabel="Minimal fullscreen player background blur" />
+                  <span className="xe_settings__slider-value">{settings.fsMinimalBlur}px</span>
+                </div>
+                <h2>Rotation speed</h2>
+                <div className="xe_settings__slider-row">
+                  <Slider value={settings.fsMinimalRotationSpeed} min={0} max={4} wheelStep={0.1} resetTo={1} onChange={(v) => update({ fsMinimalRotationSpeed: Math.round(v * 10) / 10 })} ariaLabel="Minimal fullscreen player background rotation speed" />
+                  <span className="xe_settings__slider-value">{settings.fsMinimalRotationSpeed === 0 ? 'Off' : `${settings.fsMinimalRotationSpeed.toFixed(1)}x`}</span>
+                </div>
+                <p className="xe_settings__hint">{settings.reducedMotion ? 'Reduced motion is on...' : '1x is one rotation every 220 seconds'}</p>
               </section>
             </>
           )}
