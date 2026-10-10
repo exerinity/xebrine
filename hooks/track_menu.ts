@@ -3,7 +3,7 @@ import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
 import type { ContextMenuItem } from '../components/context_menu';
 import { displayArtist } from '../utils/groups';
-import { openSearch, searchLabel } from '../utils/search_engine';
+import { search_menu_item } from '../utils/search_menu';
 import { toSlugParam } from '../utils/slug';
 import { toast } from '../utils/toast';
 import type { TrackMeta } from '../types';
@@ -42,14 +42,12 @@ export function useTrackMenu() {
     { label: 'Go to album', heading: 'Navigation...', onSelect: () => goToAlbum(track) },
     { label: 'Go to artist', onSelect: () => goToArtist(track) },
     {
-      label: searchLabel(settings.searchEngine, settings.customSearchUrl),
-      separatorBefore: true,
-      onSelect: () =>
-        openSearch(
-          `${track.title} by ${track.artist}`,
-          settings.searchEngine,
-          settings.customSearchUrl
-        )
+      ...search_menu_item(
+        `${track.title} by ${track.artist}`,
+        settings.searchEngine,
+        settings.customSearchUrl
+      ),
+      separatorBefore: true
     }
   ];
 
