@@ -53,6 +53,18 @@
   transition: color 120ms ease;
 }
 
+.xe_context-menu__submenu-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: #8a8a8a;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  transition: color 120ms ease;
+}
+
 .xe_context-menu__item:hover,
 .xe_context-menu__item:focus-visible {
   border-color: #292929;
@@ -62,7 +74,9 @@
 }
 
 .xe_context-menu__item:hover .xe_context-menu__icon,
-.xe_context-menu__item:focus-visible .xe_context-menu__icon {
+.xe_context-menu__item:focus-visible .xe_context-menu__icon,
+.xe_context-menu__item:hover .xe_context-menu__submenu-indicator,
+.xe_context-menu__item:focus-visible .xe_context-menu__submenu-indicator {
   color: #fff;
 }
 
