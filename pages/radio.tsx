@@ -14,7 +14,8 @@ import { FloatingInput } from '../components/floating_input';
 import { Modal } from '../components/modal';
 import { Radio_filter_modal } from '../components/radio_filter_modal';
 import { Spinner } from '../components/spinner';
-import { openSearch, searchLabel } from '../utils/search_engine';
+import { searchLabel } from '../utils/search_engine';
+import { search_menu_item } from '../utils/search_menu';
 import { radio_homepage, radio_location } from '../utils/radio_station';
 import { toast } from '../utils/toast';
 
@@ -313,14 +314,15 @@ export function Radio_page() {
       { label: 'Copy station name', heading: 'Copy', onSelect: () => copy_station(station.name, 'name') },
       { label: 'Copy station location', onSelect: () => copy_station(location, 'location') },
       {
-        label: searchLabel(settings.searchEngine, settings.customSearchUrl),
-        heading: 'Search',
-        onSelect: () => openSearch(station.name, settings.searchEngine, settings.customSearchUrl)
+        ...search_menu_item(station.name, settings.searchEngine, settings.customSearchUrl),
+        heading: 'Search'
       },
-      {
-        label: `Search location with ${searchLabel(settings.searchEngine, settings.customSearchUrl).replace(/^Search /, '')}`,
-        onSelect: () => openSearch(location, settings.searchEngine, settings.customSearchUrl)
-      }
+      search_menu_item(
+        location,
+        settings.searchEngine,
+        settings.customSearchUrl,
+        `Search location with ${searchLabel(settings.searchEngine, settings.customSearchUrl).replace(/^Search /, '')}`
+      )
     ];
   }
 
