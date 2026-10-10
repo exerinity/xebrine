@@ -14,7 +14,7 @@ import { dbGet } from '../management/db';
 import { deleteLyrics, saveLyrics, subscribeLyricsChanges } from '../management/stored_lyrics';
 import { containsProfanity } from '../utils/profanity';
 import { isExplicitId, markExplicit } from '../utils/explicit_tracks';
-import { openSearch, searchLabel } from '../utils/search_engine';
+import { search_menu_item } from '../utils/search_menu';
 import { toast } from '../utils/toast';
 import type { Lyrics, StoredLyrics, TrackMeta } from '../types';
 import { LyricsSkeleton } from './skeletons';
@@ -387,14 +387,20 @@ export function LyricsPanel({
     if (line.time !== null) {
       const time = line.time;
       items.push(
-        { label: 'Jump to this line', onSelect: () => seek(time) },
         {
-          label: `...${NUDGE_SECONDS} seconds before`,
-          onSelect: () => seek(time - NUDGE_SECONDS)
-        },
-        {
-          label: `...${NUDGE_SECONDS} seconds after`,
-          onSelect: () => seek(time + NUDGE_SECONDS)
+          label: 'Jump to this line',
+          onSelect: () => seek(time),
+          submenu: [
+            {
+              heading: 'Jump...',
+              label: `...${NUDGE_SECONDS} seconds before`,
+              onSelect: () => seek(time - NUDGE_SECONDS)
+            },
+            {
+              label: `...${NUDGE_SECONDS} seconds after`,
+              onSelect: () => seek(time + NUDGE_SECONDS)
+            }
+          ]
         }
       );
     }
@@ -409,10 +415,7 @@ export function LyricsPanel({
               .then(() => toast.success('Copied the line'))
               .catch(() => toast.error("Couldn't copy the line"))
         },
-        {
-          label: searchLabel(settings.searchEngine, settings.customSearchUrl),
-          onSelect: () => openSearch(line.text, settings.searchEngine, settings.customSearchUrl)
-        }
+        search_menu_item(line.text, settings.searchEngine, settings.customSearchUrl)
       );
     }
     if (items[0]) items[0].heading = '"' + lineHeading(line.text) + '"';
