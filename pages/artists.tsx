@@ -4,7 +4,7 @@ import { useLibrary } from '../context/library_context';
 import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
 import { groupArtists, type ArtistGroup } from '../utils/groups';
-import { openSearch, searchLabel } from '../utils/search_engine';
+import { search_menu_item } from '../utils/search_menu';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { toSlugParam } from '../utils/slug';
@@ -46,7 +46,7 @@ function loadSort(): { sort: ArtistSort; direction: SortDirection } {
 
 export function ArtistsPage() {
   const { tracks } = useLibrary();
-  const { playNow, enqueueEnd } = usePlayer();
+  const { playNow, enqueueNext, enqueueEnd } = usePlayer();
   const { settings } = useSettings();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
@@ -68,24 +68,23 @@ export function ArtistsPage() {
       onSelect: () => navigate(`/artists/${toSlugParam(artist.name)}`)
     },
     {
-      label: 'Play all music',
-      heading: 'Queue...',
-      onSelect: () => playNow(artist.tracks, 0)
-    },
-    {
       label: 'Shuffle all music',
+      heading: 'Queue...',
       onSelect: () =>
         playNow(
           intelligentShuffle(artist.tracks, (t) => ({ id: t.id, artist: t.artist }), getRecentIds()),
           0
         )
     },
-    { label: 'Enqueue all music', onSelect: () => enqueueEnd(artist.tracks) },
     {
-      label: searchLabel(settings.searchEngine, settings.customSearchUrl),
-      separatorBefore: true,
-      onSelect: () => openSearch(artist.name, settings.searchEngine, settings.customSearchUrl)
+      label: 'Enqueue all music',
+      onSelect: () => enqueueEnd(artist.tracks),
+      submenu: [
+        { label: 'Play all music next', onSelect: () => enqueueNext(artist.tracks) },
+        { label: 'Play all music now', onSelect: () => playNow(artist.tracks, 0) }
+      ]
     },
+    { ...search_menu_item(artist.name, settings.searchEngine, settings.customSearchUrl), separatorBefore: true },
     { label: 'Copy name', onSelect: () => copyName(artist.name) }
   ];
 
