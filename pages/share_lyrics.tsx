@@ -12,7 +12,7 @@ import {
   type CardStyle,
   type LogoMode
 } from '../utils/share_card';
-import { openSearch } from '../utils/search_engine';
+import { search_menu_item } from '../utils/search_menu';
 import { toast } from '../utils/toast';
 import type { Lyrics, StoredLyrics } from '../types';
 import { ContextMenu, type ContextMenuItem } from '../components/context_menu';
@@ -206,10 +206,7 @@ export function ShareLyricsPage() {
         separatorBefore: true,
         onSelect: () => copyLine(line.text)
       },
-      {
-        label: 'Search Google',
-        onSelect: () => openSearch(line.text, 'google', '')
-      }
+      search_menu_item(line.text, settings.searchEngine, settings.customSearchUrl)
     ];
   };
 
