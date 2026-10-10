@@ -1,6 +1,7 @@
 import {
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type MouseEvent,
@@ -9,6 +10,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { MAX_VOLUME, REMOTE_LOCK_MESSAGE, usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
+import { useLibrary } from '../context/library_context';
 import { Spinner } from './spinner';
 import { radio_homepage } from '../utils/radio_station';
 import { ScrollingText } from './scrolling_text';
@@ -19,6 +21,10 @@ import { ContextMenu, type ContextMenuItem } from './context_menu';
 import { toast } from '../utils/toast';
 import { toSlugParam } from '../utils/slug';
 import { displayArtist } from '../utils/groups';
+import { useTrackMenu } from '../hooks/track_menu';
+import { search_menu_item } from '../utils/search_menu';
+import { intelligentShuffle } from '../queue/shuffle';
+import { getRecentIds } from '../queue/history';
 import {
   AutoMixIcon,
   AutoPlayIcon,
@@ -61,6 +67,7 @@ interface PlayerBarProps {
 }
 
 type SecondaryToolId = 'automix' | 'sleep' | 'lastfm' | 'autoplay' | 'side-panel';
+type PlayerFieldMenu = 'track' | 'artist' | 'album';
 
 const SECONDARY_TOOL_WIDTH: Record<SecondaryToolId, number> = {
   automix: 76,
@@ -125,8 +132,11 @@ export function PlayerBar({
     currentTime,
     duration,
     togglePlay,
+    playNow,
     next,
     prev,
+    enqueueNext,
+    enqueueEnd,
     setVolume,
     toggleShuffle,
     cycleRepeat,
@@ -138,6 +148,8 @@ export function PlayerBar({
     remoteLocked
   } = usePlayer();
   const { settings, update } = useSettings();
+  const { tracks } = useLibrary();
+  const { buildMenu } = useTrackMenu();
   const lastfm = useLastfmSession();
   const scrobbleStatus = useScrobbleStatus();
   const lastAudibleVolumeRef = useRef(volume > 0 ? volume : 0.8);
@@ -147,6 +159,11 @@ export function PlayerBar({
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [nowEntering, setNowEntering] = useState(false);
   const [scrobbleMenu, setScrobbleMenu] = useState<{ x: number; y: number } | null>(null);
+  const [field_context_menu, set_field_context_menu] = useState<{
+    x: number;
+    y: number;
+    type: PlayerFieldMenu;
+  } | null>(null);
   const [secondaryToolsOpen, setSecondaryToolsOpen] = useState(false);
   const secondaryToolsRef = useRef<HTMLDivElement | null>(null);
   const volumeControlsRef = useRef<HTMLDivElement | null>(null);
@@ -160,6 +177,21 @@ export function PlayerBar({
   const loveRequestRef = useRef(0);
 
   const track = current?.track ?? null;
+  const artist_tracks = useMemo(() => {
+    if (!track) return [];
+    const artist = displayArtist(track).toLowerCase();
+    const matches = tracks.filter(item => displayArtist(item).toLowerCase() === artist);
+    return matches.length > 0 ? matches : [track];
+  }, [track, tracks]);
+  const album_tracks = useMemo(() => {
+    if (!track) return [];
+    const artist = displayArtist(track).toLowerCase();
+    const album = track.album.toLowerCase();
+    const matches = tracks.filter(
+      item => displayArtist(item).toLowerCase() === artist && item.album.toLowerCase() === album
+    );
+    return matches.length > 0 ? matches : [track];
+  }, [track, tracks]);
   const radio_homepage_url = radio_homepage(radio_station?.homepage);
   const playerAtTop = settings.playerBarPosition === 'top';
   const compact = settings.playerBarLayout === 'compact';
@@ -298,30 +330,92 @@ export function PlayerBar({
     }
   };
 
-  const handleFieldClick = (field: 'title' | 'artist' | 'album', value: string) => {
-    if (settings.playerBarClickAction === 'open') {
-      openField(field);
-    } else {
-      copyField(field, value);
-    }
+  const handleFieldClick = (field: 'title' | 'artist' | 'album') => {
+    openField(field);
   };
 
-  const handleFieldContextMenu = (e: MouseEvent, field: 'title' | 'artist' | 'album', value: string) => {
+  const handleFieldContextMenu = (e: MouseEvent, field: 'title' | 'artist' | 'album') => {
     if (!track) return;
     e.preventDefault();
-    if (settings.playerBarClickAction === 'open') {
-      copyField(field, value);
-    } else {
-      openField(field);
-    }
+    set_field_context_menu({
+      x: e.clientX,
+      y: e.clientY,
+      type: field === 'title' ? 'track' : field
+    });
   };
 
-  const fieldTooltip = (field: 'title' | 'artist' | 'album', value: string) => {
+  const fieldTooltip = (field: 'title' | 'artist' | 'album') => {
     const target = field === 'artist' ? track!.artist : track!.album;
-    if (settings.playerBarClickAction === 'open') {
-      return copiedField === field ? 'Copied!' : `Go to "${target}" (right-click to copy)`;
+    return `Go to "${target}" (right-click for options)`;
+  };
+
+  const player_field_menu_items = (): ContextMenuItem[] => {
+    if (!track || !field_context_menu) return [];
+    if (field_context_menu.type === 'track') return buildMenu(track);
+    if (field_context_menu.type === 'artist') {
+      return [
+        {
+          label: 'Open this artist',
+          heading: 'Navigation...',
+          onSelect: () => openField('artist')
+        },
+        {
+          label: 'Shuffle all music',
+          heading: 'Queue...',
+          onSelect: () =>
+            playNow(
+              intelligentShuffle(artist_tracks, item => ({ id: item.id, artist: item.artist }), getRecentIds()),
+              0
+            )
+        },
+        {
+          label: 'Enqueue all music',
+          onSelect: () => enqueueEnd(artist_tracks),
+          submenu: [
+            { label: 'Play all music next', onSelect: () => enqueueNext(artist_tracks) },
+            { label: 'Play all music now', onSelect: () => playNow(artist_tracks, 0) }
+          ]
+        },
+        {
+          ...search_menu_item(displayArtist(track), settings.searchEngine, settings.customSearchUrl),
+          separatorBefore: true
+        },
+        { label: 'Copy name', onSelect: () => copyField('artist', displayArtist(track)) }
+      ];
     }
-    return copiedField === field ? 'Copied!' : `Copy "${value}" (right-click to open)`;
+    return [
+      {
+        label: 'Open album artist',
+        heading: 'Navigation...',
+        onSelect: () => openField('artist')
+      },
+      search_menu_item(
+        `${track.album} by ${displayArtist(track)}`,
+        settings.searchEngine,
+        settings.customSearchUrl
+      ),
+      {
+        label: 'Copy name',
+        onSelect: () => copyField('album', `${track.album} by ${displayArtist(track)}`)
+      },
+      {
+        label: 'Enqueue this album',
+        heading: 'Queue...',
+        onSelect: () => enqueueEnd(album_tracks),
+        submenu: [
+          { label: 'Play this album next', onSelect: () => enqueueNext(album_tracks) },
+          { label: 'Play this album now', onSelect: () => playNow(album_tracks, 0) }
+        ]
+      },
+      {
+        label: 'Shuffle this album',
+        onSelect: () =>
+          playNow(
+            intelligentShuffle(album_tracks, item => ({ id: item.id, artist: item.artist }), getRecentIds()),
+            0
+          )
+      }
+    ];
   };
 
   const toggleMute = () => {
@@ -600,9 +694,9 @@ export function PlayerBar({
                   <ScrollingText
                     text={track.title}
                     className="xe_player-bar__title"
-                    title={fieldTooltip('title', track.title)}
-                    onClick={() => handleFieldClick('title', track.title)}
-                    onContextMenu={(e) => handleFieldContextMenu(e, 'title', track.title)}
+                    title={fieldTooltip('title')}
+                    onClick={() => handleFieldClick('title')}
+                    onContextMenu={(e) => handleFieldContextMenu(e, 'title')}
                   />
                   <ExplicitBadge trackId={track.id} />
                   {lastfm && settings.lastfmLovedTracks && (
@@ -628,16 +722,16 @@ export function PlayerBar({
                 <ScrollingText
                   text={track.artist}
                   className="xe_player-bar__subtitle"
-                  title={fieldTooltip('artist', track.artist)}
-                  onClick={() => handleFieldClick('artist', track.artist)}
-                  onContextMenu={(e) => handleFieldContextMenu(e, 'artist', track.artist)}
+                  title={fieldTooltip('artist')}
+                  onClick={() => handleFieldClick('artist')}
+                  onContextMenu={(e) => handleFieldContextMenu(e, 'artist')}
                 />
                 <ScrollingText
                   text={track.album}
                   className="xe_player-bar__subtitle xe_player-bar__album"
-                  title={fieldTooltip('album', track.album)}
-                  onClick={() => handleFieldClick('album', track.album)}
-                  onContextMenu={(e) => handleFieldContextMenu(e, 'album', track.album)}
+                  title={fieldTooltip('album')}
+                  onClick={() => handleFieldClick('album')}
+                  onContextMenu={(e) => handleFieldContextMenu(e, 'album')}
                 />
                 {loadError && <span className="xe_player-bar__error">{loadError}</span>}
               </>
@@ -786,6 +880,14 @@ export function PlayerBar({
           y={scrobbleMenu.y}
           items={scrobbleMenuItems}
           onClose={() => setScrobbleMenu(null)}
+        />
+      )}
+      {field_context_menu && (
+        <ContextMenu
+          x={field_context_menu.x}
+          y={field_context_menu.y}
+          items={player_field_menu_items()}
+          onClose={() => set_field_context_menu(null)}
         />
       )}
     </>
