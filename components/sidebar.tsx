@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { usePlayer } from '../src/context/player';
 import { useRemote } from '../context/remote_context';
+import { useSettings } from '../context/settings_context';
 import { clamp } from '../utils/format';
 import {
   DiscIcon,
@@ -66,6 +67,7 @@ interface SidebarProps {
 export function Sidebar({ onOpenFullscreen }: SidebarProps) {
   const navigate = useNavigate();
   const { queue, current, radio_station } = usePlayer();
+  const { update } = useSettings();
   const remote = useRemote();
   const remoteWaiting = remote.pending.length;
   const hasRemoteStatus = remoteWaiting > 0 || remote.phase === 'live' || remote.phase === 'connecting';
@@ -77,6 +79,7 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
   );
   const [settingsMenu, setSettingsMenu] = useState<{ x: number; y: number } | null>(null);
   const [remoteMenu, setRemoteMenu] = useState<{ x: number; y: number } | null>(null);
+  const [fullscreen_menu, set_fullscreen_menu] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia(`(max-width: ${SMALL_SCREEN}px)`);
@@ -183,6 +186,10 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
             type="button"
             className="xe_nav__link xe_nav__fullscreen"
             onClick={onOpenFullscreen}
+            onContextMenu={(event) => {
+              event.preventDefault();
+              set_fullscreen_menu({ x: event.clientX, y: event.clientY });
+            }}
             title="Open fullscreen player"
             aria-label="Open fullscreen player"
           >
@@ -224,6 +231,30 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
             { label: 'Control', onSelect: () => navigate('/remote?role=control') }
           ]}
           onClose={() => setRemoteMenu(null)}
+        />
+      )}
+      {fullscreen_menu && (
+        <ContextMenu
+          x={fullscreen_menu.x}
+          y={fullscreen_menu.y}
+          items={[
+            {
+              heading: 'Change fullscreen mode...',
+              label: 'Change to maximal player',
+              onSelect: () => {
+                update({ fsPlayerStyle: 'maximal' });
+                onOpenFullscreen?.();
+              }
+            },
+            {
+              label: 'Change to minimal player',
+              onSelect: () => {
+                update({ fsPlayerStyle: 'minimal' });
+                onOpenFullscreen?.();
+              }
+            }
+          ]}
+          onClose={() => set_fullscreen_menu(null)}
         />
       )}
     </nav>
