@@ -55,6 +55,7 @@ import {
   type SearchEngineId
 } from '../utils/search_engine';
 import { Spinner } from '../components/spinner';
+import { ContextMenu, type ContextMenuItem } from '../components/context_menu';
 import { HOME_SECTION_IDS, HOME_SECTION_LABELS, moveHomeSection, type HomeSectionId } from '../utils/home_sections';
 import { useDragReorder } from '../hooks/drag_reorder';
 
@@ -77,6 +78,18 @@ const SECTIONS: { id: SectionId; label: string }[] = [
 const TOAST_VARIANTS: ToastVariant[] = ['success', 'error', 'info', 'warning'];
 
 const REMOVE_CONFIRM_MS = 2000;
+
+function meows(depth: number): ContextMenuItem {
+  if (depth === 0) return { label: 'Meow' };
+  return { label: 'Meow', submenu: [meows(depth - 1)] };
+}
+
+const MEOW_ITEMS: ContextMenuItem[] = [
+  { label: 'Meow' },
+  { label: 'Meow' },
+  { label: 'Meow' },
+  meows(5)
+];
 
 const SIZE_SLIDER_RATIO = MAX_SIZE_LIMIT_BYTES / MIN_SIZE_LIMIT_BYTES;
 
@@ -117,6 +130,7 @@ export function SettingsPage() {
   );
   const [toastVariant, setToastVariant] = useState<ToastVariant>('info');
   const [toastMessage, setToastMessage] = useState('');
+  const [mmmeow, set_meow_menu] = useState<{ x: number; y: number } | null>(null);
   const [showFilteredWords, setShowFilteredWords] = useState(false);
   const [pronArtist, setPronArtist] = useState('');
   const [pronSay, setPronSay] = useState('');
@@ -358,7 +372,7 @@ export function SettingsPage() {
               </section>
 
               <section className="xe_settings__section">
-                <h2>Context menu search engine/source</h2>
+                <h2>Default context menu search engine/source</h2>
                 <select
                   className="xe_sort-select"
                   aria-label="Context menu search engine/source"
@@ -1203,6 +1217,31 @@ export function SettingsPage() {
               <section className="xe_settings__section">
                 <h2>Spinner that does nothing</h2>
                 <Spinner></Spinner>
+              </section>
+
+              <section className="xe_settings__section">
+                <h2>Context menu test</h2>
+                <p className="xe_settings__hint">Right click this button:</p>
+                <div className="xe_settings__actions">
+                  <button
+                    type="button"
+                    className="xe_btn"
+                    onContextMenu={(event) => {
+                      event.preventDefault();
+                      set_meow_menu({ x: event.clientX, y: event.clientY });
+                    }}
+                  >
+                    Meow?
+                  </button>
+                </div>
+                {mmmeow && (
+                  <ContextMenu
+                    x={mmmeow.x}
+                    y={mmmeow.y}
+                    items={MEOW_ITEMS}
+                    onClose={() => set_meow_menu(null)}
+                  />
+                )}
               </section>
 
               <section className="xe_settings__section">
