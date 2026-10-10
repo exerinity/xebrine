@@ -4,7 +4,7 @@ import { useLibrary } from '../context/library_context';
 import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
 import { groupAlbums, type AlbumGroup } from '../utils/groups';
-import { openSearch, searchLabel } from '../utils/search_engine';
+import { search_menu_item } from '../utils/search_menu';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { useAlbumArt } from '../hooks/album_art';
@@ -47,7 +47,7 @@ function loadSort(): { sort: AlbumSort; direction: SortDirection } {
 }
 
 export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
-  const { playNow, enqueueEnd, remoteLocked } = usePlayer();
+  const { playNow, enqueueNext, enqueueEnd, remoteLocked } = usePlayer();
   const { settings } = useSettings();
   const art = useAlbumArt(album.key, album.tracks[0]);
   const navigate = useNavigate();
@@ -59,15 +59,7 @@ export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void
       heading: 'Navigation...',
       onSelect: () => navigate(`/artists/${toSlugParam(album.artist)}`)
     },
-    {
-      label: searchLabel(settings.searchEngine, settings.customSearchUrl),
-      onSelect: () =>
-        openSearch(
-          `${album.album} by ${album.artist}`,
-          settings.searchEngine,
-          settings.customSearchUrl
-        )
-    },
+    search_menu_item(`${album.album} by ${album.artist}`, settings.searchEngine, settings.customSearchUrl),
     {
       label: 'Copy name',
       onSelect: () => {
@@ -80,9 +72,12 @@ export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void
     {
       label: 'Enqueue this album',
       heading: 'Queue...',
-      onSelect: () => enqueueEnd(album.tracks)
+      onSelect: () => enqueueEnd(album.tracks),
+      submenu: [
+        { label: 'Play this album next', onSelect: () => enqueueNext(album.tracks) },
+        { label: 'Play this album now', onSelect: () => playNow(album.tracks, 0) }
+      ]
     },
-    { label: 'Play this album now', onSelect: () => playNow(album.tracks, 0) },
     {
       label: 'Shuffle this album',
       onSelect: () =>
