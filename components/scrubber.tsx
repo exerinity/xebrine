@@ -3,6 +3,7 @@ import { usePlayer } from '../src/context/player';
 import { formatTime, parseSeekInput } from '../utils/format';
 import { Slider } from './slider';
 import { Modal } from './modal';
+import { ContextMenu, type ContextMenuItem } from './context_menu';
 
 const TIME_MODE_KEY = 'xebrine.timeMode';
 
@@ -18,12 +19,17 @@ export function Scrubber() {
   const [timeMode, setTimeMode] = useState<TimeMode>(loadTimeMode);
   const [seekModalOpen, setSeekModalOpen] = useState(false);
   const [seekInput, setSeekInput] = useState('');
+  const [context_menu, set_context_menu] = useState<{ x: number; y: number } | null>(null);
 
   const shown = dragValue ?? currentTime;
   const parsedSeek = parseSeekInput(seekInput, duration);
   const submitSeek = () => {
     if (parsedSeek === null) return;
     seek(parsedSeek);
+  };
+  const open_seek_modal = () => {
+    setSeekInput('');
+    setSeekModalOpen(true);
   };
   const toggleTimeMode = () => {
     const mode: TimeMode = timeMode === 'elapsed' ? 'remaining' : 'elapsed';
@@ -40,6 +46,11 @@ export function Scrubber() {
     : timeMode === 'elapsed'
       ? formatTime(duration)
       : `-${formatTime(Math.max(0, duration - shown))}`;
+  const context_menu_items: ContextMenuItem[] = [
+    { heading: 'Scrubber...', label: 'Restart the track (0s)', onSelect: () => seek(0) },
+    { label: 'Open seek modal', onSelect: open_seek_modal },
+    { label: 'Toggle duration / remaining', onSelect: toggleTimeMode }
+  ];
 
   return (
     <div className="xe_scrubber">
@@ -57,11 +68,10 @@ export function Scrubber() {
         ariaLabel="Seek"
         className="xe_scrubber__slider"
         onContextMenu={
-          current
+          current && !radio_station
             ? (e) => {
                 e.preventDefault();
-                setSeekInput('');
-                setSeekModalOpen(true);
+                set_context_menu({ x: e.clientX, y: e.clientY });
               }
             : undefined
         }
@@ -108,6 +118,14 @@ export function Scrubber() {
             </div>
           </form>
         </Modal>
+      )}
+      {context_menu && (
+        <ContextMenu
+          x={context_menu.x}
+          y={context_menu.y}
+          items={context_menu_items}
+          onClose={() => set_context_menu(null)}
+        />
       )}
     </div>
   );
