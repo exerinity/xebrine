@@ -50,10 +50,10 @@ export const SEARCH_ENGINES: { id: SearchEngineId; label: string; template: stri
   { id: 'beatport', label: 'Beatport', template: `https://www.beatport.com/search?q=${QUERY_TOKEN}` },
   { id: 'chatgpt', label: 'ChatGPT', template: `https://chatgpt.com/?prompt=${QUERY_TOKEN}` },
   { id: 'grok', label: 'Grok', template: `https://grok.com/?q=${QUERY_TOKEN}` },
-  { id: 'groktw', label: 'Grok on X', template: `https://twitter.com/i/grok?text=${QUERY_TOKEN}` },
+  { id: 'groktw', label: 'Grok on Twitter', template: `https://x.com/i/grok?text=${QUERY_TOKEN}` },
   { id: 'claude', label: 'Claude', template: `https://claude.ai/new?q=${QUERY_TOKEN}`},
   
-  { id: 'twitter', label: 'X', template: `https://twitter.com/search?q=${QUERY_TOKEN}` },
+  { id: 'twitter', label: 'Twitter', template: `https://x.com/search?q=${QUERY_TOKEN}` },
   { id: 'tunebat', label: 'Tunebat', template: `https://tunebat.com/Search?q=${QUERY_TOKEN}`},
   { id: 'custom', label: 'Custom', template: '' }
 ];
