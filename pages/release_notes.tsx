@@ -11,6 +11,14 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '18',
+    date: '2026-10-11',
+    notes: [
+      'Redesigned both the maximal and minimal fullscreen player',
+      'Context menu work: a better search option, more context menus around the place, and keyboard navigation.'
+    ],
+  },
+  {
     version: '17',
     date: '2026-10-05',
     notes: [
