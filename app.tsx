@@ -132,7 +132,7 @@ function Shell() {
   const [sidePanelVisible, setSidePanelVisible] = useState(false);
   const accent = useAccentColor(artworkUrl);
   useDynamicFavicon(Boolean(current || radio_station), accent.accent, isPlaying);
-  usePageKeys(settings.pageKeyMode);
+  const page_key_cursor_path = usePageKeys(settings.pageKeyMode);
   const accentStyle = useMemo(
     () =>
       ({
@@ -215,7 +215,10 @@ function Shell() {
       }`}
       style={accentStyle}
     >
-      <Sidebar onOpenFullscreen={() => setFullscreenOpen(true)} />
+      <Sidebar
+        onOpenFullscreen={() => setFullscreenOpen(true)}
+        page_key_cursor_path={page_key_cursor_path}
+      />
       <main className="xe_main">
         <div className="xe_route-view">
           {settings.showBackgroundIcon && <PageIconBackdrop />}

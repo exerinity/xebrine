@@ -62,9 +62,10 @@ function loadWidth(): number {
 
 interface SidebarProps {
   onOpenFullscreen?: () => void;
+  page_key_cursor_path?: string | null;
 }
 
-export function Sidebar({ onOpenFullscreen }: SidebarProps) {
+export function Sidebar({ onOpenFullscreen, page_key_cursor_path }: SidebarProps) {
   const navigate = useNavigate();
   const { queue, current, radio_station } = usePlayer();
   const { update } = useSettings();
@@ -136,7 +137,9 @@ export function Sidebar({ onOpenFullscreen }: SidebarProps) {
         <NavLink
           key={link.path}
           to={link.path}
-          className={({ isActive }) => `xe_nav__link${isActive ? ' xe_nav__link--active' : ''}`}
+          className={({ isActive }) =>
+            `xe_nav__link${isActive ? ' xe_nav__link--active' : ''}${page_key_cursor_path === link.path ? ' xe_nav__link--cursor' : ''}`
+          }
           title={
             link.path === '/remote' && hasRemoteStatus
               ? remoteWaiting > 0
