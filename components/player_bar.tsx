@@ -54,6 +54,7 @@ import { ScanDrawer } from './scan_drawer';
 import { AutoMixDrawer } from './auto_mix_drawer';
 import { SleepTimerControl } from './sleep_timer';
 import { UpdateDrawer } from './update_drawer';
+import { is_online, use_online } from '../hooks/online_status';
 
 interface PlayerBarProps {
   collapsed?: boolean;
@@ -151,6 +152,7 @@ export function PlayerBar({
   const { tracks } = useLibrary();
   const { buildMenu } = useTrackMenu();
   const lastfm = useLastfmSession();
+  const online = use_online();
   const scrobbleStatus = useScrobbleStatus();
   const lastAudibleVolumeRef = useRef(volume > 0 ? volume : 0.8);
   const [copiedField, setCopiedField] = useState<'title' | 'artist' | 'album' | null>(null);
@@ -275,8 +277,9 @@ export function PlayerBar({
     }
     const controller = new AbortController();
     setLoveKnown(false);
-    setLoveLoading(true);
+    setLoveLoading(online);
     setLoveSaving(false);
+    if (!online) return;
     fetchLovedStatus(lastfm.username, track.artist, track.title, controller.signal)
       .then((loved) => {
         if (requestId !== loveRequestRef.current) return;
@@ -290,7 +293,7 @@ export function PlayerBar({
         setLoveLoading(false);
       });
     return () => controller.abort();
-  }, [lastfm?.sessionKey, lastfm?.username, settings.lastfmLovedTracks, track?.artist, track?.id, track?.title]);
+  }, [lastfm?.sessionKey, lastfm?.username, settings.lastfmLovedTracks, track?.artist, track?.id, track?.title, online]);
 
   useLayoutEffect(() => {
     const slot = scrubberSlotRef.current;
@@ -436,6 +439,10 @@ export function PlayerBar({
 
   const toggleTrackLoved = () => {
     if (!track || !lastfm || !loveKnown || loveSaving) return;
+    if (!is_online()) {
+      toast.info('Reconnect to update loved tracks');
+      return;
+    }
     const requestId = ++loveRequestRef.current;
     const nextLoved = !trackLoved;
     setTrackLoved(nextLoved);

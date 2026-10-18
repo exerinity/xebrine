@@ -403,6 +403,11 @@
   border-color: #3ddc84;
 }
 
+.xe_scrobble-pill--queued {
+  color: #f0bd5f;
+  border-color: #f0bd5f;
+}
+
 .xe_scrobble-pill--failed {
   color: #f5524a;
   border-color: #f5524a;

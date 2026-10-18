@@ -3,7 +3,7 @@ import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
 import { useLastfmSession } from './lastfm_session';
 import { sendNowPlaying, type ScrobbleEntry } from '../api/lastfm';
-import { flushScrobbles, queueScrobble } from '../management/scrobbles';
+import { flushScrobbles, pendingScrobbles, queueScrobble } from '../management/scrobbles';
 import {
   buildScrobblePayload,
   isScrobbleLength,
@@ -12,6 +12,7 @@ import {
 } from '../utils/scrobble_rules';
 import { toast } from '../utils/toast';
 import { setScrobbleStatus } from '../utils/scrobble_status';
+import { is_online, use_online } from './online_status';
 
 interface PlayState {
   startedAt: number;
@@ -26,20 +27,28 @@ function nowSeconds(): number {
   return Math.floor(Date.now() / 1000);
 }
 
+function is_transient_error(error: unknown): boolean {
+  const status = error && typeof error === 'object' && 'status' in error ? error.status : 0;
+  return !is_online() || error instanceof TypeError || status === 429 || (typeof status === 'number' && status >= 500);
+}
+
 async function submit(sessionKey: string, entry: ScrobbleEntry): Promise<void> {
-  setScrobbleStatus('sending');
   await queueScrobble(entry);
-  if (!navigator.onLine) {
-    setScrobbleStatus('failed');
+  if (!is_online()) {
+    setScrobbleStatus('queued');
     return;
   }
+  setScrobbleStatus('sending');
   try {
     await flushScrobbles(sessionKey);
-    setScrobbleStatus('scrobbled');
+    const remaining = await pendingScrobbles();
+    const id = `${entry.timestamp}-${entry.artist}-${entry.track}`;
+    setScrobbleStatus(remaining.some((item) => item.id === id) ? 'queued' : 'scrobbled');
   } catch (error) {
-    setScrobbleStatus('failed');
+    const transient = is_transient_error(error);
+    setScrobbleStatus(transient ? 'queued' : 'failed');
     const message = error instanceof Error ? error.message : 'Unknown error';
-    toast.error(`Couldn't scrobble "${entry.track}" to Last.fm: ${message}`, 0);
+    if (!transient) toast.error(`Couldn't scrobble "${entry.track}" to Last.fm: ${message}`, 0);
   }
 }
 
@@ -47,6 +56,7 @@ export function useScrobbler(): void {
   const { current, isPlaying, currentTime, duration } = usePlayer();
   const { settings } = useSettings();
   const session = useLastfmSession();
+  const online = use_online();
 
   const stateRef = useRef<PlayState | null>(null);
   const settingsRef = useRef(settings);
@@ -61,13 +71,13 @@ export function useScrobbler(): void {
   useEffect(() => {
     const flush = () => {
       const sk = sessionRef.current?.sessionKey;
-      if (!sk || !navigator.onLine) return;
-      flushScrobbles(sk).catch(() => null);
+      if (!sk || !is_online()) return;
+      flushScrobbles(sk).then((sent) => {
+        if (sent > 0) setScrobbleStatus('scrobbled');
+      }).catch((error: unknown) => setScrobbleStatus(is_transient_error(error) ? 'queued' : 'failed'));
     };
     flush();
-    window.addEventListener('online', flush);
-    return () => window.removeEventListener('online', flush);
-  }, [sessionKey]);
+  }, [sessionKey, online]);
 
   useEffect(() => {
     stateRef.current = key ? { startedAt: nowSeconds(), nowPlayingSent: false, scrobbled: false } : null;
@@ -97,11 +107,12 @@ export function useScrobbler(): void {
     const payload = buildScrobblePayload(track, config.scrobbleMode);
     if (!payload) return;
     const timer = window.setTimeout(() => {
+      if (!is_online()) return;
       state.nowPlayingSent = true;
-      sendNowPlaying(sk, payload).catch(() => null);
+      sendNowPlaying(sk, payload).catch(() => { state.nowPlayingSent = false; });
     }, NOW_PLAYING_DELAY_MS);
     return () => window.clearTimeout(timer);
-  }, [key, isPlaying, sessionKey]);
+  }, [key, isPlaying, sessionKey, online]);
 
   useEffect(() => {
     const state = stateRef.current;

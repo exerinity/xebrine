@@ -6,6 +6,7 @@ import { estimateCountryFromTimezone } from '../utils/timezone_country';
 import { countryName } from '../utils/countries';
 import { LastfmTrackCard } from './trending_tracks';
 import { Spinner } from './spinner';
+import { use_online } from '../hooks/online_status';
 
 export function GeoTrendingTracks({
   selectedCountry,
@@ -19,6 +20,7 @@ export function GeoTrendingTracks({
   excludedTrackIds: string[] | null;
 }) {
   const { tracks } = useLibrary();
+  const online = use_online();
   const estimatedCountry = useMemo(estimateCountryFromTimezone, []);
   const country = countryName(selectedCountry) ?? estimatedCountry;
   const [chart, setChart] = useState<TrendingTrack[] | null>(null);
@@ -26,6 +28,11 @@ export function GeoTrendingTracks({
   useEffect(() => {
     if (!country) return;
     let active = true;
+    if (!online) {
+      setChart((current) => current ?? []);
+      return;
+    }
+    setChart(null);
     fetchGeoTrendingTracks(country, searchLimit)
       .then((tracks: TrendingTrack[]) => {
         if (active) setChart(tracks);
@@ -36,7 +43,7 @@ export function GeoTrendingTracks({
     return () => {
       active = false;
     };
-  }, [country, searchLimit]);
+  }, [country, searchLimit, online]);
 
   const matches = useMemo(() => {
     const excluded = new Set(excludedTrackIds ?? []);

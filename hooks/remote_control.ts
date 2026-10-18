@@ -10,6 +10,7 @@ import {
   type RemoteState
 } from '../utils/remote_protocol';
 import { parseMessage, remoteUrl, startKeepalive } from './remote_socket';
+import { is_online } from './online_status';
 
 export type ControlPhase =
   | 'idle'
@@ -63,6 +64,11 @@ export function useRemoteControl(): RemoteControl {
 
   const connect = useCallback((pin: string) => {
     if (socketRef.current || !isValidPin(pin)) return;
+    if (!is_online()) {
+      setPhase('error');
+      setError('Connect to the internet before joining a remote session');
+      return;
+    }
     setPhase('connecting');
     setError('');
     setState(null);
@@ -113,7 +119,7 @@ export function useRemoteControl(): RemoteControl {
     });
 
     socket.addEventListener('error', () => {
-      if (!rejected) setError('The host could not be reached');
+      if (!rejected) setError(is_online() ? 'The host could not be reached' : 'You are offline. The host could not be reached');
     });
 
     socket.addEventListener('close', () => {
@@ -124,8 +130,19 @@ export function useRemoteControl(): RemoteControl {
       setQueue([]);
       if (rejected) return;
       setPhase('ended');
-      setError((current) => current || 'The connection to the host was severed');
+      setError((current) => current || (is_online() ? 'The connection to the host was severed' : 'You are offline. The connection to the host ended.'));
     });
+  }, [release]);
+
+  useEffect(() => {
+    const offline = () => {
+      if (!socketRef.current) return;
+      release();
+      setPhase('error');
+      setError('You are offline. The connection to the host ended');
+    };
+    window.addEventListener('offline', offline);
+    return () => window.removeEventListener('offline', offline);
   }, [release]);
 
   const sendCmd = useCallback((cmd: RemoteCommand) => {

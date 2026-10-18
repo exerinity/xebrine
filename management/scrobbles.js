@@ -1,8 +1,9 @@
 import { sendScrobbles } from '../api/lastfm';
 import { dbDelete, dbGetAll, dbPut, dbWriteBatch } from './db';
+import { is_online } from '../utils/online_status';
 
 const MAX_BATCH = 50;
-const MAX_ATTEMPTS = 20;
+let activeFlush = Promise.resolve();
 
 /**
  * @typedef {import('../api/lastfm').ScrobbleEntry & { id: string, attempts: number, lastError?: string }} PendingScrobble
@@ -55,13 +56,14 @@ export async function clearPending() {
   announce();
 }
 
-export async function flushScrobbles(sessionKey) {
-  if (!navigator.onLine) return 0;
+async function flushPending(sessionKey) {
+  if (!is_online()) return 0;
   const all = await pendingScrobbles();
   if (all.length === 0) return 0;
 
   let sent = 0;
   for (let i = 0; i < all.length; i += MAX_BATCH) {
+    if (!is_online()) break;
     const batch = all.slice(i, i + MAX_BATCH);
     try {
       await sendScrobbles(sessionKey, batch.map(toEntry));
@@ -69,14 +71,15 @@ export async function flushScrobbles(sessionKey) {
       sent += batch.length;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      const retries = [];
-      const exhausted = [];
-      for (const item of batch) {
-        const attempts = item.attempts + 1;
-        if (attempts >= MAX_ATTEMPTS) exhausted.push(item.id);
-        else retries.push({ ...item, attempts, lastError: message });
+      const status = typeof error?.status === 'number' ? error.status : 0;
+      const transient = !is_online() || error instanceof TypeError || status === 429 || status >= 500;
+      if (transient) {
+        await dbWriteBatch('scrobbles', batch.map((item) => ({ ...item, lastError: message })));
+        announce();
+        throw error;
       }
-      await dbWriteBatch('scrobbles', retries, exhausted);
+      const retries = batch.map((item) => ({ ...item, attempts: item.attempts + 1, lastError: message }));
+      await dbWriteBatch('scrobbles', retries);
       announce();
       throw error;
     }
@@ -84,4 +87,10 @@ export async function flushScrobbles(sessionKey) {
 
   announce();
   return sent;
+}
+
+export function flushScrobbles(sessionKey) {
+  const result = activeFlush.then(() => flushPending(sessionKey));
+  activeFlush = result.catch(() => undefined);
+  return result;
 }

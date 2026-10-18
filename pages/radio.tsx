@@ -18,6 +18,7 @@ import { searchLabel } from '../utils/search_engine';
 import { search_menu_item } from '../utils/search_menu';
 import { radio_homepage, radio_location } from '../utils/radio_station';
 import { toast } from '../utils/toast';
+import { is_online, use_online } from '../hooks/online_status';
 
 const EMPTY_FILTERS: radio_filters = { countries: [], languages: [], tags: [], codecs: [] };
 const GROUPS = ['Stations', 'Directory', 'Activity', 'Server', 'Add station'];
@@ -160,6 +161,7 @@ export function Radio_page() {
   const [station_menu, set_station_menu] = useState<{ x: number; y: number; station: radio_station_record } | null>(null);
   const { radio_station, radio_connecting, isPlaying: is_playing, play_radio, togglePlay: toggle_play, remoteLocked: remote_locked } = use_player();
   const { settings } = useSettings();
+  const online = use_online();
   const adding = resource_key === 'add';
   const group = adding ? 'Add station' : resource.group;
   const missing_required = resource.fields.some(field => field.required && !applied[field.key]?.trim());
@@ -184,17 +186,27 @@ export function Radio_page() {
   const visible_rows = rows.slice(display_page * 50, (display_page + 1) * 50);
 
   useEffect(() => {
+    if (!online) {
+      set_filter_error(true);
+      return;
+    }
     const controller = new AbortController();
+    set_filter_error(false);
     void get_radio_filters(controller.signal).then(set_filters).catch(() => {
       if (!controller.signal.aborted) set_filter_error(true);
     });
     return () => controller.abort();
-  }, []);
+  }, [online]);
 
   useEffect(() => {
     if (adding || missing_required) {
       set_data(null);
       set_error(null);
+      set_loading(false);
+      return;
+    }
+    if (!online) {
+      set_error('You are offline. The radio directory will reload when you connect to the internet');
       set_loading(false);
       return;
     }
@@ -215,10 +227,14 @@ export function Radio_page() {
       if (!controller.signal.aborted) set_loading(false);
     });
     return () => controller.abort();
-  }, [resource.key, applied, refresh, adding, missing_required]);
+  }, [resource.key, applied, refresh, adding, missing_required, online]);
 
   useEffect(() => {
     if (!detail_uuid) return;
+    if (!online) {
+      set_detail_loading(false);
+      return;
+    }
     const controller = new AbortController();
     set_detail_loading(true);
     void get_station(detail_uuid, controller.signal).then(station => {
@@ -236,7 +252,7 @@ export function Radio_page() {
       if (!controller.signal.aborted) set_detail_loading(false);
     });
     return () => controller.abort();
-  }, [detail_uuid]);
+  }, [detail_uuid, online]);
 
   function choose_resource(key: string, values?: Record<string, string>) {
     const next = RADIO_RESOURCES.find(item => item.key === key);
@@ -335,6 +351,10 @@ export function Radio_page() {
   }
 
   async function vote_station(station: radio_station_record) {
+    if (!is_online()) {
+      toast.info('Connect to the internet to vote for this station');
+      return;
+    }
     set_action_busy(true);
     try {
       await modify_radio(`vote/${encodeURIComponent(station.stationuuid)}`, {});
@@ -349,6 +369,10 @@ export function Radio_page() {
 
   async function add_station(event: FormEvent) {
     event.preventDefault();
+    if (!is_online()) {
+      toast.info('Reconnect to submit a station');
+      return;
+    }
     set_action_busy(true);
     set_added_uuid('');
     try {
@@ -388,11 +412,12 @@ export function Radio_page() {
         {adding ? (
           <form onSubmit={add_station}>
             <p className="xe_page__meta">Submit a station to the public Radio Browser directory</p>
+            {!online && <p className="xe_empty-note" role="status">Connect to the internet to submit stations</p>}
             <div className="xe_page__toolbar">
               {RADIO_ADD_FIELDS.map(field => <Radio_field key={field.key} field={field} value={add_values[field.key] ?? ''}
                 on_change={value => set_add_values(current => ({ ...current, [field.key]: value }))} />)}
             </div>
-            <button className="xe_btn xe_btn--accent" disabled={action_busy} type="submit">{action_busy ? 'Submitting' : 'Submit station'}</button>
+            <button className="xe_btn xe_btn--accent" disabled={action_busy || !online} type="submit">{action_busy ? 'Submitting' : 'Submit station'}</button>
             {added_uuid && <button className="xe_btn" type="button" onClick={() => open_station(added_uuid)}>Open submitted station</button>}
           </form>
         ) : (
@@ -404,7 +429,7 @@ export function Radio_page() {
               <select className="xe_sort-select" aria-label="Export format" value={export_format} onChange={event => set_export_format(event.target.value)}>
                 {resource.formats.map(format => <option key={format} value={format}>{format.toUpperCase()}</option>)}
               </select>
-              {!missing_required && <a className="xe_btn" href={radio_export_url(resource.key, applied, export_format)} download>Export</a>}
+              {!missing_required && online && <a className="xe_btn" href={radio_export_url(resource.key, applied, export_format)} download>Export</a>}
             </div>
             <form onSubmit={submit_search}>
               <div className="xe_page__toolbar">
@@ -431,6 +456,7 @@ export function Radio_page() {
               {loading ? <><Spinner size={14} /> Loading {resource.label.toLowerCase()}...</> : missing_required ? 'Enter the required fields to search' :
                 error ? '' : Array.isArray(data) ? `${rows.length} results${offset ? ` from offset ${offset}` : ''}` : data === null ? '' : resource.label}
             </p>
+            {error && <p className="xe_empty-note" role="status">{error}</p>}
             {!loading && !error && Array.isArray(data) && rows.length === 0 && <p className="xe_empty-note">No results...</p>}
             {rows.length > 0 && <div className="xe_track-table" aria-busy={loading}>
               <div className="xe_track-table__row xe_track-table__row--head">

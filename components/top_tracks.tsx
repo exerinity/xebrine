@@ -5,6 +5,7 @@ import { useLastfmSession } from '../hooks/lastfm_session';
 import { matchTrendingTracks, type TrendingTrack } from '../utils/lastfm_trending';
 import { LastfmTrackCard } from './trending_tracks';
 import { Spinner } from './spinner';
+import { use_online } from '../hooks/online_status';
 
 export function TopTracksSection({
   title,
@@ -16,12 +17,17 @@ export function TopTracksSection({
   displayLimit: number;
 }) {
   const { tracks } = useLibrary();
+  const online = use_online();
   const session = useLastfmSession();
   const [chart, setChart] = useState<TrendingTrack[] | null>(null);
 
   useEffect(() => {
     if (!session) return;
     let active = true;
+    if (!online) {
+      setChart((current) => current ?? []);
+      return;
+    }
     setChart(null);
     fetchUserTopTracks(session.username, period)
       .then((tracks: TrendingTrack[]) => {
@@ -33,7 +39,7 @@ export function TopTracksSection({
     return () => {
       active = false;
     };
-  }, [period, session?.username]);
+  }, [period, session?.username, online]);
 
   const matches = useMemo(
     () => matchTrendingTracks(chart ?? [], tracks).slice(0, displayLimit),

@@ -23,8 +23,9 @@ import { Modal } from './modal';
 import { LrclibSearchModal } from './lrclib_search_modal';
 import { ContextMenu, type ContextMenuItem } from './context_menu';
 import { DownloadIcon, NoteIcon, SearchIcon, ShareIcon, TrashIcon, UploadIcon } from './icons';
+import { is_online, use_online } from '../hooks/online_status';
 
-type Status = 'idle' | 'waiting' | 'loading' | 'notfound' | 'error' | 'ratelimited' | 'badfile';
+type Status = 'idle' | 'waiting' | 'loading' | 'notfound' | 'error' | 'offline' | 'ratelimited' | 'badfile';
 type RetryStatus = { seconds: number; attempt: number };
 const AUTO_SEARCH_DELAY_MS = 2000;
 const REQUEST_RETRY_DELAY_MS = 2000;
@@ -37,17 +38,14 @@ const STATUS_TEXT: Record<Exclude<Status, 'idle'>, string> = {
   waiting: 'Standing by, one moment...',
   loading: 'Searching LRCLIB...',
   notfound: 'No lyrics found',
-  error: 'LRCLIB request failed - are you online?',
+  error: 'LRCLIB request failed. Please try again.',
+  offline: 'You are offline. Lyrics will be searched again when you reconnect.',
   ratelimited: 'LRCLIB is rate limiting you - slow down!',
   badfile: 'Could not read any lyrics from that file'
 };
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError';
-}
-
-function navigatorIsOnline(): boolean {
-  return typeof navigator !== 'undefined' && navigator.onLine;
 }
 
 function isRetryableRequestError(error: unknown): boolean {
@@ -135,6 +133,7 @@ export function LyricsPanel({
 }: LyricsPanelProps) {
   const { current, seek, audioRef } = usePlayer();
   const { settings } = useSettings();
+  const online = use_online();
   const navigate = useNavigate();
   const track = current?.track ?? null;
 
@@ -173,6 +172,10 @@ export function LyricsPanel({
       const isCurrentRequest = () => !signal.aborted && requestAbortRef.current?.signal === signal;
       if (!isCurrentRequest()) return;
       setRetryStatus(null);
+      if (!is_online()) {
+        setStatus('offline');
+        return;
+      }
       setStatus('loading');
       try {
         let found: Lyrics | null = null;
@@ -188,7 +191,7 @@ export function LyricsPanel({
               isAbortError(error) ||
               rateLimited ||
               !isRetryableRequestError(error) ||
-              !navigatorIsOnline() ||
+              !is_online() ||
               retries >= MAX_REQUEST_RETRIES
             ) {
               throw error;
@@ -198,7 +201,7 @@ export function LyricsPanel({
               if (isCurrentRequest()) setRetryStatus({ seconds, attempt: retries });
             });
             if (isCurrentRequest()) setRetryStatus(null);
-            if (!navigatorIsOnline()) throw error;
+            if (!is_online()) throw error;
           }
         }
         if (!isCurrentRequest()) return;
@@ -215,7 +218,7 @@ export function LyricsPanel({
         setRetryStatus(null);
         if (isAbortError(error)) return;
         setLyricsResult(null);
-        setStatus(error instanceof LrclibError && error.status === 429 ? 'ratelimited' : 'error');
+        setStatus(error instanceof LrclibError && error.status === 429 ? 'ratelimited' : !is_online() ? 'offline' : 'error');
       }
     },
     [settings.lrclibMode]
@@ -241,6 +244,10 @@ export function LyricsPanel({
       if (stored) {
         setLyricsResult(stored);
       } else {
+        if (!is_online()) {
+          setStatus('offline');
+          return;
+        }
         setStatus('waiting');
         timer = window.setTimeout(() => {
           if (!cancelled && !controller.signal.aborted) void runSearch(track, controller.signal);
@@ -254,6 +261,11 @@ export function LyricsPanel({
       controller.abort();
     };
   }, [track?.id, runSearch]);
+
+  useEffect(() => {
+    if (!online || status !== 'offline' || !track || !requestAbortRef.current) return;
+    void runSearch(track, requestAbortRef.current.signal);
+  }, [online, status, track?.id, runSearch]);
 
   useEffect(() => {
     return subscribeLyricsChanges(({ trackId, lyrics: changedLyrics }) => {

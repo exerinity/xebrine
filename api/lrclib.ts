@@ -1,5 +1,6 @@
 import type { Lyrics, TrackMeta } from '../types';
 import { parseLrc } from '../utils/lyrics';
+import { is_online } from '../utils/online_status';
 
 const BASE = 'https://lrclib.net/api';
 const CLIENT_HEADER = 'Xebrine v10.0 (https://xebrine.com)';
@@ -109,6 +110,7 @@ function enqueueRequest<T>(request: () => Promise<T>, signal?: AbortSignal): Pro
     const earliestStart = Math.max(nextAfterGap, rateLimitedUntil);
     await wait(earliestStart - Date.now(), signal);
     if (signal?.aborted) throw abortReason(signal);
+    if (!is_online()) throw new Error('You are offline');
 
     try {
       return await request();
@@ -161,6 +163,7 @@ async function toLrclibError(response: Response): Promise<LrclibError> {
 }
 
 async function requestJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+  if (!is_online()) throw new Error('You are offline');
   return enqueueRequest(async () => {
     const response = await fetch(`${BASE}${path}`, {
       signal,

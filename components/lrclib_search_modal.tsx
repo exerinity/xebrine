@@ -13,6 +13,7 @@ import { FloatingInput } from './floating_input';
 import { SearchIcon } from './icons';
 import { Modal } from './modal';
 import { Spinner } from './spinner';
+import { is_online, use_online } from '../hooks/online_status';
 
 type SearchMode = 'keyword' | 'fields' | 'signature' | 'id';
 
@@ -99,6 +100,7 @@ function recordKind(record: LrclibRecord): string {
 
 export function LrclibSearchModal({ track, onSelect, onClose }: LrclibSearchModalProps) {
   const modeName = useId();
+  const online = use_online();
   const [mode, setMode] = useState<SearchMode>('fields');
   const [draft, setDraft] = useState<SearchDraft>(() => draftFromTrack(track));
   const [results, setResults] = useState<LrclibRecord[]>([]);
@@ -181,6 +183,10 @@ export function LrclibSearchModal({ track, onSelect, onClose }: LrclibSearchModa
 
   const search = async () => {
     if (validation || loading || cooldownSeconds > 0) return;
+    if (!is_online()) {
+      setError('You are offline. Connect to the internet to search LRCLIB');
+      return;
+    }
     requestRef.current?.abort();
     const controller = new AbortController();
     requestRef.current = controller;
@@ -232,7 +238,7 @@ export function LrclibSearchModal({ track, onSelect, onClose }: LrclibSearchModa
           setError(caught.message);
         }
       } else {
-        setError('Could not reach LRCLIB');
+        setError(is_online() ? 'Could not reach LRCLIB' : 'You are offline. Connect to the internet to search LRCLIB');
       }
     } finally {
       if (requestRef.current === controller && mountedRef.current) {
@@ -286,6 +292,11 @@ export function LrclibSearchModal({ track, onSelect, onClose }: LrclibSearchModa
           </fieldset>
 
           <p className="xe_lrclib-search__hint">{currentMode.hint}</p>
+          {!online && (
+            <p className="xe_lrclib-search__validation" role="status">
+              You are offline. Connect to the internet to search LRCLIB
+            </p>
+          )}
 
           <div className="xe_lrclib-search__fields">
             {mode === 'keyword' && (
@@ -373,8 +384,8 @@ export function LrclibSearchModal({ track, onSelect, onClose }: LrclibSearchModa
             <button
               type="submit"
               className="xe_btn xe_btn--accent"
-              disabled={Boolean(validation) || loading || cooldownSeconds > 0}
-              title={validation ?? undefined}
+              disabled={Boolean(validation) || loading || cooldownSeconds > 0 || !online}
+              title={!online ? 'Reconnect to search LRCLIB' : validation ?? undefined}
             >
               {loading ? <Spinner /> : <SearchIcon size={14} />}
               {loading ? 'Searching...' : 'Search'}

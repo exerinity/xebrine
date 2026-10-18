@@ -1,14 +1,28 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { report_station_play, station_stream_url, type radio_station_record } from '../../../api/radio_browser';
+import { use_online } from '../../../hooks/online_status';
 
 export function use_radio_playback(
   audio: HTMLAudioElement,
   station: radio_station_record | null,
   set_load_error: Dispatch<SetStateAction<string | null>>
 ): boolean {
+  const online = use_online();
   const [connecting, set_connecting] = useState(false);
+  const station_ref = useRef<radio_station_record | null>(null);
+  const should_play_ref = useRef(false);
   useEffect(() => {
+    if (station !== station_ref.current) {
+      station_ref.current = station;
+      should_play_ref.current = station !== null;
+    }
     if (!station) { set_connecting(false); return; }
+    if (!should_play_ref.current) { set_connecting(false); return; }
+    if (!online) {
+      set_connecting(false);
+      set_load_error('The connection to the internet was lost, will tune back in after reconnection');
+      return;
+    }
     let cancelled = false;
     let stopped = false;
     let reported = false;
@@ -37,6 +51,7 @@ export function use_radio_playback(
     const paused = () => {
       if (!audio.paused) return;
       stopped = true;
+      should_play_ref.current = false;
       clearTimeout(timeout);
       set_connecting(false);
       if (audio.hasAttribute('src')) {
@@ -71,6 +86,6 @@ export function use_radio_playback(
       audio.removeAttribute('src');
       audio.load();
     };
-  }, [audio, station, set_load_error]);
+  }, [audio, station, set_load_error, online]);
   return connecting;
 }

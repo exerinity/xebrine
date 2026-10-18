@@ -4,6 +4,7 @@ import { useLibrary } from '../context/library_context';
 import { usePlayer } from '../src/context/player';
 import { useAlbumArt } from '../hooks/album_art';
 import { useTrackMenu } from '../hooks/track_menu';
+import { use_online } from '../hooks/online_status';
 import { matchTrendingTracks, type TrendingTrack } from '../utils/lastfm_trending';
 import type { TrackMeta } from '../types';
 import { ContextMenu } from './context_menu';
@@ -94,10 +95,15 @@ export function TrendingTracks({
   onMatchedTracks(trackIds: string[] | null): void;
 }) {
   const { tracks } = useLibrary();
+  const online = use_online();
   const [chart, setChart] = useState<TrendingTrack[] | null>(null);
 
   useEffect(() => {
     let active = true;
+    if (!online) {
+      setChart((current) => current ?? []);
+      return;
+    }
     onMatchedTracks(null);
     setChart(null);
     fetchTrendingTracks(searchLimit)
@@ -110,7 +116,7 @@ export function TrendingTracks({
     return () => {
       active = false;
     };
-  }, [searchLimit, onMatchedTracks]);
+  }, [searchLimit, onMatchedTracks, online]);
 
   const matches = useMemo(
     () => matchTrendingTracks(chart ?? [], tracks).slice(0, displayLimit),

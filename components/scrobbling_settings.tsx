@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSettings } from '../context/settings_context';
 import { useLastfmSession } from '../hooks/lastfm_session';
 import { setLastfmSession } from '../utils/lastfm_session';
@@ -23,6 +23,7 @@ import { Spinner } from './spinner';
 import { Slider } from './slider';
 import { LASTFM_COUNTRIES } from '../utils/countries';
 import { estimateCountryFromTimezone } from '../utils/timezone_country';
+import { is_online, use_online } from '../hooks/online_status';
 
 function stamp(unix: number | null): string {
   if (!unix) return '';
@@ -35,12 +36,15 @@ function stamp(unix: number | null): string {
 export function ScrobblingSettings() {
   const { settings, update } = useSettings();
   const session = useLastfmSession();
+  const online = use_online();
   const estimatedCountry = estimateCountryFromTimezone();
   const [profile, setProfile] = useState<LastfmProfile | null>(null);
   const [recent, setRecent] = useState<RecentTrack[]>([]);
   const [pending, setPending] = useState<PendingScrobble[]>([]);
   const [connecting, setConnecting] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [account_error, set_account_error] = useState<string | null>(null);
+  const account_request = useRef(0);
 
   const refreshPending = useCallback(() => {
     pendingScrobbles()
@@ -54,29 +58,47 @@ export function ScrobblingSettings() {
   }, [refreshPending]);
 
   const loadAccount = useCallback((username: string) => {
+    const request = ++account_request.current;
+    if (!is_online()) {
+      setLoading(false);
+      set_account_error('Connect to the internet to check this');
+      return;
+    }
     setLoading(true);
+    set_account_error(null);
     Promise.all([fetchProfile(username), fetchRecentTracks(username, 25)])
       .then(([info, tracks]) => {
+        if (request !== account_request.current) return;
         setProfile(info);
         setRecent(tracks);
       })
       .catch((error: unknown) => {
+        if (request !== account_request.current) return;
         const message = error instanceof Error ? error.message : 'Unknown error';
+        set_account_error(`Could not load your Last.fm profile: ${message}`);
         toast.error(`Couldn't load your Last.fm profile: ${message}`);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (request === account_request.current) setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
     if (!session) {
+      account_request.current += 1;
       setProfile(null);
       setRecent([]);
+      set_account_error(null);
       return;
     }
     loadAccount(session.username);
-  }, [session?.username, loadAccount]);
+  }, [session?.username, loadAccount, online]);
 
   const connect = () => {
+    if (!is_online()) {
+      toast.info('Connect to the internet before connecting Last.fm');
+      return;
+    }
     setConnecting(true);
     connectLastfm()
       .then((next) => {
@@ -97,6 +119,10 @@ export function ScrobblingSettings() {
 
   const retry = () => {
     if (!session) return;
+    if (!is_online()) {
+      toast.info('Your scrobbles are queued until you connect to the internet');
+      return;
+    }
     flushScrobbles(session.sessionKey)
       .then((sent) => {
         if (sent > 0) toast.success(`Sent ${sent} pending scrobble${sent === 1 ? '' : 's'}`);
@@ -141,11 +167,13 @@ export function ScrobblingSettings() {
                         ? ` / Joined ${new Date(profile.registered * 1000).getFullYear()}`
                         : ''}
                     </>
-                  ) : (
+                  ) : loading ? (
                     <span className="xe_scrobble-profile__loading">
                       <Spinner size={11} />
                       Loading profile...
                     </span>
+                  ) : (
+                    <span>{account_error ?? 'Profile unavailable'}</span>
                   )}
                 </span>
                 {profile?.url && (
@@ -174,6 +202,7 @@ export function ScrobblingSettings() {
                 </button>
               </div>
             </div>
+            {profile && account_error && <p className="xe_settings__hint" role="status">{account_error}</p>}
             <p className="xe_settings__hint">Logged in as {session.username}</p>
           </>
         ) : (

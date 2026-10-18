@@ -1,3 +1,5 @@
+import { is_online } from '../utils/online_status';
+
 const BASE = '/i/services/lastfm';
 const trendingCache = new Map();
 const topTracksCache = new Map();
@@ -33,9 +35,10 @@ const geoTracksRequests = new Map();
  */
 
 async function request(path, init) {
+  if (!is_online()) throw new Error('You are offline');
   const res = await fetch(`${BASE}${path}`, init);
   const data = await res.json().catch(() => null);
-  if (!res.ok) throw new Error(data?.error || `Last.fm request failed (${res.status})`);
+  if (!res.ok) throw Object.assign(new Error(data?.error || `Last.fm request failed (${res.status})`), { status: res.status });
   return data;
 }
 
@@ -65,6 +68,10 @@ function cachedChart(cache, requests, key, load) {
 
 export function connectLastfm() {
   return new Promise((resolve, reject) => {
+    if (!is_online()) {
+      reject(new Error('Connect to the internet before connecting Last.fm'));
+      return;
+    }
     const popup = window.open(`${BASE}/auth/start`, 'xebrine-lastfm', 'width=520,height=760');
     if (!popup) {
       reject(new Error('Your browser blocked the Last.fm sign-in window'));

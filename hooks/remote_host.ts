@@ -12,6 +12,7 @@ import {
   type RemoteState
 } from '../utils/remote_protocol';
 import { parseMessage, remoteUrl, startKeepalive } from './remote_socket';
+import { is_online } from './online_status';
 
 export type HostPhase = 'idle' | 'connecting' | 'live' | 'error';
 
@@ -156,6 +157,11 @@ export function useRemoteHost(): RemoteHost {
 
   const start = useCallback(() => {
     if (socketRef.current) return;
+    if (!is_online()) {
+      setPhase('error');
+      setError('Connect to the internet before hosting a remote session');
+      return;
+    }
     setPhase('connecting');
     setError('');
 
@@ -215,7 +221,7 @@ export function useRemoteHost(): RemoteHost {
     });
 
     socket.addEventListener('error', () => {
-      setError('The connection has been severed');
+      setError(is_online() ? 'The connection has been severed' : 'You are offline. The remote session ended.');
     });
 
     socket.addEventListener('close', () => {
@@ -225,11 +231,22 @@ export function useRemoteHost(): RemoteHost {
       setPhase((current) => (current === 'idle' ? current : 'error'));
       setPending([]);
       setControllers([]);
-      setError((current) => current || 'The remote session ended unexpectedly');
+      setError((current) => current || (is_online() ? 'The remote session ended unexpectedly' : 'You are offline. The remote session ended'));
     });
   }, [pushQueue, pushState]);
 
   useEffect(() => stop, [stop]);
+
+  useEffect(() => {
+    const offline = () => {
+      if (!socketRef.current) return;
+      stop();
+      setPhase('error');
+      setError('You are offline. The remote session ended');
+    };
+    window.addEventListener('offline', offline);
+    return () => window.removeEventListener('offline', offline);
+  }, [stop]);
 
   useEffect(() => {
     if (phase !== 'live' || controllers.length === 0) return;

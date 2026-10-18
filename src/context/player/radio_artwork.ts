@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react';
 import { station_artwork_url, type radio_station_record } from '../../../api/radio_browser';
 import { optimizeCoverImage } from '../../../utils/cover_image';
+import { use_online } from '../../../hooks/online_status';
 
 export function use_radio_artwork(station: radio_station_record | null): string | null {
+  const online = use_online();
   const key = station?.favicon ? `${station.stationuuid}:${station.favicon}` : '';
   const source = station?.favicon ? station_artwork_url(station) : '';
   const [artwork, set_artwork] = useState<{ key: string; url: string } | null>(null);
 
   useEffect(() => {
+    if (!online) {
+      set_artwork(null);
+      return;
+    }
     if (!source) return;
     const controller = new AbortController();
     let object_url: string | null = null;
@@ -30,7 +36,7 @@ export function use_radio_artwork(station: radio_station_record | null): string 
       controller.abort();
       if (object_url) URL.revokeObjectURL(object_url);
     };
-  }, [key, source]);
+  }, [key, source, online]);
 
-  return artwork?.key === key ? artwork.url : null;
+  return online && artwork?.key === key ? artwork.url : null;
 }
