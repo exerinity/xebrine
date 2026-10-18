@@ -22,6 +22,7 @@ const chunk_rules: [RegExp, string][] = [
   [/pages\/lyrics\.[^/?]+(?:\?|$)/, 'lyrp'],
   [/pages\/share_lyrics\.[^/?]+(?:\?|$)/, 'lyrs'],
   [/pages\/settings\.[^/?]+(?:\?|$)/, 'set'],
+  [/pages\/settings\/[^/?]+\.[^/?]+(?:\?|$)/, 'set'],
   [/components\/scrobbling_settings\.[^/?]+(?:\?|$)/, 'scset'],
   [/pages\/about\.[^/?]+(?:\?|$)/, 'abt'],
   [/pages\/release_notes\.[^/?]+(?:\?|$)/, 'rel'],
