@@ -121,7 +121,7 @@ interface LyricsPanelProps {
   variant?: 'page' | 'fullscreen' | 'sidebar';
   droppedFile?: File | null;
   onDroppedFileHandled?(): void;
-  onInstrumentalChange?(instrumental: boolean): void;
+  onHideLyricsChange?(hide_lyrics: boolean): void;
 }
 
 export function LyricsPanel({
@@ -129,7 +129,7 @@ export function LyricsPanel({
   variant = 'page',
   droppedFile = null,
   onDroppedFileHandled,
-  onInstrumentalChange
+  onHideLyricsChange
 }: LyricsPanelProps) {
   const { current, seek, audioRef } = usePlayer();
   const { settings } = useSettings();
@@ -141,6 +141,8 @@ export function LyricsPanel({
   const lyrics = lyricsResult && lyricsResult.trackId === track?.id ? lyricsResult.lyrics : null;
   const instrumental = isInstrumentalLyrics(lyrics);
   const [status, setStatus] = useState<Status>('idle');
+  const hide_lyrics =
+    instrumental || status === 'notfound' || status === 'error' || status === 'offline' || status === 'ratelimited';
   const [retryStatus, setRetryStatus] = useState<RetryStatus | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [following, setFollowing] = useState(true);
@@ -162,8 +164,8 @@ export function LyricsPanel({
   trackIdRef.current = track?.id;
 
   useEffect(() => {
-    onInstrumentalChange?.(instrumental);
-  }, [instrumental, onInstrumentalChange]);
+    onHideLyricsChange?.(hide_lyrics);
+  }, [hide_lyrics, onHideLyricsChange]);
 
   useEffect(() => () => window.clearTimeout(followTimerRef.current), []);
 

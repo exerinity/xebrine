@@ -1202,7 +1202,7 @@ button.xe_scrubber__time:hover {
     gap 460ms cubic-bezier(0.22, 0.8, 0.2, 1);
 }
 
-.xe_fullscreen-player__minimal-layout--instrumental {
+.xe_fullscreen-player__minimal-layout--centered {
   grid-template-columns: minmax(260px, min(42vw, 620px)) minmax(0, 0px);
   gap: 0;
 }
@@ -1249,7 +1249,7 @@ button.xe_scrubber__time:hover {
     visibility 0s;
 }
 
-.xe_fullscreen-player__minimal-layout--instrumental .xe_fullscreen-player__minimal-lyrics {
+.xe_fullscreen-player__minimal-layout--centered .xe_fullscreen-player__minimal-lyrics {
   opacity: 0;
   translate: 40px 0;
   visibility: hidden;
@@ -1293,7 +1293,7 @@ button.xe_scrubber__time:hover {
     left: clamp(-40px, -2vw, -20px);
   }
 
-  .xe_fullscreen-player__minimal-layout--instrumental .xe_fullscreen-player__minimal-artwork {
+  .xe_fullscreen-player__minimal-layout--centered .xe_fullscreen-player__minimal-artwork {
     left: 0;
   }
 }
@@ -1742,7 +1742,7 @@ button.xe_scrubber__time:hover {
     min-height: 100%;
   }
 
-  .xe_fullscreen-player__minimal-layout--instrumental {
+  .xe_fullscreen-player__minimal-layout--centered {
     grid-template-columns: 1fr;
     align-content: center;
     gap: 0;
@@ -1750,7 +1750,7 @@ button.xe_scrubber__time:hover {
     min-height: 0;
   }
 
-  .xe_fullscreen-player__minimal-layout--instrumental .xe_fullscreen-player__minimal-artwork {
+  .xe_fullscreen-player__minimal-layout--centered .xe_fullscreen-player__minimal-artwork {
     min-height: 0;
   }
 
@@ -1766,7 +1766,7 @@ button.xe_scrubber__time:hover {
     height: clamp(360px, 52vh, 560px);
   }
 
-  .xe_fullscreen-player__minimal-layout--instrumental .xe_fullscreen-player__minimal-lyrics {
+  .xe_fullscreen-player__minimal-layout--centered .xe_fullscreen-player__minimal-lyrics {
     height: 0;
     min-height: 0;
   }

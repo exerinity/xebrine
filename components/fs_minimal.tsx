@@ -22,17 +22,17 @@ export function FullscreenMinimalPlayer({
   coverRef,
   coverHandlers
 }: FullscreenMinimalPlayerProps) {
-  const [instrumental, setInstrumental] = useState(false);
-  const hide_lyrics = instrumental || radio;
+  const [lyrics_hidden, set_lyrics_hidden] = useState(false);
+  const hide_lyrics = lyrics_hidden || radio;
 
   useEffect(() => {
-    setInstrumental(false);
+    set_lyrics_hidden(false);
   }, [trackId]);
 
   return (
     <div
       className={`xe_fullscreen-player__minimal-layout${
-        hide_lyrics ? ' xe_fullscreen-player__minimal-layout--instrumental' : ''
+        hide_lyrics ? ' xe_fullscreen-player__minimal-layout--centered' : ''
       }`}
     >
       <section className="xe_fullscreen-player__minimal-artwork" aria-label="Current track artwork">
@@ -54,7 +54,7 @@ export function FullscreenMinimalPlayer({
         inert={hide_lyrics}
       >
         {!radio && (
-          <LyricsPanel showToolbar={false} variant="fullscreen" onInstrumentalChange={setInstrumental} />
+          <LyricsPanel showToolbar={false} variant="fullscreen" onHideLyricsChange={set_lyrics_hidden} />
         )}
       </section>
     </div>
