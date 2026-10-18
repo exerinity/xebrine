@@ -1,6 +1,6 @@
 import type { Lyrics, TrackMeta } from '../types';
 import { parseLrc } from '../utils/lyrics';
-import { is_online } from '../utils/online_status';
+import { is_online, online_signal } from '../utils/online_status';
 
 const BASE = 'https://lrclib.net/api';
 const CLIENT_HEADER = 'Xebrine v10.0 (https://xebrine.com)';
@@ -164,9 +164,10 @@ async function toLrclibError(response: Response): Promise<LrclibError> {
 
 async function requestJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   if (!is_online()) throw new Error('You are offline');
+  const active_signal = online_signal(signal);
   return enqueueRequest(async () => {
     const response = await fetch(`${BASE}${path}`, {
-      signal,
+      signal: active_signal,
       headers: {
         Accept: 'application/json',
         'Lrclib-Client': CLIENT_HEADER
@@ -174,7 +175,7 @@ async function requestJson<T>(path: string, signal?: AbortSignal): Promise<T> {
     });
     if (!response.ok) throw await toLrclibError(response);
     return response.json() as Promise<T>;
-  }, signal);
+  }, active_signal);
 }
 
 function addTrimmed(params: URLSearchParams, name: string, value: string | undefined): void {

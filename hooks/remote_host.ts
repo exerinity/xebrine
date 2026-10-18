@@ -12,7 +12,7 @@ import {
   type RemoteState
 } from '../utils/remote_protocol';
 import { parseMessage, remoteUrl, startKeepalive } from './remote_socket';
-import { is_online } from './online_status';
+import { is_online, subscribe_online } from '../utils/online_status';
 
 export type HostPhase = 'idle' | 'connecting' | 'live' | 'error';
 
@@ -239,13 +239,13 @@ export function useRemoteHost(): RemoteHost {
 
   useEffect(() => {
     const offline = () => {
+      if (is_online()) return;
       if (!socketRef.current) return;
       stop();
       setPhase('error');
       setError('You are offline. The remote session ended');
     };
-    window.addEventListener('offline', offline);
-    return () => window.removeEventListener('offline', offline);
+    return subscribe_online(offline);
   }, [stop]);
 
   useEffect(() => {

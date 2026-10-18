@@ -10,7 +10,7 @@ import {
   type RemoteState
 } from '../utils/remote_protocol';
 import { parseMessage, remoteUrl, startKeepalive } from './remote_socket';
-import { is_online } from './online_status';
+import { is_online, subscribe_online } from '../utils/online_status';
 
 export type ControlPhase =
   | 'idle'
@@ -136,13 +136,13 @@ export function useRemoteControl(): RemoteControl {
 
   useEffect(() => {
     const offline = () => {
+      if (is_online()) return;
       if (!socketRef.current) return;
       release();
       setPhase('error');
       setError('You are offline. The connection to the host ended');
     };
-    window.addEventListener('offline', offline);
-    return () => window.removeEventListener('offline', offline);
+    return subscribe_online(offline);
   }, [release]);
 
   const sendCmd = useCallback((cmd: RemoteCommand) => {

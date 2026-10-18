@@ -265,6 +265,12 @@ export function LyricsPanel({
   }, [track?.id, runSearch]);
 
   useEffect(() => {
+    if (online || !track || lyrics || (status !== 'waiting' && status !== 'loading')) return;
+    setRetryStatus(null);
+    setStatus('offline');
+  }, [online, track?.id, lyrics, status]);
+
+  useEffect(() => {
     if (!online || status !== 'offline' || !track || !requestAbortRef.current) return;
     void runSearch(track, requestAbortRef.current.signal);
   }, [online, status, track?.id, runSearch]);

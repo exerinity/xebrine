@@ -8,9 +8,10 @@ import { LibrarySettings } from './settings/library';
 import { PlaybackSettings } from './settings/playback';
 import { AccessibilitySettings } from './settings/accessibility';
 import { ToysSettings } from './settings/toys';
+import { KillSwitchesSettings } from './settings/kill_switches';
 import { ShareSettings } from './settings/share';
 
-type SectionId = 'all' | 'preferences' | 'appearance' | 'home' | 'library' | 'playback' | 'a11y' | 'toys' | 'share';
+type SectionId = 'all' | 'preferences' | 'appearance' | 'home' | 'library' | 'playback' | 'a11y' | 'toys' | 'kill' | 'share';
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'preferences', label: 'Main preferences' },
@@ -20,6 +21,7 @@ const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'playback', label: 'Playback settings' },
   { id: 'a11y', label: 'Accessibility' },
   { id: 'toys', label: 'Toys' },
+  { id: 'kill', label: 'Kill switches' },
   { id: 'share', label: 'Share settings' },
   { id: 'all', label: 'All settings' },
 ];
@@ -68,6 +70,7 @@ export function SettingsPage() {
           {(active === 'all' || active === 'playback') && <PlaybackSettings show_heading={active === 'all'} />}
           {(active === 'all' || active === 'a11y') && <AccessibilitySettings show_heading={active === 'all'} />}
           {(active === 'all' || active === 'toys') && <ToysSettings show_heading={active === 'all'} />}
+          {(active === 'all' || active === 'kill') && <KillSwitchesSettings show_heading={active === 'all'} />}
           {(active === 'all' || active === 'share') && <ShareSettings show_heading={active === 'all'} />}
         </div>
       </div>

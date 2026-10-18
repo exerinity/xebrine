@@ -1,4 +1,4 @@
-import { is_online } from '../utils/online_status';
+import { is_online, online_signal } from '../utils/online_status';
 
 const BASE = '/i/services/lastfm';
 const trendingCache = new Map();
@@ -36,7 +36,7 @@ const geoTracksRequests = new Map();
 
 async function request(path, init) {
   if (!is_online()) throw new Error('You are offline');
-  const res = await fetch(`${BASE}${path}`, init);
+  const res = await fetch(`${BASE}${path}`, { ...init, signal: online_signal(init?.signal) });
   const data = await res.json().catch(() => null);
   if (!res.ok) throw Object.assign(new Error(data?.error || `Last.fm request failed (${res.status})`), { status: res.status });
   return data;

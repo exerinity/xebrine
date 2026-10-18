@@ -1,4 +1,4 @@
-import { is_online } from '../utils/online_status';
+import { is_online, online_signal } from '../utils/online_status';
 
 export interface radio_station_record {
   stationuuid: string;
@@ -54,7 +54,7 @@ export function normalize_station(value: unknown): radio_station_record | null {
 
 async function request_json(path: string, signal?: AbortSignal, body?: Record<string, string>): Promise<unknown> {
   if (!is_online()) throw new Error('You are offline');
-  const response = await fetch(`${BASE}${path}`, { signal, ...(body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {}) });
+  const response = await fetch(`${BASE}${path}`, { signal: online_signal(signal), ...(body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {}) });
   let data: unknown;
   try {
     data = await response.json();
@@ -102,7 +102,7 @@ export function station_stream_url(station: radio_station_record): string {
 
 export function report_station_play(uuid: string): void {
   if (!is_online()) return;
-  void fetch(`${BASE}/click/${encodeURIComponent(uuid)}`, { method: 'POST' }).catch(() => {});
+  void fetch(`${BASE}/click/${encodeURIComponent(uuid)}`, { method: 'POST', signal: online_signal() }).catch(() => {});
 }
 
 export async function browse_radio(resource: string, params: Record<string, string>, signal: AbortSignal): Promise<unknown> {
@@ -110,7 +110,7 @@ export async function browse_radio(resource: string, params: Record<string, stri
   const path = `/browse/${encodeURIComponent(resource)}?${query}`;
   if (resource !== 'metrics') return request_json(path, signal);
   if (!is_online()) throw new Error('You are offline');
-  const response = await fetch(`${BASE}${path}`, { signal });
+  const response = await fetch(`${BASE}${path}`, { signal: online_signal(signal) });
   if (!response.ok) throw new Error('Could not load server metrics');
   return response.text();
 }
