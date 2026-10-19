@@ -1,6 +1,6 @@
 {
   "name": "xebrine-desktop",
-  "version": "0.0.1",
+  "version": "2",
   "private": true,
   "description": "Minimalist desktop shell for Xebrine",
   "author": "exerinity <me@exerinity.com>",
