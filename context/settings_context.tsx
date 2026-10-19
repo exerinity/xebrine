@@ -51,6 +51,8 @@ export interface Settings {
   playerBarPosition: PlayerBarPosition;
   playerBarSliderPosition: PlayerBarSliderPosition;
   playerBarLayout: PlayerBarLayout;
+  showAutoMixPill: boolean;
+  showSleepTimerPill: boolean;
   fsPlayerStyle: FullscreenPlayerStyle;
   sidePanelOpen: boolean;
   sidePanelView: SidePanelView;
@@ -106,6 +108,8 @@ export const DEFAULT_SETTINGS: Settings = {
   playerBarPosition: 'bottom',
   playerBarSliderPosition: 'below',
   playerBarLayout: 'comfortable',
+  showAutoMixPill: true,
+  showSleepTimerPill: true,
   fsPlayerStyle: 'maximal',
   sidePanelOpen: false,
   sidePanelView: 'queue',

@@ -124,6 +124,26 @@ export function AppearanceSettings({ show_heading }: { show_heading: boolean }) 
       </section>
 
       <section className="xe_settings__section">
+        <h2>Player bar pills</h2>
+        <label className="xe_settings__radio">
+          <input
+            type="checkbox"
+            checked={settings.showAutoMixPill}
+            onChange={(e) => update({ showAutoMixPill: e.target.checked })}
+          />
+          <span>Show auto mix</span>
+        </label>
+        <label className="xe_settings__radio">
+          <input
+            type="checkbox"
+            checked={settings.showSleepTimerPill}
+            onChange={(e) => update({ showSleepTimerPill: e.target.checked })}
+          />
+          <span>Show sleep timer</span>
+        </label>
+      </section>
+
+      <section className="xe_settings__section">
         <h2>Fullscreen player style</h2>
         <label className="xe_settings__radio">
           <input

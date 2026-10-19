@@ -90,10 +90,16 @@ const FLYOUT_TRIGGER_WIDTH = 42;
 function collapsedSecondaryTools(
   width: number,
   hasLastfm: boolean,
-  hasSidePanel: boolean
+  hasSidePanel: boolean,
+  showAutoMix: boolean,
+  showSleepTimer: boolean
 ): Set<SecondaryToolId> {
   const availableTools = SECONDARY_COLLAPSE_ORDER.filter(
-    (id) => (id !== 'lastfm' || hasLastfm) && (id !== 'side-panel' || hasSidePanel)
+    (id) =>
+      (id !== 'lastfm' || hasLastfm) &&
+      (id !== 'side-panel' || hasSidePanel) &&
+      (id !== 'automix' || showAutoMix) &&
+      (id !== 'sleep' || showSleepTimer)
   );
   let requiredWidth =
     PRIMARY_VOLUME_CONTROLS_WIDTH +
@@ -208,7 +214,9 @@ export function PlayerBar({
   const collapsedTools = collapsedSecondaryTools(
     volumeControlsWidth,
     Boolean(lastfm),
-    sidePanelAvailable
+    sidePanelAvailable,
+    settings.showAutoMixPill,
+    settings.showSleepTimerPill
   );
   const hasCollapsedTools = collapsedTools.size > 0;
   if (volume > 0) lastAudibleVolumeRef.current = volume;
@@ -505,40 +513,48 @@ export function PlayerBar({
     label: string;
     control: ReactNode;
   }> = [
-    {
-      id: 'automix',
-      label: 'Auto mix',
-      control: (
-        <div className="xe_automix-pill-wrap">
-          <AutoMixDrawer hidden={fullscreenOpen || lyricsSidePanelActive} />
-          <button
-            type="button"
-            className={`xe_automix-pill${autoMixEnabled ? ' xe_automix-pill--on' : ''}${
-              autoMixEnabled && autoMixColor ? ` xe_automix-pill--${autoMixColor}` : ''
-            }${autoMixBusy ? ' xe_automix-pill--busy' : ''}${
-              autoMixPhase === 'mixing' ? ' xe_automix-pill--mixing' : ''
-            }`}
-            disabled={!!radio_station}
-            onClick={toggleAutoMix}
-            title={`Auto mix is ${autoMixLabel.toLowerCase()}`}
-            aria-pressed={autoMixEnabled}
-          >
-            <AutoMixIcon size={14} />
-            <span
-              className="xe_automix-pill__label"
-              title={`Auto mix is ${autoMixLabel.toLowerCase()}`}
-            >
-              {autoMixLabel}
-            </span>
-          </button>
-        </div>
-      )
-    },
-    {
-      id: 'sleep',
-      label: 'Sleep timer',
-      control: <SleepTimerControl />
-    },
+    ...(settings.showAutoMixPill
+      ? [
+          {
+            id: 'automix' as const,
+            label: 'Auto mix',
+            control: (
+              <div className="xe_automix-pill-wrap">
+                <AutoMixDrawer hidden={fullscreenOpen || lyricsSidePanelActive} />
+                <button
+                  type="button"
+                  className={`xe_automix-pill${autoMixEnabled ? ' xe_automix-pill--on' : ''}${
+                    autoMixEnabled && autoMixColor ? ` xe_automix-pill--${autoMixColor}` : ''
+                  }${autoMixBusy ? ' xe_automix-pill--busy' : ''}${
+                    autoMixPhase === 'mixing' ? ' xe_automix-pill--mixing' : ''
+                  }`}
+                  disabled={!!radio_station}
+                  onClick={toggleAutoMix}
+                  title={`Auto mix is ${autoMixLabel.toLowerCase()}`}
+                  aria-pressed={autoMixEnabled}
+                >
+                  <AutoMixIcon size={14} />
+                  <span
+                    className="xe_automix-pill__label"
+                    title={`Auto mix is ${autoMixLabel.toLowerCase()}`}
+                  >
+                    {autoMixLabel}
+                  </span>
+                </button>
+              </div>
+            )
+          }
+        ]
+      : []),
+    ...(settings.showSleepTimerPill
+      ? [
+          {
+            id: 'sleep' as const,
+            label: 'Sleep timer',
+            control: <SleepTimerControl />
+          }
+        ]
+      : []),
     ...(lastfm
       ? [
           {
