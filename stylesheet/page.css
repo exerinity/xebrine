@@ -362,6 +362,66 @@
   color: var(--accent-text);
 }
 
+.xe_about__download-section {
+  max-width: 650px;
+  margin: 0;
+}
+
+.xe_about__download-section .xe_about__text {
+  margin-bottom: 20px;
+}
+
+.xe_about__download-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.xe_about__download-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.xe_about__download-details {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.xe_about__download-details strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.xe_about__download-details span {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+@media (max-width: 520px) {
+  .xe_about__download-item {
+    flex-wrap: wrap;
+  }
+
+  .xe_about__download-item .xe_btn {
+    justify-content: center;
+    width: 100%;
+    margin-top: 2px;
+  }
+}
+
 .xe_about__list--group {
   margin-bottom: 18px;
 }

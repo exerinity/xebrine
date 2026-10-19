@@ -27,6 +27,7 @@ const chunk_rules: [RegExp, string][] = [
   [/pages\/settings\/[^/?]+\.[^/?]+(?:\?|$)/, 'set'],
   [/components\/scrobbling_settings\.[^/?]+(?:\?|$)/, 'scset'],
   [/pages\/about\.[^/?]+(?:\?|$)/, 'abt'],
+  [/pages\/about\/[^/?]+\.[^/?]+(?:\?|$)/, 'abt'],
   [/pages\/release_notes\.[^/?]+(?:\?|$)/, 'rel'],
   [/pages\/remote\.[^/?]+(?:\?|$)/, 'rem'],
   [/components\/remote_host\.[^/?]+(?:\?|$)/, 'rmh'],

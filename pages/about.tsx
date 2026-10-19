@@ -1,213 +1,28 @@
-import { useMemo, useState, type ReactNode } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useLibrary } from '../context/library_context';
-import { BackIcon, ChevronRightIcon, LogoIcon, NoteIcon } from '../components/icons';
+import { useNavigate, useParams } from 'react-router-dom';
+import { BackIcon, ChevronRightIcon, NoteIcon } from '../components/icons';
 import { usePageTitle } from '../hooks/page_title';
-import { electronVersion, isElectron } from '../utils/electron';
-import { CountUp } from '../components/count_up';
-import { Spinner } from '../components/spinner';
-import { albumKey, displayArtist } from '../utils/groups';
-import { durationBreakdown, formatBytes, formatTime } from '../utils/format';
-import type { TrackMeta } from '../types';
-import { LATEST_VERSION } from './release_notes';
+import { AboutInfo } from './about/info';
+import { AboutStats } from './about/stats';
+import { AboutAcknowledgements } from './about/acknowledgements';
+import { AboutHotkeys } from './about/hotkeys';
+import { AboutDownload } from './about/download';
 
-const HOTKEYS: { chords: string[][]; action: string }[] = [
-  { chords: [['Space'], ['K']], action: 'Play / pause' },
-  { chords: [['F']], action: 'Toggle the fullscreen player' },
-  { chords: [['Ctrl', 'F']], action: 'Focus the search bar' },
-  { chords: [['R']], action: 'Restart the current track' },
-  { chords: [['T']], action: 'Cycle repeat mode' },
-  { chords: [['H']], action: 'Toggle shuffle' },
-  { chords: [['Z']], action: 'Previous track' },
-  { chords: [['X']], action: 'Next track' },
-  { chords: [['Arrow Left'], ['J'], ['A']], action: 'Seek back 10s (Shift 1s / Ctrl 5s / Alt 30s)' },
-  { chords: [['Arrow Right'], ['L'], ['D']], action: 'Seek forward 10s (Shift 1s / Ctrl 5s / Alt 30s)' },
-  { chords: [['Arrow Up'], ['W']], action: 'Volume up' },
-  { chords: [['Arrow Down'], ['S']], action: 'Volume down' },
-  { chords: [['0 - 9']], action: 'Jump to 0 - 90% of the track (Shift nudges 5%)' },
-  { chords: [['?']], action: 'Open this list' }
-];
-
-type SectionId = 'info' | 'stats' | 'acknowledgements' | 'hotkeys';
+type SectionId = 'info' | 'stats' | 'acknowledgements' | 'hotkeys' | 'download';
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'info', label: 'About Xebrine' },
   { id: 'stats', label: 'Cool stats' },
   { id: 'acknowledgements', label: 'Acknowledgements' },
-  { id: 'hotkeys', label: 'Hotkeys' }
-];
-
-interface Acknowledgement {
-  name: string;
-  url: string;
-  role: ReactNode;
-}
-
-const DEPENDENCY_ACKNOWLEDGEMENTS: { heading: string; items: Acknowledgement[] }[] = [
-  {
-    heading: 'Application',
-    items: [
-      { name: 'React', url: 'https://react.dev', role: 'React React React' },
-      { name: 'react-dom', url: 'https://react.dev', role: 'rendering' },
-      {
-        name: 'react-router-dom',
-        url: 'https://reactrouter.com',
-        role: 'routing, navigation'
-      },
-      {
-        name: 'music-metadata',
-        url: 'https://github.com/borewit/music-metadata',
-        role: 'embedded artwork extraction'
-      },
-      {
-        name: 'mediainfo.js',
-        url: 'https://mediainfo.js.org',
-        role: 'fast audio metadata scanning'
-      },
-      {
-        name: 'meSpeak',
-        url: 'https://github.com/mikolalysenko/mespeak',
-        role: 'the library used for the TTS announcer because the speech synthesis API is very inconsistent across devices'
-      }
-    ]
-  },
-  {
-    heading: 'Compilation',
-    items: [
-      { name: 'Vite', url: 'https://vite.dev', role: 'bundler' },
-      {
-        name: '@vitejs/plugin-react',
-        url: 'https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react',
-        role: 'React JSX transformation and Fast Refresh'
-      },
-      {
-        name: 'vite-plugin-pwa',
-        url: 'https://vite-pwa-org.netlify.app',
-        role: 'the thing that makes the pwa a pwa'
-      },
-      {
-        name: 'Workbox',
-        url: 'https://developer.chrome.com/docs/workbox',
-        role: 'precaching'
-      },
-      { name: 'TypeScript', url: 'https://www.typescriptlang.org', role: '75% of the codebase' }
-    ]
-  },
-  {
-    heading: 'Types',
-    items: [
-      {
-        name: '@types/react',
-        url: 'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react',
-        role: 'React definitions'
-      },
-      {
-        name: '@types/react-dom',
-        url: 'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react-dom',
-        role: 'React DOM definitions'
-      },
-      {
-        name: '@types/wicg-file-system-access',
-        url: 'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wicg-file-system-access',
-        role: 'File System Access API definitions'
-      }
-    ]
-  },
-  {
-    heading: 'Icon generation',
-    items: [
-      { name: 'ab_glyph', url: 'https://crates.io/crates/ab_glyph', role: 'font glyph loading / rendering' },
-      { name: 'image', url: 'https://crates.io/crates/image', role: 'PNG composition' },
-      {
-        name: 'yeslogic-fontconfig-sys',
-        url: 'https://crates.io/crates/yeslogic-fontconfig-sys',
-        role: 'system font discovery'
-      }
-    ]
-  }
-];
-
-const EXTERNAL_ACKNOWLEDGEMENTS: Acknowledgement[] = [
-  { name: 'LRCLIB', url: 'https://lrclib.net', role: 'lyrics' },
-  { name: 'Last.fm', url: 'https://www.last.fm', role: <Link to="/lastfm">scrobbling</Link> },
-  {
-    name: 'Cloudflare Workers',
-    url: 'https://workers.dev',
-    role: 'basically where this thing lives'
-  },
-  { name: 'Inter', url: 'https://rsms.me/inter/', role: 'font' },
-  { name: 'Voxity', url: 'https://voxity.dev', role: 'THE KING' }
+  { id: 'hotkeys', label: 'Hotkeys' },
+  { id: 'download', label: 'Downloads' }
 ];
 
 export function AboutPage() {
   const navigate = useNavigate();
-  const { tracks, folders, scanning } = useLibrary();
-  const { section: sectionParam } = useParams<{ section: string }>();
-  const active = (SECTIONS.find((s) => s.id === sectionParam)?.id ?? SECTIONS[0].id) as SectionId;
-  const [spinning, setSpinning] = useState(false);
-  const section = SECTIONS.find((s) => s.id === active) ?? SECTIONS[0];
+  const { section: section_param } = useParams<{ section: string }>();
+  const active = (SECTIONS.find((item) => item.id === section_param)?.id ?? SECTIONS[0].id) as SectionId;
+  const section = SECTIONS.find((item) => item.id === active) ?? SECTIONS[0];
   usePageTitle('About');
-
-  const stats = useMemo(() => {
-    const artists = new Set<string>();
-    const albums = new Set<string>();
-    const genres = new Set<string>();
-    const subfolders = new Set<string>();
-    const formats = new Map<string, number>();
-    let totalSeconds = 0;
-    let totalBytes = 0;
-    let withCoverArt = 0;
-    let longest: TrackMeta | null = null;
-    let shortest: TrackMeta | null = null;
-    let earliestYear = 0;
-    let latestYear = 0;
-
-    for (const track of tracks) {
-      totalSeconds += track.duration || 0;
-      totalBytes += track.sizeBytes || 0;
-      artists.add(displayArtist(track).toLowerCase());
-      albums.add(albumKey(track));
-      if (track.genre?.trim()) genres.add(track.genre.trim().toLowerCase());
-      if (track.hasCoverArt) withCoverArt++;
-
-      const ext = track.fileName.includes('.')
-        ? track.fileName.split('.').pop()!.toLowerCase()
-        : '';
-      if (ext) formats.set(ext, (formats.get(ext) ?? 0) + 1);
-
-      const dir = track.relPath.slice(0, -1);
-      for (let i = 1; i <= dir.length; i++) {
-        subfolders.add(`${track.folderId}/${dir.slice(0, i).join('/')}`);
-      }
-
-      if (track.duration > 0) {
-        if (!longest || track.duration > longest.duration) longest = track;
-        if (!shortest || track.duration < shortest.duration) shortest = track;
-      }
-      if (track.year) {
-        earliestYear = earliestYear ? Math.min(earliestYear, track.year) : track.year;
-        latestYear = Math.max(latestYear, track.year);
-      }
-    }
-
-    return {
-      totalSeconds,
-      totalBytes,
-      artists: artists.size,
-      albums: albums.size,
-      genres: genres.size,
-      subfolders: subfolders.size,
-      withCoverArt,
-      longest: longest as TrackMeta | null,
-      shortest: shortest as TrackMeta | null,
-      earliestYear,
-      latestYear,
-      formats: [...formats.entries()].sort((a, b) => b[1] - a[1]),
-      averageSeconds: tracks.length ? totalSeconds / tracks.length : 0
-    };
-  }, [tracks]);
-
-  const breakdown = durationBreakdown(stats.totalSeconds);
 
   return (
     <div className="xe_page">
@@ -225,15 +40,15 @@ export function AboutPage() {
 
       <div className="xe_split">
         <nav className="xe_split__nav" aria-label="About sections">
-          {SECTIONS.map((s) => (
+          {SECTIONS.map((item) => (
             <button
-              key={s.id}
+              key={item.id}
               type="button"
-              className={`xe_split__item${s.id === active ? ' xe_split__item--active' : ''}`}
-              aria-current={s.id === active}
-              onClick={() => navigate(`/i/${s.id}`)}
+              className={`xe_split__item${item.id === active ? ' xe_split__item--active' : ''}`}
+              aria-current={item.id === active}
+              onClick={() => navigate(`/i/${item.id}`)}
             >
-              <span>{s.label}</span>
+              <span>{item.label}</span>
               <ChevronRightIcon size={16} />
             </button>
           ))}
@@ -243,275 +58,12 @@ export function AboutPage() {
           <header className="xe_split__head">
             <h2 className="xe_split__title">{section.label}</h2>
           </header>
-
           <div className="xe_about">
-            {active === 'info' && (
-              <>
-                <div className="xe_about__hero">
-                  <span
-                    className={`xe_about__logo${spinning ? ' xe_about__logo--spin' : ''}`}
-                    onClick={() => setSpinning(true)}
-                    onAnimationEnd={() => setSpinning(false)}
-                  >
-                    <LogoIcon size={60} />
-                  </span>
-                  <div>
-                    <h2 className="xe_about__name">Xebrine {LATEST_VERSION}</h2>
-                    {isElectron && (
-                      <p className="xe_about__version">You are running Xebrine in its Electron wrapper (electron v{electronVersion()})</p>
-                    )}
-                  </div>
-                </div>
-
-                <p className="xe_about__lead">
-                  <strong>Xebrine</strong> (pronounced <i>"zeh-brine"</i>) is a utillitarian heavy-duty, highly customizable, power-user desktop-focused PWA music player app designed for
-                  large music collections and very long listening sessions. Made in React with a minimal amount of dependencies by <a href="https://exerinity.com" target="_blank">exerinity</a>, it is the non-replacing spiritual-successor to the venerable{' '}
-                  <a href="https://voxity.dev" target="_blank" rel="noopener noreferrer">
-                    Voxity
-                  </a>, a music player PWA written in vanilla JavaScript.</p>
-
-                <p className="xe_about__lead">
-                  Xebrine was released a year after Voxity was created. The key difference between the two
-                  is Voxity is the uglier, no-nonsense utillitarian player; Xebrine is
-                  the prettied-up, more feature-rich, and more friendly "experienceful" player.
-                  However, both are undoubtedly utilitarian and power-user focused...
-                </p>
-
-                <h3 className="xe_about__heading">Features</h3>
-
-                <h4 className="xe_about__subheading">Library</h4>
-                <ul className="xe_about__list xe_about__list--group">
-                  <li>Folder-based library read straight from disk via the File System Access API, organized by artist and album</li>
-                  <li>Fully local: tracks, cover art, and lyrics are cached in IndexedDB</li>
-                  <li><Link to="/settings/library">Scan filters</Link> to omit tracks missing tags or cover art, or in unwanted formats, with live scan progress and an ETA</li>
-                  <li>Search, sorting, and infinite scrolling on the library, artists, and albums pages</li>
-                </ul>
-
-                <h4 className="xe_about__subheading">Queue & playback</h4>
-                <ul className="xe_about__list xe_about__list--group">
-                  <li><Link to="/queue">Queue</Link> with intelligent shuffle (recently-played weighting and artist spreading), repeat modes, drag-to-reorder, play next / add to queue, and clear others</li>
-                  <li>Rudimentary beat-matched <Link to="/settings/playback">auto mix</Link>: BPM analysis in a worker, tempo matching, and equal-power crossfades</li>
-                  <li>Fullscreen player with lyrics, up next, and a just-played card</li>
-                  <li><Link to="/settings/preferences">Configurable player bar fields</Link>: click to copy or to open the artist / album, right-click for the opposite</li>
-                </ul>
-
-                <h4 className="xe_about__subheading">Sound</h4>
-                <ul className="xe_about__list xe_about__list--group">
-                  <li><Link to="/settings/playback">18-band equalizer</Link> with a stack of presets</li>
-                  <li>Volume boost to 150%</li>
-                  <li>Live spectrum visualizer</li>
-                </ul>
-
-                <h4 className="xe_about__subheading">Lyrics</h4>
-                <ul className="xe_about__list xe_about__list--group">
-                  <li>Synced and interactive (click to jump) lyrics from LRCLIB (<Link to="/settings/preferences">strict or lax matching</Link>)</li>
-                  <li><Link to="/lyrics">LRC/SRT/VTT import and LRC export</Link></li>
-                  <li><Link to="/lyrics/share">Share lyrics</Link> as a stylable card image: pick up to 7 lines, tweak colors, style, and background, and download as a PNG</li>
-                  <li>Optional <Link to="/settings/toys">explicit tagging</Link> that scans lyrics for profanity and badges offending tracks</li>
-                </ul>
-
-                <h4 className="xe_about__subheading">Interface</h4>
-                <ul className="xe_about__list xe_about__list--group">
-                  <li>Artwork-derived accent theming that recolors the app for every track</li>
-                  <li>Context menus, toasts, scrolling marquee titles, and a resizable collapsing sidebar</li>
-                  <li>Keyboard shortcuts for nearly everything (<Link to="/i/hotkeys">see Hotkeys</Link>)</li>
-                  <li><Link to="/settings/a11y">Reduced motion</Link> mode</li>
-                </ul>
-
-                <h4 className="xe_about__subheading">System</h4>
-                <ul className="xe_about__list">
-                  <li>Media Session integration: hardware media keys, OS now-playing info, and seeking</li>
-                  <li><Link to="/settings/preferences">System notifications</Link> on track change</li>
-                  <li><Link to="/settings/a11y">Spoken track announcements</Link> with volume ducking</li>
-                  <li>Installable PWA that works offline</li>
-                  <li><Link to="/lastfm">Last.fm scrobbling</Link></li>
-                </ul>
-              </>
-            )}
-
-            {active === 'stats' &&
-              (scanning ? (
-                <div className="xe_about__scanning">
-                  <Spinner size={30} />
-                </div>
-              ) : tracks.length === 0 ? (
-                <p className="xe_empty-note">
-                  Nothing to measure yet - <Link to="/settings/library">add a folder</Link>!
-                </p>
-              ) : (
-                <>
-                  <h3 className="xe_about__heading">Your library has a runtime of...</h3>
-                  <div className="xe_about__duration">
-                    <div className="xe_about__duration-parts">
-                      {breakdown.map((part, i) => (
-                        <div key={part.unit} className="xe_about__duration-part">
-                          <strong>
-                            <CountUp value={part.value} delay={i * 110} />
-                          </strong>
-                          <span>
-                            {part.unit}
-                            {part.value === 1 ? '' : 's'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="xe_about__duration-note">
-                      <CountUp value={Math.floor(stats.totalSeconds)} delay={breakdown.length * 110} />{' '}
-                      seconds in total, counting years as 365 days, months as 30, and weeks as 7
-                    </p>
-                  </div>
-
-                  <h3 className="xe_about__heading">The big numbers</h3>
-                  <div className="xe_about__stats">
-                    <div className="xe_about__stat">
-                      <strong>
-                        <CountUp value={tracks.length} />
-                      </strong>
-                      <span>track{tracks.length === 1 ? '' : 's'}</span>
-                    </div>
-                    <div className="xe_about__stat">
-                      <strong>
-                        <CountUp value={stats.artists} delay={60} />
-                      </strong>
-                      <span>artist{stats.artists === 1 ? '' : 's'}</span>
-                    </div>
-                    <div className="xe_about__stat">
-                      <strong>
-                        <CountUp value={stats.albums} delay={120} />
-                      </strong>
-                      <span>album{stats.albums === 1 ? '' : 's'}</span>
-                    </div>
-                    <div className="xe_about__stat">
-                      <strong>
-                        <CountUp value={stats.genres} delay={180} />
-                      </strong>
-                      <span>genre{stats.genres === 1 ? '' : 's'}</span>
-                    </div>
-                    <div className="xe_about__stat">
-                      <strong>
-                        <CountUp value={folders.length} delay={240} />
-                      </strong>
-                      <span>library folder{folders.length === 1 ? '' : 's'}</span>
-                    </div>
-                    <div className="xe_about__stat">
-                      <strong>
-                        <CountUp value={stats.subfolders} delay={300} />
-                      </strong>
-                      <span>subfolder{stats.subfolders === 1 ? '' : 's'}</span>
-                    </div>
-                    <div className="xe_about__stat">
-                      <strong>
-                        <CountUp value={stats.totalBytes} delay={360} format={formatBytes} />
-                      </strong>
-                      <span>on disk</span>
-                    </div>
-                    <div className="xe_about__stat">
-                      <strong>
-                        <CountUp value={stats.averageSeconds} delay={420} format={formatTime} />
-                      </strong>
-                      <span>average duration</span>
-                    </div>
-                  </div>
-
-                  <h3 className="xe_about__heading">Tidbits</h3>
-                  <ul className="xe_about__list">
-                    {stats.longest && (
-                      <li>
-                        Longest track: <strong>{stats.longest.title}</strong> by{' '}
-                        {stats.longest.artist} ({formatTime(stats.longest.duration)})
-                      </li>
-                    )}
-                    {stats.shortest && (
-                      <li>
-                        Shortest track: <strong>{stats.shortest.title}</strong> by{' '}
-                        {stats.shortest.artist} ({formatTime(stats.shortest.duration)})
-                      </li>
-                    )}
-                    {stats.earliestYear > 0 && (
-                      <li>
-                        Your library has songs released between <strong>{stats.earliestYear}</strong> and{' '}
-                        <strong>{stats.latestYear}</strong>, spanning{' '}
-                        {stats.latestYear - stats.earliestYear + 1} year
-                        {stats.latestYear - stats.earliestYear === 0 ? '' : 's'}
-                      </li>
-                    )}
-                    <li>
-                      <strong>{stats.withCoverArt.toLocaleString()}</strong> of {tracks.length}{' '}
-                      track{tracks.length === 1 ? '' : 's'} have cover art (
-                      {Math.round((stats.withCoverArt / tracks.length) * 100)}%)
-                    </li>
-                    <li>
-                      Averaging{' '}
-                      <strong>{formatBytes(Math.round(stats.totalBytes / tracks.length))}</strong>{' '}
-                      and {(tracks.length / Math.max(1, stats.albums)).toFixed(1)} tracks per album
-                    </li>
-                    <li>
-                      The most prominent formats are:{' '}
-                      {stats.formats
-                        .map(([ext, count]) => `${ext.toLowerCase()} (${count.toLocaleString()})`)
-                        .join(', ')}
-                    </li>
-                  </ul>
-                </>
-              ))}
-
-            {active === 'acknowledgements' && (
-              <>
-                <p className="xe_about__text">This is a list of what Xebrine was built with and what it uses. You can view the source here: <a href="https://github.com/xebrine/xebrine" target="_blank">github.com/xebrine/xebrine</a></p>
-                {DEPENDENCY_ACKNOWLEDGEMENTS.map((group) => (
-                  <section key={group.heading}>
-                    <h3 className="xe_about__heading">{group.heading}</h3>
-                    <ul className="xe_about__list">
-                      {group.items.map((item) => (
-                        <li key={item.name}>
-                          <a href={item.url} target="_blank" rel="noopener noreferrer">
-                            {item.name}
-                          </a>
-                          : {item.role}
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                ))}
-
-                <h3 className="xe_about__heading">Miscellaneous</h3>
-                <ul className="xe_about__list">
-                  {EXTERNAL_ACKNOWLEDGEMENTS.map((item) => (
-                    <li key={item.name}>
-                      <a href={item.url} target="_blank" rel="noopener noreferrer">
-                        {item.name}
-                      </a>
-                      : {item.role}
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-
-            {active === 'hotkeys' && (
-              <table className="xe_hotkeys">
-                <tbody>
-                  {HOTKEYS.map((row) => (
-                    <tr key={row.action}>
-                      <th scope="row">
-                        {row.chords.map((chord, ci) => (
-                          <span key={ci} className="xe_hotkeys__chord">
-                            {ci > 0 && <span className="xe_hotkeys__sep">or</span>}
-                            {chord.map((key, ki) => (
-                              <span key={ki} className="xe_hotkeys__key">
-                                {ki > 0 && <span className="xe_hotkeys__plus">+</span>}
-                                <kbd>{key}</kbd>
-                              </span>
-                            ))}
-                          </span>
-                        ))}
-                      </th>
-                      <td>{row.action}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+            {active === 'info' && <AboutInfo />}
+            {active === 'stats' && <AboutStats />}
+            {active === 'acknowledgements' && <AboutAcknowledgements />}
+            {active === 'hotkeys' && <AboutHotkeys />}
+            {active === 'download' && <AboutDownload />}
           </div>
         </div>
       </div>

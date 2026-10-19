@@ -5,13 +5,10 @@ Made as a non-replacing spiritual successor to [Voxity](https://github.com/exeri
 
 > [!IMPORTANT]
 > Xebrine, unlike Voxity, is written in TypeScript and uses React for the UI. Voxity is entirely vanilla JavaScript and more of an "ugly utilitarian" app. However, because Xebrine needs the File System Access API, this will only work on Chromium browsers on desktop and Android; and hence will not work on iPhone, Mozilla Firefox, and basically anywhere not Chromium.
-> Further, Voxity is *decently lightweight* for what it does; **Xebrine is not a lightweight player at all - it is heavy by design.** If you're conscious about RAM usage, you probably shouldn't use this. (although, it uses about 200 to 350 MB, which is not bad compared to Spotify using 1 GB+...)
+> Further, Voxity is *decently lightweight* for what it does; **Xebrine is not a lightweight player at all - it is heavy, by design.** If you're conscious about RAM usage, you probably shouldn't use this. (although, it uses about 200 to 350 MB, which is not bad compared to Spotify using 1 GB+...)
 
 > [!CAUTION]
 Xebrine is super super early and probably won't work as expected. Known issues include scanning never starts or can choke, rudimental Last.fm handling, janky album rendering, and the player bar isn't very responsive on smaller screens. **Use with caution.**
-
-> [!NOTE]
-Xebrine is not a Tauri or Electron music player. [The Rust in this repo](tools) is used to generate [the icons](https://xebrine.com/i/xebrine/icon/icons.txt). There is an [Electron folder](electron), but it is experimental and binaries of it are not distributed.
 
 [![](https://meow.exerinity.gay/xeb2.png)](https://meow.exerinity.gay/xeb2.png)
 
