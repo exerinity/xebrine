@@ -11,6 +11,16 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '19',
+    date: '2026-10-19',
+    notes: [
+      <>Added <Link to="/playlist">playlists</Link>, which supports M3U, M3U8 and PLS and automatically searches during scans</>,
+      'The page key navigation now shows a cursor and has a delay before switching page for performance',
+      'The minimal fullscreen cover art now centers if: offline, no lyrics found, lyrics failed, instrumental.',
+      <>Added <Link to="/settings/kill">kill switches</Link></>
+    ]
+  },
+  {
     version: '18',
     date: '2026-10-11',
     notes: [
