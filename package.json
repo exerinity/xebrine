@@ -2,7 +2,7 @@
   "name": "xebrine",
   "description": "Xebrine is a music player PWA for power users",
   "private": true,
-  "version": "15.0",
+  "version": "19",
   "type": "module",
   "author": "exerinity <me@exerinity.com>",
   "scripts": {
