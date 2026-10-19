@@ -1,9 +1,10 @@
-const { open, readdir, realpath, stat } = require("node:fs/promises");
+const { open, readFile, readdir, realpath, stat } = require("node:fs/promises");
 const path = require("node:path");
 const { parentPort, workerData } = require("node:worker_threads");
 const { default: media_info_factory, isTrackType: is_track_type } = require("mediainfo.js");
 
 const AUDIO_EXTENSIONS = new Set(["mp3", "m4a", "mp4", "aac", "flac", "ogg", "oga", "opus", "wav", "webm"]);
+const PLAYLIST_EXTENSIONS = new Set(["m3u", "m3u8", "pls"]);
 const PARSER_COUNT = 4;
 const PROGRESS_INTERVAL_MS = 100;
 const wasm_path = require.resolve("mediainfo.js/MediaInfoModule.wasm");
@@ -72,6 +73,94 @@ function audio_file(name) {
   return AUDIO_EXTENSIONS.has(name.split(".").pop()?.toLowerCase());
 }
 
+function playlist_file(name) {
+  return PLAYLIST_EXTENSIONS.has(name.split(".").pop()?.toLowerCase());
+}
+
+function playlist_name(file_name) {
+  const dot = file_name.lastIndexOf(".");
+  return (dot > 0 ? file_name.slice(0, dot) : file_name).trim() || "Untitled playlist";
+}
+
+function decode_path(value) {
+  const trimmed = value.trim().replace(/^file:\/\//i, "");
+  try {
+    return decodeURIComponent(trimmed);
+  } catch {
+    return trimmed;
+  }
+}
+
+function normalize_segments(segments) {
+  const result = [];
+  for (const segment of segments) {
+    if (!segment || segment === ".") continue;
+    if (segment === "..") result.pop();
+    else result.push(segment);
+  }
+  return result;
+}
+
+function playlist_entries(file_name, content) {
+  const lines = content.replace(/^\uFEFF/, "").split(/\r?\n/);
+  if (file_name.toLowerCase().endsWith(".pls")) {
+    return lines
+      .map((line) => {
+        const match = /^File(\d+)\s*=\s*(.*)$/i.exec(line);
+        return match ? { index: Number(match[1]), value: match[2].trim() } : null;
+      })
+      .filter((entry) => entry?.value)
+      .sort((a, b) => a.index - b.index)
+      .map((entry) => entry.value);
+  }
+  return lines.map((line) => line.trim()).filter((line) => line && !line.startsWith("#"));
+}
+
+function resolve_track_id(entry, playlist_path, tracks_by_path, tracks_by_name) {
+  if (/^(?:https?|rtsp):\/\//i.test(entry)) return null;
+  let file_path = decode_path(entry).replace(/\\/g, "/");
+  file_path = file_path.replace(/^\/[a-z]:\//i, "").replace(/^[a-z]:\//i, "").replace(/^\/+/, "");
+  const raw_segments = file_path.split("/");
+  const relative = normalize_segments([...playlist_path.slice(0, -1), ...raw_segments]);
+  const direct = tracks_by_path.get(relative.join("/").toLowerCase());
+  if (direct) return direct.id;
+
+  const normalized = normalize_segments(raw_segments).join("/").toLowerCase();
+  const exact = tracks_by_path.get(normalized);
+  if (exact) return exact.id;
+
+  const normalized_segments = normalized.split("/");
+  for (let index = 1; index < normalized_segments.length - 1; index++) {
+    const suffix = tracks_by_path.get(normalized_segments.slice(index).join("/"));
+    if (suffix) return suffix.id;
+  }
+
+  const file_name = raw_segments.at(-1)?.toLowerCase();
+  return file_name ? tracks_by_name.get(file_name)?.id ?? null : null;
+}
+
+function parse_playlist(library_folder_id, segments, file_name, content, tracks) {
+  const tracks_by_path = new Map(tracks.map((track) => [track.relPath.join("/").toLowerCase(), track]));
+  const tracks_by_name = new Map();
+  for (const track of tracks) {
+    const key = track.fileName.toLowerCase();
+    tracks_by_name.set(key, tracks_by_name.has(key) ? null : track);
+  }
+  const track_ids = [];
+  for (const entry of playlist_entries(file_name, content)) {
+    const id = resolve_track_id(entry, segments, tracks_by_path, tracks_by_name);
+    if (id) track_ids.push(id);
+  }
+  return {
+    id: `${library_folder_id}:${segments.join("/")}`,
+    folderId: library_folder_id,
+    relPath: segments,
+    fileName: file_name,
+    name: playlist_name(file_name),
+    trackIds: track_ids,
+  };
+}
+
 function ignored_format(name) {
   return workerData.rules.formats.includes(name.split(".").pop()?.toLowerCase());
 }
@@ -119,6 +208,7 @@ async function scan() {
   const existing_by_id = new Map(existingTracks.map((track) => [track.id, track]));
   const skipped = [];
   const sources = [];
+  const playlist_sources = [];
   const directories = [[]];
   const ordered_tracks = [];
   const changed_tracks = [];
@@ -140,7 +230,7 @@ async function scan() {
       progress: {
         currentFilePath: current_file_path,
         done,
-        total: sources.length,
+        total: sources.length + playlist_sources.length,
         omitted: excluded + hidden,
         audioSeconds: audio_seconds,
         discovering,
@@ -181,6 +271,8 @@ async function scan() {
             continue;
           }
           sources.push({ id, segments, name: entry.name });
+        } else if (entry.isFile() && playlist_file(entry.name)) {
+          playlist_sources.push({ segments, name: entry.name });
         }
       }
     }
@@ -245,13 +337,30 @@ async function scan() {
   if (!cancelled && sources.length) {
     await Promise.all(Array.from({ length: Math.min(PARSER_COUNT, sources.length) }, process_sources));
   }
-  report_progress(true);
   ordered_tracks.sort((a, b) => a.order - b.order);
   const tracks = ordered_tracks.map(({ track }) => track);
+  const playlist_tracks = mode === "new" ? [...existingTracks, ...tracks] : tracks;
+  const playlists = [];
+  for (const source of playlist_sources) {
+    if (cancelled) break;
+    const display_path = [folderName, ...source.segments].join("/");
+    current_file_path = display_path;
+    try {
+      const file_path = await safe_path(source.segments);
+      const content = await readFile(file_path, "utf8");
+      playlists.push(parse_playlist(libraryFolderId, source.segments, source.name, content, playlist_tracks));
+    } catch {
+      skipped.push({ path: display_path, reason: "playlist could not be read" });
+    }
+    done++;
+    report_progress();
+  }
+  report_progress(true);
   const returned_ids = new Set(tracks.map((track) => track.id));
   const finished = complete && !cancelled;
   return {
     tracks,
+    playlists,
     changedTracks: changed_tracks,
     removedTrackIds: mode === "full" && finished
       ? existingTracks.filter((track) => !returned_ids.has(track.id)).map((track) => track.id)

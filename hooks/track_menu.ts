@@ -6,7 +6,7 @@ import { displayArtist } from '../utils/groups';
 import { search_menu_item } from '../utils/search_menu';
 import { toSlugParam } from '../utils/slug';
 import { toast } from '../utils/toast';
-import type { TrackMeta } from '../types';
+import type { PlaybackSource, TrackMeta } from '../types';
 
 function copy(text: string, label: string) {
   navigator.clipboard
@@ -29,14 +29,18 @@ export function useTrackMenu() {
     });
   };
 
-  const buildMenu = (track: TrackMeta, onPlayNow?: () => void): ContextMenuItem[] => [
+  const buildMenu = (
+    track: TrackMeta,
+    onPlayNow?: () => void,
+    source?: PlaybackSource
+  ): ContextMenuItem[] => [
     {
       label: 'Play now',
       heading: 'Enqueue track...',
-      onSelect: onPlayNow ?? (() => playNow([track], 0))
+      onSelect: onPlayNow ?? (() => playNow([track], 0, source))
     },
-    { label: 'Play next', onSelect: () => enqueueNext([track]) },
-    { label: 'Enqueue', onSelect: () => enqueueEnd([track]) },
+    { label: 'Play next', onSelect: () => enqueueNext([track], source) },
+    { label: 'Enqueue', onSelect: () => enqueueEnd([track], source) },
     { label: 'Copy title', heading: 'Copy metadata...', onSelect: () => copy(track.title, 'title') },
     { label: 'Copy info', onSelect: () => copy(`${track.title} by ${track.artist}`, 'info') },
     { label: 'Go to album', heading: 'Navigation...', onSelect: () => goToAlbum(track) },

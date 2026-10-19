@@ -1,0 +1,39 @@
+.xe_playlist-cover {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+  overflow: hidden;
+}
+
+.xe_playlist-cover img {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: cover;
+}
+
+.xe_playlist-cover--1 img {
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+}
+
+.xe_playlist-cover--2 {
+  grid-template-rows: 1fr;
+}
+
+.xe_playlist-cover--2 img {
+  height: 100%;
+}
+
+.xe_playlist-cover--3 img:first-child {
+  grid-row: 1 / -1;
+}
+
+.xe_playlist-hero__art {
+  padding: 0;
+}

@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode
 } from 'react';
-import type { FolderRecord, TrackMeta } from '../types';
+import type { FolderRecord, PlaylistRecord, TrackMeta } from '../types';
 import { dbDelete, dbGetAll, dbPut, dbWriteBatch } from '../management/db';
 import {
   getTrackFile,
@@ -40,6 +40,7 @@ export interface ScanReport {
 interface LibraryContextValue {
   folders: FolderRecord[];
   tracks: TrackMeta[];
+  playlists: PlaylistRecord[];
   scanning: ScanProgress | null;
   scanReport: ScanReport | null;
   permissionNeeded: boolean;
@@ -83,6 +84,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   const { settings } = useSettings();
   const [folders, setFolders] = useState<FolderRecord[]>([]);
   const [tracks, setTracks] = useState<TrackMeta[]>([]);
+  const [playlists, setPlaylists] = useState<PlaylistRecord[]>([]);
   const [scanning, setScanning] = useState<ScanProgress | null>(null);
   const [scanReport, setScanReport] = useState<ScanReport | null>(null);
   const [permissionNeeded, setPermissionNeeded] = useState(false);
@@ -97,20 +99,25 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   foldersRef.current = folders;
   const tracksRef = useRef(tracks);
   tracksRef.current = tracks;
+  const playlistsRef = useRef(playlists);
+  playlistsRef.current = playlists;
   const scanAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [storedFolders, storedTracks] = await Promise.all([
+      const [storedFolders, storedTracks, storedPlaylists] = await Promise.all([
         dbGetAll<FolderRecord>('folders'),
-        dbGetAll<TrackMeta>('tracks')
+        dbGetAll<TrackMeta>('tracks'),
+        dbGetAll<PlaylistRecord>('playlists')
       ]);
       if (cancelled) return;
       foldersRef.current = storedFolders;
       tracksRef.current = storedTracks;
+      playlistsRef.current = storedPlaylists;
       setFolders(storedFolders);
       setTracks(storedTracks);
+      setPlaylists(storedPlaylists);
       for (const folder of storedFolders) {
         if (!(await hasReadPermission(folder))) {
           if (!cancelled) setPermissionNeeded(true);
@@ -144,6 +151,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
         );
         const {
           tracks: scanned,
+          playlists: scannedPlaylists,
           changedTracks,
           removedTrackIds,
           skipped,
@@ -178,6 +186,26 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
         tracksRef.current = nextTracks;
         setTracks(nextTracks);
 
+        if (complete && !aborted) {
+          const previousPlaylists = playlistsRef.current.filter(
+            (playlist) => playlist.folderId === folder.id
+          );
+          const nextPlaylistIds = new Set(scannedPlaylists.map((playlist) => playlist.id));
+          await dbWriteBatch(
+            'playlists',
+            scannedPlaylists,
+            previousPlaylists
+              .filter((playlist) => !nextPlaylistIds.has(playlist.id))
+              .map((playlist) => playlist.id)
+          );
+          const nextPlaylists = [
+            ...playlistsRef.current.filter((playlist) => playlist.folderId !== folder.id),
+            ...scannedPlaylists
+          ];
+          playlistsRef.current = nextPlaylists;
+          setPlaylists(nextPlaylists);
+        }
+
         const includedTracks = folderResult.filter(
           (track) => !shouldIgnoreTrack(track, settings.ignoreRules)
         );
@@ -209,6 +237,9 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
           }
           if (mode !== 'new' || added > 0) {
             message += ` ${formatLibraryRuntime(libraryRuntime)} runtime, took ${formatScanDuration(performance.now() - startedAt)}`;
+          }
+          if (scannedPlaylists.length > 0) {
+            message += ` Imported ${scannedPlaylists.length} playlist${scannedPlaylists.length === 1 ? '' : 's'}.`;
           }
           toast.success(message, 20000);
         }
@@ -268,10 +299,15 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       [],
       all.filter((t) => t.folderId === folderId).map((t) => t.id)
     );
+    const folderPlaylists = playlistsRef.current.filter((playlist) => playlist.folderId === folderId);
+    await dbWriteBatch('playlists', [], folderPlaylists.map((playlist) => playlist.id));
     setFolders((prev) => prev.filter((f) => f.id !== folderId));
     const nextTracks = all.filter((track) => track.folderId !== folderId);
     tracksRef.current = nextTracks;
     setTracks(nextTracks);
+    const nextPlaylists = playlistsRef.current.filter((playlist) => playlist.folderId !== folderId);
+    playlistsRef.current = nextPlaylists;
+    setPlaylists(nextPlaylists);
     const folder = foldersRef.current.find((item) => item.id === folderId);
     if (folder && 'electronId' in folder) void electron?.forgetDirectory(folder.electronId);
   }, []);
@@ -325,6 +361,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       value={{
         folders,
         tracks: visibleTracks,
+        playlists,
         scanning,
         scanReport,
         permissionNeeded,

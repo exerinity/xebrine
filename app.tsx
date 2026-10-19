@@ -25,6 +25,8 @@ import { ArtistsPage } from './pages/artists';
 import { ArtistDetailPage } from './pages/artist_detail';
 import { AlbumsPage } from './pages/albums';
 import { AlbumDetailPage } from './pages/album_detail';
+import { PlaylistsPage } from './pages/playlists';
+import { PlaylistDetailPage } from './pages/playlist_detail';
 import { QueuePage } from './pages/queue';
 import { LyricsPage } from './pages/lyrics';
 import { ShareLyricsPage } from './pages/share_lyrics';
@@ -231,6 +233,8 @@ function Shell() {
             <Route path="/artists/:artistName" element={<ArtistDetailPage />} />
             <Route path="/albums/:artistName/:albumName" element={<AlbumDetailPage />} />
             <Route path="/albums" element={<AlbumsPage />} />
+            <Route path="/playlists/:playlistName" element={<PlaylistDetailPage />} />
+            <Route path="/playlists" element={<PlaylistsPage />} />
             <Route path="/queue" element={<QueuePage />} />
             <Route path="/lyrics" element={<LyricsPage />} />
             <Route path="/lyrics/share" element={<ShareLyricsPage />} />

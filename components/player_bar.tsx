@@ -179,6 +179,7 @@ export function PlayerBar({
   const loveRequestRef = useRef(0);
 
   const track = current?.track ?? null;
+  const playlist_source = current?.source?.type === 'playlist' ? current.source : null;
   const artist_tracks = useMemo(() => {
     if (!track) return [];
     const artist = displayArtist(track).toLowerCase();
@@ -335,6 +336,12 @@ export function PlayerBar({
 
   const handleFieldClick = (field: 'title' | 'artist' | 'album') => {
     openField(field);
+  };
+
+  const open_playlist_source = () => {
+    if (!playlist_source) return;
+    if (fullscreenOpen) onToggleFullscreen?.();
+    navigate(`/playlists/${toSlugParam(playlist_source.name)}`);
   };
 
   const handleFieldContextMenu = (e: MouseEvent, field: 'title' | 'artist' | 'album') => {
@@ -733,13 +740,23 @@ export function PlayerBar({
                   onClick={() => handleFieldClick('artist')}
                   onContextMenu={(e) => handleFieldContextMenu(e, 'artist')}
                 />
-                <ScrollingText
-                  text={track.album}
-                  className="xe_player-bar__subtitle xe_player-bar__album"
-                  title={fieldTooltip('album')}
-                  onClick={() => handleFieldClick('album')}
-                  onContextMenu={(e) => handleFieldContextMenu(e, 'album')}
-                />
+                {playlist_source ? (
+                  <ScrollingText
+                    text="from "
+                    suffix={<span className="xe_player-bar__playlist-name">{playlist_source.name}</span>}
+                    className="xe_player-bar__subtitle xe_player-bar__album"
+                    title={`Go to "${playlist_source.name}"`}
+                    onClick={open_playlist_source}
+                  />
+                ) : (
+                  <ScrollingText
+                    text={track.album}
+                    className="xe_player-bar__subtitle xe_player-bar__album"
+                    title={fieldTooltip('album')}
+                    onClick={() => handleFieldClick('album')}
+                    onContextMenu={(e) => handleFieldContextMenu(e, 'album')}
+                  />
+                )}
                 {loadError && <span className="xe_player-bar__error">{loadError}</span>}
               </>
             )}

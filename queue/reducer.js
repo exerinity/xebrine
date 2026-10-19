@@ -35,10 +35,11 @@ export const initialQueue = {
 
 /**
  * @param {import('../types').TrackMeta[]} tracks
+ * @param {import('../types').PlaybackSource} [source]
  * @returns {import('../types').QueueItem[]}
  */
-export function makeItems(tracks) {
-  return tracks.map((track) => ({ key: crypto.randomUUID(), track }));
+export function makeItems(tracks, source) {
+  return tracks.map((track) => ({ key: crypto.randomUUID(), track, source }));
 }
 
 /**

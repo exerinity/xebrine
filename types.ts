@@ -33,6 +33,15 @@ export interface TrackMeta {
   hasCoverArt: boolean;
 }
 
+export interface PlaylistRecord {
+  id: string;
+  folderId: string;
+  relPath: string[];
+  fileName: string;
+  name: string;
+  trackIds: string[];
+}
+
 export interface LyricLine {
   time: number | null;
   text: string;
@@ -50,7 +59,13 @@ export interface StoredLyrics {
   lyrics: Lyrics;
 }
 
+export interface PlaybackSource {
+  type: 'playlist';
+  name: string;
+}
+
 export interface QueueItem {
   key: string;
   track: TrackMeta;
+  source?: PlaybackSource;
 }

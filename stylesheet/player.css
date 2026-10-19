@@ -699,6 +699,14 @@
   font-size: 13px;
 }
 
+.xe_player-bar__playlist-name {
+  color: var(--text);
+}
+
+.xe_player-bar--fullscreen .xe_player-bar__playlist-name {
+  color: #fff;
+}
+
 .xe_player-bar__album {
   max-height: 20px;
   overflow: hidden;

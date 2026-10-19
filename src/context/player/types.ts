@@ -1,6 +1,6 @@
 import type { radio_station_record } from '../../../api/radio_browser';
 import type { RefObject } from 'react';
-import type { QueueItem, TrackMeta } from '../../../types';
+import type { PlaybackSource, QueueItem, TrackMeta } from '../../../types';
 import type { SleepTimerMode, SleepTimerSelection } from './sleep_timer';
 
 export type RepeatMode = 'off' | 'all' | 'one';
@@ -26,9 +26,9 @@ export interface PlayerContextValue {
   loadError: string | null;
   audioRef: RefObject<HTMLAudioElement | null>;
   justPlayed: QueueItem | null;
-  playNow(tracks: TrackMeta[], startIndex?: number): void;
-  enqueueNext(tracks: TrackMeta[]): void;
-  enqueueEnd(tracks: TrackMeta[]): void;
+  playNow(tracks: TrackMeta[], startIndex?: number, source?: PlaybackSource): void;
+  enqueueNext(tracks: TrackMeta[], source?: PlaybackSource): void;
+  enqueueEnd(tracks: TrackMeta[], source?: PlaybackSource): void;
   removeAt(index: number): void;
   removeAbove(index: number): void;
   removeBelow(index: number): void;

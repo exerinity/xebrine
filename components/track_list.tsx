@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { REMOTE_LOCK_MESSAGE, usePlayer } from '../src/context/player';
 import { useTrackMenu } from '../hooks/track_menu';
 import { formatTime } from '../utils/format';
-import type { TrackMeta } from '../types';
+import type { PlaybackSource, TrackMeta } from '../types';
 import { ContextMenu } from './context_menu';
 import { NowPlayingIcon, PauseIcon, PlayIcon, PlayNextIcon, PlusIcon } from './icons';
 import { ExplicitBadge } from './explicit_badge';
@@ -10,6 +10,7 @@ import { ExplicitBadge } from './explicit_badge';
 interface TrackListProps {
   tracks: TrackMeta[];
   playOnlySelected?: boolean;
+  source?: PlaybackSource;
 }
 
 interface MenuState {
@@ -19,13 +20,13 @@ interface MenuState {
   index: number;
 }
 
-export function TrackList({ tracks, playOnlySelected = false }: TrackListProps) {
+export function TrackList({ tracks, playOnlySelected = false, source }: TrackListProps) {
   const { current, isPlaying, playNow, enqueueNext, enqueueEnd, remoteLocked } = usePlayer();
   const { buildMenu, goToArtist, goToAlbum } = useTrackMenu();
   const currentTrackId = current?.track.id;
   const [menu, setMenu] = useState<MenuState | null>(null);
   const startTrack = (track: TrackMeta, index: number) =>
-    playNow(playOnlySelected ? [track] : tracks, playOnlySelected ? 0 : index);
+    playNow(playOnlySelected ? [track] : tracks, playOnlySelected ? 0 : index, source);
 
   return (
     <div className="xe_track-table">
@@ -94,7 +95,7 @@ export function TrackList({ tracks, playOnlySelected = false }: TrackListProps) 
                 className="xe_mini-btn"
                 title={remoteLocked ? REMOTE_LOCK_MESSAGE : 'Play next'}
                 disabled={remoteLocked}
-                onClick={() => enqueueNext([track])}
+                onClick={() => enqueueNext([track], source)}
               >
                 <PlayNextIcon size={13} />
               </button>
@@ -103,7 +104,7 @@ export function TrackList({ tracks, playOnlySelected = false }: TrackListProps) 
                 className="xe_mini-btn"
                 title={remoteLocked ? REMOTE_LOCK_MESSAGE : 'Add to end of queue'}
                 disabled={remoteLocked}
-                onClick={() => enqueueEnd([track])}
+                onClick={() => enqueueEnd([track], source)}
               >
                 <PlusIcon size={13} />
               </button>
@@ -115,7 +116,7 @@ export function TrackList({ tracks, playOnlySelected = false }: TrackListProps) 
         <ContextMenu
           x={menu.x}
           y={menu.y}
-          items={buildMenu(menu.track, () => startTrack(menu.track, menu.index))}
+          items={buildMenu(menu.track, () => startTrack(menu.track, menu.index), source)}
           onClose={() => setMenu(null)}
         />
       )}

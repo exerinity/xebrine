@@ -1,5 +1,6 @@
-import type { FolderRecord, TrackMeta } from '../types';
+import type { FolderRecord, PlaylistRecord, TrackMeta } from '../types';
 import { parseMetadata, SCAN_CONCURRENCY } from './scan_pool';
+import { is_playlist_file, parse_playlist } from './playlists';
 import {
   isIgnoredFormat,
   isIgnoredSize,
@@ -30,6 +31,7 @@ const PROGRESS_INTERVAL_MS = 100;
 const MAX_IN_FLIGHT = SCAN_CONCURRENCY * 2;
 
 interface ScanFile {
+  kind: 'audio' | 'playlist';
   name: string;
   relPath: string[];
   knownSize?: number;
@@ -70,6 +72,7 @@ export interface ScanOptions {
 
 export interface ScanResult {
   tracks: TrackMeta[];
+  playlists: PlaylistRecord[];
   changedTracks: TrackMeta[];
   removedTrackIds: string[];
   skipped: SkippedFile[];
@@ -183,9 +186,10 @@ async function* walkBrowserFiles(
             handle: entry as FileSystemDirectoryHandle,
             relPath
           });
-        } else if (isAudioFile(entry.name)) {
+        } else if (isAudioFile(entry.name) || is_playlist_file(entry.name)) {
           const handle = entry as FileSystemFileHandle;
           yield {
+            kind: is_playlist_file(entry.name) ? 'playlist' : 'audio',
             name: entry.name,
             relPath,
             getFile: () => handle.getFile()
@@ -242,8 +246,9 @@ async function* walkLegacyElectronFiles(
       for (const entry of result.entries) {
         const relPath = [...result.relPath, entry.name];
         if (entry.kind === 'directory') directories.push(relPath);
-        else if (isAudioFile(entry.name)) {
+        else if (isAudioFile(entry.name) || is_playlist_file(entry.name)) {
           yield {
+            kind: is_playlist_file(entry.name) ? 'playlist' : 'audio',
             name: entry.name,
             relPath,
             knownSize: entry.size,
@@ -280,7 +285,7 @@ async function scanElectronFolder(
   try {
     if (options.signal?.aborted) {
       return {
-        tracks: [], changedTracks: [], removedTrackIds: [], skipped: [],
+        tracks: [], playlists: [], changedTracks: [], removedTrackIds: [], skipped: [],
         excluded: 0, aborted: true, complete: false
       };
     }
@@ -311,6 +316,7 @@ export async function scanFolder(
   const skipped: SkippedFile[] = [];
   const walkState: WalkState = { complete: true };
   const orderedTracks: OrderedTrack[] = [];
+  const playlistSources: ScanFile[] = [];
   const changedTracks: TrackMeta[] = [];
   const inFlight = new Set<Promise<void>>();
 
@@ -414,6 +420,10 @@ export async function scanFolder(
       : walkBrowserFiles(folder, skipped, walkState, options.signal);
     for await (const source of walk) {
       throwIfAborted(options.signal);
+      if (source.kind === 'playlist') {
+        playlistSources.push(source);
+        continue;
+      }
       const id = trackId(folder.id, source.relPath);
       if (mode === 'new' && existingById.has(id)) continue;
       if (isIgnoredFormat(source.name, rules)) {
@@ -442,10 +452,37 @@ export async function scanFolder(
   await Promise.all(inFlight);
   if (fatalError !== undefined) throw fatalError;
   aborted ||= options.signal?.aborted ?? false;
-  reportProgress(true);
 
   orderedTracks.sort((a, b) => a.order - b.order);
   const tracks = orderedTracks.map(({ track }) => track);
+  const playlistTracks = mode === 'new' ? [...existingTracks, ...tracks] : tracks;
+  const playlists: PlaylistRecord[] = [];
+  if (!aborted) {
+    total += playlistSources.length;
+    for (const source of playlistSources) {
+      if (options.signal?.aborted) {
+        aborted = true;
+        break;
+      }
+      currentFilePath = [folder.name, ...source.relPath].join('/');
+      try {
+        const file = await source.getFile();
+        playlists.push(
+          parse_playlist(folder.id, source.relPath, source.name, await file.text(), playlistTracks)
+        );
+      } catch (error) {
+        if (isAbortError(error)) {
+          aborted = true;
+          break;
+        }
+        skipped.push({ path: currentFilePath, reason: 'playlist could not be read' });
+      }
+      done++;
+      reportProgress();
+    }
+  }
+  reportProgress(true);
+
   const returnedIds = new Set(tracks.map((track) => track.id));
   const complete = walkState.complete && !aborted;
   const removedTrackIds =
@@ -455,6 +492,7 @@ export async function scanFolder(
 
   return {
     tracks,
+    playlists,
     changedTracks,
     removedTrackIds,
     skipped,

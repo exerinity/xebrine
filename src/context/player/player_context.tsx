@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode
 } from 'react';
-import type { QueueItem, TrackMeta } from '../../../types';
+import type { PlaybackSource, QueueItem, TrackMeta } from '../../../types';
 import { initialQueue, makeItems, queueReducer } from '../../../queue/reducer';
 import { intelligentShuffle, jumble } from '../../../queue/shuffle';
 import { getRecentIds, pushRecent } from '../../../queue/history';
@@ -358,23 +358,23 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
   }, [currentKey, radio_station]);
 
-  const playNow = useCallback((tracks: TrackMeta[], startIndex = 0) => {
+  const playNow = useCallback((tracks: TrackMeta[], startIndex = 0, source?: PlaybackSource) => {
     if (refuseWhenLocked()) return;
     radio_ref.current = null;
     set_radio_station(null);
     cancelCrossfade();
     autoplayRef.current = true;
-    dispatch({ type: 'SET', items: makeItems(tracks), position: startIndex });
+    dispatch({ type: 'SET', items: makeItems(tracks, source), position: startIndex });
   }, []);
 
-  const enqueueNext = useCallback((tracks: TrackMeta[]) => {
+  const enqueueNext = useCallback((tracks: TrackMeta[], source?: PlaybackSource) => {
     if (refuseWhenLocked()) return;
-    dispatch({ type: 'ENQUEUE_NEXT', items: makeItems(tracks) });
+    dispatch({ type: 'ENQUEUE_NEXT', items: makeItems(tracks, source) });
   }, []);
 
-  const enqueueEnd = useCallback((tracks: TrackMeta[]) => {
+  const enqueueEnd = useCallback((tracks: TrackMeta[], source?: PlaybackSource) => {
     if (refuseWhenLocked()) return;
-    dispatch({ type: 'ENQUEUE_END', items: makeItems(tracks) });
+    dispatch({ type: 'ENQUEUE_END', items: makeItems(tracks, source) });
   }, []);
 
   const removeAt = useCallback(
