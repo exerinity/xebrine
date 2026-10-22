@@ -121,7 +121,7 @@ export function ScanDrawer() {
             <>
               <span className="xe_scan-drawer__count">
                 {waitingForFiles
-                  ? 'Starting scan, one moment...'
+                  ? 'Initializing...'
                   : `${info!.done}/${info!.total}${info!.discovering ? '+' : ''} ${info!.omitted > 0 ? ` - ${info!.omitted} excl` : ''}`}
                 {rate !== null && !waitingForFiles && ` - ${formatRate(rate)}/s`}
                 {!waitingForFiles &&

@@ -90,33 +90,6 @@ export function PreferencesSettings({ show_heading }: { show_heading: boolean })
       </section>
 
       <section className="xe_settings__section">
-        <h2>What should clicking fields in the player bar do?</h2>
-        <label className="xe_settings__radio">
-          <input
-            type="radio"
-            name="player-bar-click-action"
-            checked={settings.playerBarClickAction === 'copy'}
-            onChange={() => update({ playerBarClickAction: 'copy' })}
-          />
-          <span>
-            <strong>Copy field</strong> copies the title, artist, or album text to your clipboard
-          </span>
-        </label>
-        <label className="xe_settings__radio">
-          <input
-            type="radio"
-            name="player-bar-click-action"
-            checked={settings.playerBarClickAction === 'open'}
-            onChange={() => update({ playerBarClickAction: 'open' })}
-          />
-          <span>
-            <strong>Open field</strong> navigates to the artist or album page, or opens the radio station website
-          </span>
-        </label>
-        <p className="xe_settings__hint">Secondary clicking will always do the opposite action set here</p>
-      </section>
-
-      <section className="xe_settings__section">
         <h2>Page keys navigation</h2>
         <div className="xe_settings__slider-row">
           <Slider

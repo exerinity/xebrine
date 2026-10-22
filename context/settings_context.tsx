@@ -28,7 +28,6 @@ import {
   type HomeSectionId
 } from '../utils/home_sections';
 
-export type PlayerBarClickAction = 'copy' | 'open';
 export type PlayerBarPosition = 'top' | 'bottom';
 export type PlayerBarSliderPosition = 'above' | 'below';
 export type PlayerBarLayout = 'compact' | 'comfortable';
@@ -47,7 +46,6 @@ export interface Settings {
   eqBands: number[];
   eqPreamp: number;
   eqIntensity: number;
-  playerBarClickAction: PlayerBarClickAction;
   playerBarPosition: PlayerBarPosition;
   playerBarSliderPosition: PlayerBarSliderPosition;
   playerBarLayout: PlayerBarLayout;
@@ -104,7 +102,6 @@ export const DEFAULT_SETTINGS: Settings = {
   eqBands: [...EQ_FLAT],
   eqPreamp: EQ_PREAMP_DEFAULT,
   eqIntensity: EQ_INTENSITY_DEFAULT,
-  playerBarClickAction: 'open',
   playerBarPosition: 'bottom',
   playerBarSliderPosition: 'below',
   playerBarLayout: 'comfortable',
@@ -158,6 +155,7 @@ function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(KEY);
     const stored = raw ? JSON.parse(raw) : {};
+    delete stored.playerBarClickAction;
     const merged = { ...DEFAULT_SETTINGS, ...stored };
     const legacySidePanelOpen = localStorage.getItem('xebrine.sidePanelOpen');
     const legacySidePanelView = localStorage.getItem('xebrine.sidePanelView');

@@ -25,6 +25,7 @@ export function LibrarySettings({ show_heading }: { show_heading: boolean }) {
   const {
     folders,
     tracks,
+    playlists,
     permissionNeeded,
     scanning,
     addFolder,
@@ -43,6 +44,10 @@ export function LibrarySettings({ show_heading }: { show_heading: boolean }) {
     }
     return counts;
   }, [tracks]);
+  const playlisted_track_count = useMemo(
+    () => playlists.reduce((total, playlist) => total + playlist.trackIds.length, 0),
+    [playlists]
+  );
 
   const toggleRule = (key: keyof Omit<IgnoreRules, 'formats' | 'maxSizeBytes'>) => {
     update({ ignoreRules: { ...settings.ignoreRules, [key]: !settings.ignoreRules[key] } });
@@ -62,6 +67,12 @@ export function LibrarySettings({ show_heading }: { show_heading: boolean }) {
   const rescanAll = async () => {
     for (const folder of folders) {
       await rescanFolder(folder.id);
+    }
+  };
+
+  const scan_all_new_files = async () => {
+    for (const folder of folders) {
+      await scanNewFiles(folder.id);
     }
   };
 
@@ -194,7 +205,7 @@ export function LibrarySettings({ show_heading }: { show_heading: boolean }) {
       <section className="xe_settings__section">
         <h2>Library</h2>
         <p className="xe_settings__hint">
-          Currently crawling <strong>{tracks.length}</strong> track{tracks.length === 1 ? '' : 's'} across <strong>{folders.length}</strong> folder
+          <strong>{tracks.length}</strong> track{tracks.length === 1 ? '' : 's'} and <strong>{playlists.length}</strong> playlist{playlists.length === 1 ? '' : 's'} (total <strong>{playlisted_track_count}</strong> playlisted) across <strong>{folders.length}</strong> folder
           {folders.length === 1 ? '' : 's'}
         </p>
         {permissionNeeded && (
@@ -258,6 +269,15 @@ export function LibrarySettings({ show_heading }: { show_heading: boolean }) {
           <button type="button" className="xe_btn" onClick={() => void addFolder()} disabled={scanning !== null}>
             <FolderIcon size={14} />
             Add folder
+          </button>
+          <button
+            type="button"
+            className="xe_btn"
+            onClick={() => void scan_all_new_files()}
+            disabled={scanning !== null || folders.length === 0}
+          >
+            <SearchIcon size={14} />
+            Search all for new files
           </button>
           <button
             type="button"
