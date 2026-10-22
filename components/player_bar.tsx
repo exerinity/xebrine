@@ -47,7 +47,7 @@ import {
 import { useLastfmSession } from '../hooks/lastfm_session';
 import { useScrobbleStatus } from '../hooks/scrobble_status';
 import { SCROBBLE_STATUS_LABEL } from '../utils/scrobble_status';
-import { AUTO_PLAY_LABELS } from '../queue/auto_play';
+import { AUTO_PLAY_LABELS, AUTO_PLAY_LEVELS } from '../queue/auto_play';
 import { ExplicitBadge } from './explicit_badge';
 import { fetchLovedStatus, setLovedTrack } from '../api/lastfm';
 import { ScanDrawer } from './scan_drawer';
@@ -167,6 +167,7 @@ export function PlayerBar({
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [nowEntering, setNowEntering] = useState(false);
   const [scrobbleMenu, setScrobbleMenu] = useState<{ x: number; y: number } | null>(null);
+  const [auto_play_menu, set_auto_play_menu] = useState<{ x: number; y: number } | null>(null);
   const [field_context_menu, set_field_context_menu] = useState<{
     x: number;
     y: number;
@@ -503,6 +504,12 @@ export function PlayerBar({
         }
       ]
     : [];
+  const auto_play_menu_items: ContextMenuItem[] = AUTO_PLAY_LEVELS.map((level, index) => ({
+    label: AUTO_PLAY_LABELS[level],
+    heading: index === 0 ? 'Switch mode...' : undefined,
+    checked: settings.autoPlayLevel === level,
+    onSelect: () => update({ autoPlayLevel: level })
+  }));
   const scrubber = (
     <div key="scrubber" ref={scrubberSlotRef} className="xe_player-bar__scrubber-slot">
       <Scrubber />
@@ -593,6 +600,10 @@ export function PlayerBar({
           type="button"
           className={`xe_icon-btn${settings.autoPlay ? ' xe_icon-btn--active' : ''}`}
           onClick={() => update({ autoPlay: !settings.autoPlay })}
+          onContextMenu={(event) => {
+            event.preventDefault();
+            set_auto_play_menu({ x: event.clientX, y: event.clientY });
+          }}
           title={
             settings.autoPlay
               ? `Auto play is on (${AUTO_PLAY_LABELS[settings.autoPlayLevel].toLowerCase()}) - click to turn off`
@@ -696,7 +707,7 @@ export function PlayerBar({
           <div className="xe_player-bar__titles">
             {radio_station && (
               <>
-                {radio_homepage_url && settings.playerBarClickAction === 'open' ? (
+                {radio_homepage_url ? (
                   <a className="xe_player-bar__title" href={radio_homepage_url} target="_blank" rel="noreferrer"
                     title="Open station website (right-click to copy)"
                     onContextMenu={event => { event.preventDefault(); copyField('title', radio_station.name); }}>
@@ -704,12 +715,9 @@ export function PlayerBar({
                   </a>
                 ) : (
                   <ScrollingText text={radio_station.name} className="xe_player-bar__title"
-                    title={copiedField === 'title' ? 'Copied' : radio_homepage_url ? 'Copy station name (right-click to open website)' : 'Copy station name'}
+                    title={copiedField === 'title' ? 'Copied' : 'Copy station name'}
                     onClick={() => copyField('title', radio_station.name)}
-                    onContextMenu={radio_homepage_url ? event => {
-                      event.preventDefault();
-                      window.open(radio_homepage_url, '_blank', 'noopener,noreferrer');
-                    } : undefined} />
+                  />
                 )}
                 <ScrollingText text={[radio_station.countrycode, radio_station.language, radio_station.bitrate > 0 ? `${radio_station.bitrate} kbps` : ''].filter(Boolean).join(', ')} className="xe_player-bar__subtitle" />
                 {(!compact || radio_connecting || !isPlaying) && (
@@ -920,6 +928,14 @@ export function PlayerBar({
           y={scrobbleMenu.y}
           items={scrobbleMenuItems}
           onClose={() => setScrobbleMenu(null)}
+        />
+      )}
+      {auto_play_menu && (
+        <ContextMenu
+          x={auto_play_menu.x}
+          y={auto_play_menu.y}
+          items={auto_play_menu_items}
+          onClose={() => set_auto_play_menu(null)}
         />
       )}
       {field_context_menu && (

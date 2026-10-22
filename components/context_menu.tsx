@@ -8,11 +8,13 @@ import {
   type RefObject
 } from 'react';
 import { createPortal } from 'react-dom';
+import { CheckIcon } from './icons';
 
 export interface ContextMenuItem {
   label: string;
   onSelect?: () => void;
   icon?: ReactNode;
+  checked?: boolean;
   separatorBefore?: boolean;
   heading?: string;
   submenu?: ContextMenuItem[];
@@ -149,7 +151,8 @@ function MenuPanel({
             )}
             <button
               type="button"
-              role="menuitem"
+              role={item.checked === undefined ? 'menuitem' : 'menuitemcheckbox'}
+              aria-checked={item.checked}
               data-menu-path={item_path.join('.')}
               aria-haspopup={has_submenu ? 'menu' : undefined}
               aria-expanded={has_submenu ? submenu_is_open : undefined}
@@ -229,7 +232,11 @@ function MenuPanel({
                   <path d="M16.586 13l-5.043 5.04 1.414 1.42L20.414 12l-7.457-7.46-1.414 1.42L16.586 11H3v2h13.586z" />
                 </svg>
               ) : (
-                item.icon && <span className="xe_context-menu__icon">{item.icon}</span>
+                (item.checked || item.icon) && (
+                  <span className="xe_context-menu__icon">
+                    {item.checked ? <CheckIcon size={14} /> : item.icon}
+                  </span>
+                )
               )}
             </button>
             {submenu_is_open && item.submenu && submenu_anchor && (

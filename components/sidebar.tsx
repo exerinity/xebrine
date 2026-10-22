@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { usePlayer } from '../src/context/player';
+import { useLibrary } from '../context/library_context';
 import { useRemote } from '../context/remote_context';
 import { useSettings } from '../context/settings_context';
+import { AUTO_PLAY_LABELS, AUTO_PLAY_LEVELS } from '../queue/auto_play';
 import { clamp } from '../utils/format';
+import { THEMES } from '../utils/themes';
 import {
   DiscIcon,
   FullscreenIcon,
@@ -20,7 +23,7 @@ import {
   SearchIcon,
   SettingsIcon
 } from './icons';
-import { ContextMenu } from './context_menu';
+import { ContextMenu, type ContextMenuItem } from './context_menu';
 
 export const NAV_LINKS = [
   { path: '/', label: 'Home', icon: HomeIcon },
@@ -69,8 +72,9 @@ interface SidebarProps {
 
 export function Sidebar({ onOpenFullscreen, page_key_cursor_path }: SidebarProps) {
   const navigate = useNavigate();
-  const { queue, current, radio_station } = usePlayer();
-  const { update } = useSettings();
+  const { queue, current, radio_station, autoMixEnabled, toggleAutoMix } = usePlayer();
+  const { folders, scanning, rescanFolder, scanNewFiles } = useLibrary();
+  const { settings, update } = useSettings();
   const remote = useRemote();
   const remoteWaiting = remote.pending.length;
   const hasRemoteStatus = remoteWaiting > 0 || remote.phase === 'live' || remote.phase === 'connecting';
@@ -128,6 +132,207 @@ export function Sidebar({ onOpenFullscreen, page_key_cursor_path }: SidebarProps
       null;
     }
   };
+
+  const set_notifications = async (enabled: boolean) => {
+    if (enabled && 'Notification' in window && Notification.permission === 'default') {
+      await Notification.requestPermission();
+    }
+    update({ notifications: enabled });
+  };
+
+  const main_preferences_menu: ContextMenuItem[] = [
+    {
+      label: 'LRCLIB config',
+      submenu: [
+        {
+          label: 'Strict',
+          checked: settings.lrclibMode === 'strict',
+          onSelect: () => update({ lrclibMode: 'strict' })
+        },
+        {
+          label: 'Lax',
+          checked: settings.lrclibMode === 'lax',
+          onSelect: () => update({ lrclibMode: 'lax' })
+        }
+      ]
+    },
+    {
+      label: 'Page keys navigation',
+      submenu: [
+        {
+          label: 'Disabled',
+          checked: settings.pageKeyMode === 'off',
+          onSelect: () => update({ pageKeyMode: 'off' })
+        },
+        {
+          label: 'Shift',
+          checked: settings.pageKeyMode === 'shift',
+          onSelect: () => update({ pageKeyMode: 'shift' })
+        },
+        {
+          label: 'Enabled',
+          checked: settings.pageKeyMode === 'page',
+          onSelect: () => update({ pageKeyMode: 'page' })
+        }
+      ]
+    },
+    {
+      label: 'Notifications',
+      checked: settings.notifications,
+      onSelect: () => void set_notifications(!settings.notifications)
+    },
+    {
+      label: 'Prevent exit',
+      checked: settings.preventExit,
+      onSelect: () => update({ preventExit: !settings.preventExit })
+    }
+  ];
+
+  const appearance_menu: ContextMenuItem[] = [
+    {
+      label: 'Theme',
+      submenu: THEMES.map((theme) => ({
+        label: theme.label,
+        checked: settings.theme === theme.id,
+        onSelect: () => update({ theme: theme.id })
+      }))
+    },
+    {
+      label: 'Page background',
+      checked: settings.showBackgroundIcon,
+      onSelect: () => update({ showBackgroundIcon: !settings.showBackgroundIcon })
+    },
+    {
+      label: 'Player bar position',
+      submenu: [
+        {
+          label: 'Top',
+          checked: settings.playerBarPosition === 'top',
+          onSelect: () => update({ playerBarPosition: 'top' })
+        },
+        {
+          label: 'Bottom',
+          checked: settings.playerBarPosition === 'bottom',
+          onSelect: () => update({ playerBarPosition: 'bottom' })
+        }
+      ]
+    },
+    {
+      label: 'Slider position',
+      submenu: [
+        {
+          label: 'Above',
+          checked: settings.playerBarSliderPosition === 'above',
+          onSelect: () => update({ playerBarSliderPosition: 'above' })
+        },
+        {
+          label: 'Below',
+          checked: settings.playerBarSliderPosition === 'below',
+          onSelect: () => update({ playerBarSliderPosition: 'below' })
+        }
+      ]
+    },
+    {
+      label: 'Player layout',
+      submenu: [
+        {
+          label: 'Comfortable',
+          checked: settings.playerBarLayout === 'comfortable',
+          onSelect: () => update({ playerBarLayout: 'comfortable' })
+        },
+        {
+          label: 'Compact',
+          checked: settings.playerBarLayout === 'compact',
+          onSelect: () => update({ playerBarLayout: 'compact' })
+        }
+      ]
+    },
+    {
+      label: 'Player bar pills',
+      submenu: [
+        {
+          label: 'Auto mix',
+          checked: settings.showAutoMixPill,
+          onSelect: () => update({ showAutoMixPill: !settings.showAutoMixPill })
+        },
+        {
+          label: 'Sleep timer',
+          checked: settings.showSleepTimerPill,
+          onSelect: () => update({ showSleepTimerPill: !settings.showSleepTimerPill })
+        }
+      ]
+    },
+    {
+      label: 'Fullscreen style',
+      submenu: [
+        {
+          label: 'Maximal',
+          checked: settings.fsPlayerStyle === 'maximal',
+          onSelect: () => update({ fsPlayerStyle: 'maximal' })
+        },
+        {
+          label: 'Minimal',
+          checked: settings.fsPlayerStyle === 'minimal',
+          onSelect: () => update({ fsPlayerStyle: 'minimal' })
+        }
+      ]
+    }
+  ];
+
+  const playback_menu: ContextMenuItem[] = [
+    {
+      label: 'Auto play',
+      submenu: AUTO_PLAY_LEVELS.map((level) => ({
+        label: AUTO_PLAY_LABELS[level],
+        checked: settings.autoPlayLevel === level,
+        onSelect: () => update({ autoPlayLevel: level })
+      }))
+    },
+    {
+      label: 'Auto mix',
+      checked: autoMixEnabled,
+      onSelect: toggleAutoMix
+    },
+    {
+      label: 'Equalizer',
+      checked: settings.eqEnabled,
+      onSelect: () => update({ eqEnabled: !settings.eqEnabled })
+    }
+  ];
+
+  const accessibility_menu: ContextMenuItem[] = [
+    {
+      label: 'Reduced motion',
+      checked: settings.reducedMotion,
+      onSelect: () => update({ reducedMotion: !settings.reducedMotion })
+    },
+    {
+      label: 'Announce song changes',
+      checked: settings.announceTrackChanges,
+      onSelect: () => update({ announceTrackChanges: !settings.announceTrackChanges })
+    }
+  ];
+
+  const scan_for_new_files = async () => {
+    if (scanning !== null) return;
+    for (const folder of folders) await scanNewFiles(folder.id);
+  };
+
+  const rescan_library = async () => {
+    if (scanning !== null) return;
+    for (const folder of folders) await rescanFolder(folder.id);
+  };
+
+  const library_menu: ContextMenuItem[] = [
+    {
+      label: 'Scan for new files',
+      onSelect: () => void scan_for_new_files()
+    },
+    {
+      label: 'Rescan',
+      onSelect: () => void rescan_library()
+    }
+  ];
 
   return (
     <nav className={`xe_nav${collapsed ? ' xe_nav--collapsed' : ''}`} style={{ width }}>
@@ -222,7 +427,19 @@ export function Sidebar({ onOpenFullscreen, page_key_cursor_path }: SidebarProps
           y={settingsMenu.y}
           items={SETTINGS_SECTIONS.map((section) => ({
             label: section.label,
-            onSelect: () => navigate(`/settings/${section.id}`)
+            onSelect: () => navigate(`/settings/${section.id}`),
+            submenu:
+              section.id === 'preferences'
+                ? main_preferences_menu
+                : section.id === 'appearance'
+                  ? appearance_menu
+                  : section.id === 'library'
+                    ? library_menu
+                  : section.id === 'playback'
+                    ? playback_menu
+                    : section.id === 'a11y'
+                      ? accessibility_menu
+                      : undefined
           }))}
           onClose={() => setSettingsMenu(null)}
         />
