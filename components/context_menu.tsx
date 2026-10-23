@@ -31,7 +31,8 @@ interface ContextMenuProps {
 const MARGIN = 8;
 const DRAG_SLOP = 8;
 const SUBMENU_GAP = 4;
-const SUBMENU_HOVER_DELAY = 400;
+const SUBMENU_HOVER_DELAY = 180;
+const SUBMENU_MOVE_DURATION = 170;
 
 interface MenuPanelProps {
   x: number;
@@ -45,6 +46,13 @@ interface MenuPanelProps {
   onOpenSubmenu: (path: number[], anchor: DOMRect) => void;
   onCloseSubmenus: (path: number[]) => void;
   onSelect: (path: number[]) => void;
+}
+
+interface MenuHighlight {
+  top: number;
+  height: number;
+  visible: boolean;
+  ready: boolean;
 }
 
 function menu_item_at_path(items: ContextMenuItem[], path: number[]) {
@@ -81,9 +89,19 @@ function MenuPanel({
   onCloseSubmenus,
   onSelect
 }: MenuPanelProps) {
+  const path_key = path.join('.');
   const ref = useRef<HTMLDivElement>(null);
   const submenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const moveAnimation = useRef<Animation | null>(null);
+  const positioned = useRef(false);
+  const previousPath = useRef(path_key);
   const [pos, setPos] = useState({ x, y });
+  const [highlight, setHighlight] = useState<MenuHighlight>({
+    top: 0,
+    height: 0,
+    visible: false,
+    ready: false
+  });
 
   const clearSubmenuTimer = () => {
     if (submenuTimer.current === null) return;
@@ -99,6 +117,25 @@ function MenuPanel({
     }, SUBMENU_HOVER_DELAY);
   };
 
+  const moveHighlight = (item: HTMLElement) => {
+    const panel = ref.current;
+    if (!panel) return;
+    const panel_rect = panel.getBoundingClientRect();
+    const item_rect = item.getBoundingClientRect();
+    setHighlight((previous) => ({
+      top: item_rect.top - panel_rect.top + panel.scrollTop,
+      height: item_rect.height,
+      visible: true,
+      ready: previous.visible || previous.ready
+    }));
+  };
+
+  const hideHighlight = () => {
+    setHighlight((previous) =>
+      previous.visible ? { ...previous, visible: false } : previous
+    );
+  };
+
   const focus_adjacent_item = (item_path: number[], direction: number) => {
     const menu_items = Array.from(ref.current?.children ?? []).flatMap(item => {
       const button = item.querySelector<HTMLElement>(':scope > [data-menu-path]');
@@ -109,7 +146,22 @@ function MenuPanel({
     menu_items[(index + direction + menu_items.length) % menu_items.length].focus();
   };
 
-  useEffect(() => clearSubmenuTimer, []);
+  useEffect(() => {
+    return () => {
+      clearSubmenuTimer();
+      moveAnimation.current?.cancel();
+    };
+  }, []);
+
+  useEffect(() => clearSubmenuTimer(), [path_key]);
+
+  useEffect(() => {
+    setHighlight((previous) =>
+      previous.visible || previous.ready
+        ? { ...previous, visible: false, ready: false }
+        : previous
+    );
+  }, [path_key]);
 
   useLayoutEffect(() => {
     const el = ref.current;
@@ -122,8 +174,57 @@ function MenuPanel({
     }
     if (nx + rect.width > window.innerWidth - MARGIN) nx = window.innerWidth - rect.width - MARGIN;
     if (ny + rect.height > window.innerHeight - MARGIN) ny = window.innerHeight - rect.height - MARGIN;
-    setPos({ x: Math.max(MARGIN, nx), y: Math.max(MARGIN, ny) });
-  }, [anchor, items, x, y]);
+    const next = { x: Math.max(MARGIN, nx), y: Math.max(MARGIN, ny) };
+    const path_changed = previousPath.current !== path_key;
+    const reduced_motion =
+      document.documentElement.classList.contains('xe_reduced-motion') ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const offset_x = rect.left - next.x;
+    const offset_y = rect.top - next.y;
+
+    moveAnimation.current?.cancel();
+    el.style.left = `${next.x}px`;
+    el.style.top = `${next.y}px`;
+    setPos((previous) =>
+      previous.x === next.x && previous.y === next.y ? previous : next
+    );
+
+    if (positioned.current && anchor && path_changed && !reduced_motion) {
+      moveAnimation.current = el.animate(
+        [
+          {
+            transform: `translate3d(${offset_x}px, ${offset_y}px, 0) scale(0.995)`,
+            opacity: 0.9,
+            filter: 'blur(0.35px)'
+          },
+          {
+            transform: 'translate3d(0, 0, 0) scale(1)',
+            opacity: 1,
+            filter: 'blur(0)'
+          }
+        ],
+        {
+          duration: SUBMENU_MOVE_DURATION,
+          easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)'
+        }
+      );
+    }
+
+    positioned.current = true;
+    previousPath.current = path_key;
+  }, [anchor, items, path_key, x, y]);
+
+  const path_is_open = path.every(
+    (path_index, path_index_index) => openPath[path_index_index] === path_index
+  );
+  const open_submenu_index = path_is_open ? openPath[path.length] : undefined;
+  const open_submenu_item =
+    open_submenu_index === undefined ? undefined : items[open_submenu_index];
+  const open_submenu_path =
+    open_submenu_index === undefined ? undefined : [...path, open_submenu_index];
+  const open_submenu_anchor = open_submenu_path
+    ? submenuAnchors[open_submenu_path.join('.')]
+    : undefined;
 
   return (
     <div
@@ -132,17 +233,27 @@ function MenuPanel({
       data-context-menu-id={menuId}
       style={{ left: pos.x, top: pos.y }}
       role="menu"
+      onMouseLeave={hideHighlight}
       onContextMenu={(event) => event.preventDefault()}
     >
+      <div
+        className={`xe_context-menu__highlight${
+          highlight.visible ? ' xe_context-menu__highlight--visible' : ''
+        }${highlight.ready ? ' xe_context-menu__highlight--ready' : ''}`}
+        style={{
+          height: highlight.height,
+          transform: `translate3d(0, ${highlight.top}px, 0)`
+        }}
+        aria-hidden="true"
+      />
       {items.map((item, index) => {
         const item_path = [...path, index];
         const has_submenu = Boolean(item.submenu?.length);
         const submenu_is_open =
           has_submenu && item_path.every((path_index, path_index_index) => openPath[path_index_index] === path_index);
-        const submenu_anchor = submenuAnchors[item_path.join('.')];
 
         return (
-          <div key={index}>
+          <div key={index} className="xe_context-menu__row">
             {item.separatorBefore && <div className="xe_context-menu__sep" role="separator" />}
             {item.heading && (
               <div className="xe_context-menu__heading" role="presentation">
@@ -158,17 +269,25 @@ function MenuPanel({
               aria-expanded={has_submenu ? submenu_is_open : undefined}
               className="xe_context-menu__item"
               onMouseEnter={(event) => {
+                moveHighlight(event.currentTarget);
                 if (has_submenu) openSubmenuAfterDelay(item_path, event.currentTarget.getBoundingClientRect());
                 else {
                   clearSubmenuTimer();
                   onCloseSubmenus(item_path.slice(0, -1));
                 }
               }}
-              onMouseLeave={() => {
+              onMouseLeave={(event) => {
                 clearSubmenuTimer();
+                const next_item =
+                  event.relatedTarget instanceof Element
+                    ? event.relatedTarget.closest<HTMLElement>('[data-menu-path]')
+                    : null;
+                const next_panel = next_item?.closest<HTMLElement>('[data-context-menu-id]');
+                if (next_panel !== ref.current) hideHighlight();
               }}
               onFocus={(event) => {
                 clearSubmenuTimer();
+                moveHighlight(event.currentTarget);
                 if (has_submenu) onOpenSubmenu(item_path, event.currentTarget.getBoundingClientRect());
                 else onCloseSubmenus(item_path.slice(0, -1));
               }}
@@ -239,24 +358,25 @@ function MenuPanel({
                 )
               )}
             </button>
-            {submenu_is_open && item.submenu && submenu_anchor && (
-              <MenuPanel
-                x={submenu_anchor.right + SUBMENU_GAP}
-                y={submenu_anchor.top}
-                items={item.submenu}
-                anchor={submenu_anchor}
-                menuId={menuId}
-                path={item_path}
-                openPath={openPath}
-                submenuAnchors={submenuAnchors}
-                onOpenSubmenu={onOpenSubmenu}
-                onCloseSubmenus={onCloseSubmenus}
-                onSelect={onSelect}
-              />
-            )}
           </div>
         );
       })}
+      {open_submenu_item?.submenu && open_submenu_path && open_submenu_anchor && (
+        <MenuPanel
+          key="active-submenu"
+          x={open_submenu_anchor.right + SUBMENU_GAP}
+          y={open_submenu_anchor.top}
+          items={open_submenu_item.submenu}
+          anchor={open_submenu_anchor}
+          menuId={menuId}
+          path={open_submenu_path}
+          openPath={openPath}
+          submenuAnchors={submenuAnchors}
+          onOpenSubmenu={onOpenSubmenu}
+          onCloseSubmenus={onCloseSubmenus}
+          onSelect={onSelect}
+        />
+      )}
     </div>
   );
 }

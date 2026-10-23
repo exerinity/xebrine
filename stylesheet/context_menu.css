@@ -44,6 +44,37 @@
   transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
+.xe_context-menu__row {
+  position: relative;
+  z-index: 1;
+}
+
+.xe_context-menu__highlight {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 6px;
+  right: 6px;
+  border: 1px solid #292929;
+  border-radius: 6px;
+  background: var(--xe-context-surface-raised);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, height, opacity;
+  transition: opacity 90ms ease;
+}
+
+.xe_context-menu__highlight--ready {
+  transition:
+    transform 150ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    height 150ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 90ms ease;
+}
+
+.xe_context-menu__highlight--visible {
+  opacity: 1;
+}
+
 .xe_context-menu__icon {
   display: inline-flex;
   align-items: center;
@@ -67,9 +98,7 @@
 
 .xe_context-menu__item:hover,
 .xe_context-menu__item:focus-visible {
-  border-color: #292929;
   outline: none;
-  background: var(--xe-context-surface-raised);
   color: #fff;
 }
 
