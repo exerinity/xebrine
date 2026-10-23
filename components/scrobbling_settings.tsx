@@ -21,6 +21,7 @@ import { toast } from '../utils/toast';
 import { LastfmIcon, LogoIcon, RefreshIcon } from './icons';
 import { Spinner } from './spinner';
 import { Slider } from './slider';
+import { CoverModal } from './cover_modal';
 import { LASTFM_COUNTRIES } from '../utils/countries';
 import { estimateCountryFromTimezone } from '../utils/timezone_country';
 import { is_online, use_online } from '../hooks/online_status';
@@ -43,6 +44,7 @@ export function ScrobblingSettings() {
   const [pending, setPending] = useState<PendingScrobble[]>([]);
   const [connecting, setConnecting] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [avatar_open, set_avatar_open] = useState(false);
   const [account_error, set_account_error] = useState<string | null>(null);
   const account_request = useRef(0);
 
@@ -88,6 +90,7 @@ export function ScrobblingSettings() {
       account_request.current += 1;
       setProfile(null);
       setRecent([]);
+      set_avatar_open(false);
       set_account_error(null);
       return;
     }
@@ -147,13 +150,21 @@ export function ScrobblingSettings() {
         {session ? (
           <>
             <div className="xe_scrobble-profile">
-              <div className="xe_scrobble-profile__art">
-                {profile?.image ? (
+              {profile?.image ? (
+                <button
+                  type="button"
+                  className="xe_scrobble-profile__art"
+                  onClick={() => set_avatar_open(true)}
+                  title="Enlarge avatar"
+                  aria-label="Enlarge avatar"
+                >
                   <img src={profile.image} alt="" loading="lazy" />
-                ) : (
+                </button>
+              ) : (
+                <div className="xe_scrobble-profile__art">
                   <LogoIcon size={30} />
-                )}
-              </div>
+                </div>
+              )}
               <div className="xe_scrobble-profile__info">
                 <strong className="xe_scrobble-profile__name">
                   {profile?.realname || session.username}
@@ -494,6 +505,13 @@ export function ScrobblingSettings() {
             </ul>
           )}
         </section>
+      )}
+      {avatar_open && profile?.image && (
+        <CoverModal
+          src={profile.image}
+          alt={`${profile.realname || session?.username || 'Last.fm user'} avatar`}
+          onClose={() => set_avatar_open(false)}
+        />
       )}
     </>
   );

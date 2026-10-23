@@ -30,6 +30,16 @@
   display: block;
 }
 
+button.xe_scrobble-profile__art {
+  outline: none;
+  transition: box-shadow 120ms ease;
+}
+
+button.xe_scrobble-profile__art:hover,
+button.xe_scrobble-profile__art:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-text);
+}
+
 .xe_scrobble-profile__info {
   display: flex;
   flex-direction: column;

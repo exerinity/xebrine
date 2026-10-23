@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CloseIcon, CopyIcon, DownloadIcon } from './icons';
 import { toast } from '../utils/toast';
+import { useSettings } from '../context/settings_context';
+import { useCoverDeformation } from '../hooks/cover_deformation';
 
 interface CoverModalProps {
   src: string;
@@ -11,10 +13,17 @@ interface CoverModalProps {
 const EXIT_DURATION_MS = 140;
 
 export function CoverModal({ src, alt = '', onClose }: CoverModalProps) {
+  const { settings } = useSettings();
   const [closing, setClosing] = useState(false);
   const closingRef = useRef(false);
   const onCloseRef = useRef(onClose);
   const closeTimerRef = useRef<number | null>(null);
+  const cover_ref = useRef<HTMLButtonElement | null>(null);
+  const cover_handlers = useCoverDeformation(
+    cover_ref,
+    settings.reducedMotion,
+    () => window.open(src, '_blank', 'noopener,noreferrer')
+  );
   onCloseRef.current = onClose;
 
   const requestClose = () => {
@@ -67,24 +76,6 @@ export function CoverModal({ src, alt = '', onClose }: CoverModalProps) {
     }
   };
 
-  const tiltCover = (event: MouseEvent<HTMLAnchorElement>) => {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width;
-    const y = (event.clientY - bounds.top) / bounds.height;
-
-    event.currentTarget.style.setProperty('--cover-rotate-x', `${(y - 0.5) * 10}deg`);
-    event.currentTarget.style.setProperty('--cover-rotate-y', `${(0.5 - x) * 10}deg`);
-    event.currentTarget.style.setProperty('--cover-shine-x', `${x * 100}%`);
-    event.currentTarget.style.setProperty('--cover-shine-y', `${y * 100}%`);
-  };
-
-  const resetCoverTilt = (event: MouseEvent<HTMLAnchorElement>) => {
-    event.currentTarget.style.setProperty('--cover-rotate-x', '0deg');
-    event.currentTarget.style.setProperty('--cover-rotate-y', '0deg');
-    event.currentTarget.style.setProperty('--cover-shine-x', '50%');
-    event.currentTarget.style.setProperty('--cover-shine-y', '18%');
-  };
-
   const saveCover = async () => {
     try {
       const response = await fetch(src);
@@ -123,17 +114,16 @@ export function CoverModal({ src, alt = '', onClose }: CoverModalProps) {
         <CloseIcon size={20} />
       </button>
       <div className="xe_cover-modal__content" onClick={(event) => event.stopPropagation()}>
-        <a
-          href={src}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          ref={cover_ref}
+          type="button"
           className="xe_cover-modal__link"
-          onMouseMove={tiltCover}
-          onMouseLeave={resetCoverTilt}
-          title="Open image"
+          {...cover_handlers}
+          title="Open image, drag to deform"
+          aria-label="Open image, drag to deform"
         >
-          <img src={src} alt={alt} className="xe_cover-modal__image" />
-        </a>
+          <img src={src} alt={alt} className="xe_cover-modal__image" draggable={false} />
+        </button>
         <div className="xe_cover-modal__actions">
           <button type="button" className="xe_btn xe_cover-modal__action" onClick={() => void copyCover()}>
             <CopyIcon size={15} />

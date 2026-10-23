@@ -1377,7 +1377,7 @@ button.xe_scrubber__time:hover {
   user-select: none;
 }
 
-.xe_fullscreen-player__cover--deforming {
+.xe_fullscreen-player__cover.xe_cover--deforming {
   transition: none;
   cursor: grabbing;
 }
