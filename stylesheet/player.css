@@ -715,6 +715,10 @@
   transition: max-height 220ms ease, opacity 160ms ease, transform 220ms ease;
 }
 
+.xe_player-bar__album--fading {
+  opacity: 0;
+}
+
 .xe_player-bar--compact .xe_player-bar__album {
   max-height: 0;
   opacity: 0;

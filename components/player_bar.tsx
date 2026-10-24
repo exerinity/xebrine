@@ -184,9 +184,15 @@ export function PlayerBar({
   const [loveLoading, setLoveLoading] = useState(false);
   const [loveSaving, setLoveSaving] = useState(false);
   const loveRequestRef = useRef(0);
+  const [playlist_detail_is_album, set_playlist_detail_is_album] = useState(false);
+  const [playlist_detail_fading, set_playlist_detail_fading] = useState(false);
+  const [playlist_detail_hovered, set_playlist_detail_hovered] = useState(false);
+  const playlist_detail_timeout_ref = useRef<number | null>(null);
+  const playlist_detail_key_ref = useRef<string | null>(null);
 
   const track = current?.track ?? null;
   const playlist_source = current?.source?.type === 'playlist' ? current.source : null;
+  const playlist_detail_key = playlist_source && track ? `${track.id}:${playlist_source.name}` : null;
   const artist_tracks = useMemo(() => {
     if (!track) return [];
     const artist = displayArtist(track).toLowerCase();
@@ -208,7 +214,13 @@ export function PlayerBar({
   const hadTrackRef = useRef(Boolean(track));
   const volumeLevel = volume <= 0 ? 0 : volume < 0.34 ? 1 : volume < 0.67 ? 2 : 3;
   const boosted = volume > 1;
-  const elapsedPercent = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
+  const elapsedProgress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const elapsedPercent = Math.round(elapsedProgress);
+  const playlist_detail_should_show_album =
+    Boolean(playlist_source) &&
+    !playlist_detail_hovered &&
+    duration > 0 &&
+    Math.floor(elapsedProgress / 8) % 2 === 1;
   const remainingPercent = 100 - elapsedPercent;
   const elapsedLabel = radio_station ? 'LIVE' : track ? `${elapsedPercent}%` : '--%';
   const remainingLabel = radio_station ? '' : track ? `${remainingPercent}%` : '--%';
@@ -225,8 +237,49 @@ export function PlayerBar({
   useEffect(() => {
     return () => {
       if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
+      if (playlist_detail_timeout_ref.current) window.clearTimeout(playlist_detail_timeout_ref.current);
     };
   }, []);
+
+  useEffect(() => {
+    const is_new_track = playlist_detail_key_ref.current !== playlist_detail_key;
+    playlist_detail_key_ref.current = playlist_detail_key;
+
+    if (!playlist_detail_key || is_new_track) {
+      if (playlist_detail_timeout_ref.current) window.clearTimeout(playlist_detail_timeout_ref.current);
+      playlist_detail_timeout_ref.current = null;
+      set_playlist_detail_fading(false);
+      set_playlist_detail_is_album(false);
+      return;
+    }
+    if (playlist_detail_is_album === playlist_detail_should_show_album) {
+      if (!playlist_detail_fading) return;
+      if (playlist_detail_timeout_ref.current) window.clearTimeout(playlist_detail_timeout_ref.current);
+      playlist_detail_timeout_ref.current = null;
+      set_playlist_detail_fading(false);
+      return;
+    }
+    if (settings.reducedMotion) {
+      set_playlist_detail_is_album(playlist_detail_should_show_album);
+      return;
+    }
+
+    set_playlist_detail_fading(true);
+    playlist_detail_timeout_ref.current = window.setTimeout(() => {
+      set_playlist_detail_is_album(playlist_detail_should_show_album);
+      set_playlist_detail_fading(false);
+      playlist_detail_timeout_ref.current = null;
+    }, 160);
+
+    return () => {
+      if (playlist_detail_timeout_ref.current) window.clearTimeout(playlist_detail_timeout_ref.current);
+    };
+  }, [
+    playlist_detail_is_album,
+    playlist_detail_key,
+    playlist_detail_should_show_album,
+    settings.reducedMotion
+  ]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('xe_player-hidden', collapsed);
@@ -766,11 +819,30 @@ export function PlayerBar({
                 />
                 {playlist_source ? (
                   <ScrollingText
-                    text="from "
-                    suffix={<span className="xe_player-bar__playlist-name">{playlist_source.name}</span>}
-                    className="xe_player-bar__subtitle xe_player-bar__album"
-                    title={`Go to "${playlist_source.name}"`}
-                    onClick={open_playlist_source}
+                    text={playlist_detail_is_album ? track.album : 'from '}
+                    suffix={
+                      playlist_detail_is_album ? undefined : (
+                        <span className="xe_player-bar__playlist-name">{playlist_source.name}</span>
+                      )
+                    }
+                    className={`xe_player-bar__subtitle xe_player-bar__album${
+                      playlist_detail_fading ? ' xe_player-bar__album--fading' : ''
+                    }`}
+                    title={
+                      playlist_detail_is_album
+                        ? fieldTooltip('album')
+                        : `Go to "${playlist_source.name}"`
+                    }
+                    onClick={() =>
+                      playlist_detail_is_album ? handleFieldClick('album') : open_playlist_source()
+                    }
+                    onContextMenu={
+                      playlist_detail_is_album
+                        ? (e) => handleFieldContextMenu(e, 'album')
+                        : undefined
+                    }
+                    onMouseEnter={() => set_playlist_detail_hovered(true)}
+                    onMouseLeave={() => set_playlist_detail_hovered(false)}
                   />
                 ) : (
                   <ScrollingText

@@ -10,9 +10,20 @@ interface ScrollingTextProps {
   suffix?: ReactNode;
   onClick?: () => void;
   onContextMenu?: (e: MouseEvent) => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
-export function ScrollingText({ text, className, title, suffix, onClick, onContextMenu }: ScrollingTextProps) {
+export function ScrollingText({
+  text,
+  className,
+  title,
+  suffix,
+  onClick,
+  onContextMenu,
+  onMouseEnter,
+  onMouseLeave
+}: ScrollingTextProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const textRef = useRef<HTMLSpanElement | null>(null);
   const animationRef = useRef<Animation | null>(null);
@@ -59,8 +70,14 @@ export function ScrollingText({ text, className, title, suffix, onClick, onConte
       ref={containerRef}
       className={`xe_scroll-text${className ? ` ${className}` : ''}${onClick ? ' xe_scroll-text--clickable' : ''}`}
       title={title ?? text}
-      onMouseEnter={() => animationRef.current?.pause()}
-      onMouseLeave={() => animationRef.current?.play()}
+      onMouseEnter={() => {
+        animationRef.current?.pause();
+        onMouseEnter?.();
+      }}
+      onMouseLeave={() => {
+        animationRef.current?.play();
+        onMouseLeave?.();
+      }}
       onClick={onClick}
       onContextMenu={onContextMenu}
       role={onClick ? 'button' : undefined}
