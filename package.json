@@ -12,11 +12,7 @@
     "types": "wrangler types",
     "build": "wrangler types && tsc --noEmit && tsc -p worker --noEmit && vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && wrangler deploy",
-    "icons": "cargo run --quiet --release --manifest-path tools/icon-gen/Cargo.toml",
-    "icons:transparent": "cargo run --quiet --release --manifest-path tools/icon-gen/Cargo.toml -- --transparent",
-    "icons:blank": "cargo run --quiet --release --manifest-path tools/icon-gen/Cargo.toml -- --blank-background",
-    "icons:white": "cargo run --quiet --release --manifest-path tools/icon-gen/Cargo.toml -- --white-background"
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "mediainfo.js": "^0.3.7",
