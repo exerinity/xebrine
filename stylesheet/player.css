@@ -125,6 +125,7 @@
 }
 
 .xe_player-bar--compact {
+  --automix-drawer-offset: 19px;
   grid-template-columns: minmax(150px, 1fr) minmax(200px, 1.35fr) minmax(150px, 1fr);
   gap: 12px;
   padding: 0 14px;
@@ -346,7 +347,7 @@
 .xe_automix-drawer {
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 30px);
+  bottom: calc(100% + var(--automix-drawer-offset, 30px));
   width: min(260px, calc(100vw - 36px));
   display: flex;
   flex-direction: column;
@@ -371,7 +372,7 @@
 }
 
 .xe_player-bar--top .xe_automix-drawer {
-  top: calc(100% + 30px);
+  top: calc(100% + var(--automix-drawer-offset, 30px));
   bottom: auto;
   border-top: none;
   border-bottom: 1px solid var(--border);
@@ -953,6 +954,7 @@ button.xe_scrubber__time:hover {
   position: absolute;
   right: 0;
   bottom: calc(100% + 12px);
+  --automix-drawer-offset: 30px;
   z-index: 42;
   display: flex;
   width: min(250px, calc(100vw - 28px));
@@ -1825,6 +1827,10 @@ button.xe_scrubber__time:hover {
     height: auto;
     padding: 10px 14px 14px;
     gap: 10px;
+  }
+
+  .xe_player-bar--compact {
+    --automix-drawer-offset: 30px;
   }
 
   .xe_player-bar__now {
