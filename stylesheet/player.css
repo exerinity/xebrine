@@ -163,6 +163,18 @@
   height: 18px;
 }
 
+.xe_player-bar--compact .xe_player-bar__love,
+.xe_player-bar--compact .xe_player-bar__love-loading {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+.xe_player-bar--compact .xe_player-bar__love svg {
+  width: 12px;
+  height: 12px;
+}
+
 .xe_player-bar--compact .xe_player-bar__volume-slider .xe_slider__track {
   height: 3px;
   border-radius: 99px;
