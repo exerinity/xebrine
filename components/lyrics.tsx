@@ -35,11 +35,11 @@ const HEADING_MAX = 25;
 const ACCEPTED_LYRICS_FILE = /\.(lrc|srt|vtt)$/i;
 
 const STATUS_TEXT: Record<Exclude<Status, 'idle'>, string> = {
-  waiting: 'Standing by, one moment...',
+  waiting: 'One moment...',
   loading: 'Searching LRCLIB...',
   notfound: 'No lyrics found',
-  error: 'LRCLIB request failed. Please try again.',
-  offline: 'You are offline. Lyrics will be searched again when you reconnect.',
+  error: 'All attempts exhausted, please try again',
+  offline: 'Connect to the internet',
   ratelimited: 'LRCLIB is rate limiting you - slow down!',
   badfile: 'Could not read any lyrics from that file'
 };
