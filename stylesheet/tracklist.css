@@ -13,6 +13,7 @@
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  font-weight: 550;
   position: sticky;
   top: 0;
   background: var(--bg);

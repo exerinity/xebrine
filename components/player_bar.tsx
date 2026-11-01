@@ -1044,7 +1044,7 @@ export function PlayerBar({
             className={`xe_player-bar__volume-slider-wrap${
               boosted ? ' xe_player-bar__volume-slider-wrap--boosted' : ''
             }`}
-            data-tooltip={`${Math.round(volume * 100)}%${boosted ? ' BOOST' : ''}`}
+            data-tooltip={`${Math.round(volume * 100)}%${boosted ? ' (BOOST)' : ''}`}
             onContextMenu={(e) => {
               e.preventDefault();
               setVolume(1);

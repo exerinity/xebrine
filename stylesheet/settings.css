@@ -492,7 +492,7 @@
 .xe_settings__import-key {
   flex-shrink: 0;
   font-weight: 650;
-  font-family: monospace;
+  font-family: 'Space Mono', monospace;
 }
 
 .xe_settings__import-value {
@@ -500,7 +500,7 @@
   min-width: 0;
   overflow-wrap: anywhere;
   color: var(--text-dim);
-  font-family: monospace;
+  font-family: 'Space Mono', monospace;
   text-align: right;
 }
 

@@ -790,10 +790,11 @@ html.xe_vt-player-bar .xe_player-bar {
 .xe_player-bar__percent {
   color: var(--text-dim);
   font-size: 13px;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Mona Sans Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   min-width: 28px;
   text-align: center;
   display: inline-block;
+  font-weight: 550;
 }
 
 .xe_scrubber {
@@ -915,10 +916,10 @@ button.xe_scrubber__time:hover {
   bottom: calc(100% - 7px);
   pointer-events: none;
   color: var(--text-dim);
-  font-family: 'Space Mono', monospace;
+  font-family: 'Mona Sans Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 11px;
   line-height: 1;
-  transform: scaleX(1.2);
+  transform: scaleX(1.1);
   font-weight: 550;
   transform-origin: left center;
   
@@ -970,6 +971,8 @@ button.xe_scrubber__time:hover {
 .xe_player-bar__volume-slider-wrap--boosted::after {
   color: #ffb454;
   border-color: rgba(255, 180, 84, 0.4);
+  font-weight: 650;
+  transform: scaleX(1.2);
 }
 
 .xe_player-bar__secondary-menu {
