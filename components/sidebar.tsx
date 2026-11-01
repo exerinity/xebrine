@@ -244,6 +244,12 @@ export function Sidebar({ onOpenFullscreen, page_key_cursor_path }: SidebarProps
           label: 'Compact',
           checked: settings.playerBarLayout === 'compact',
           onSelect: () => update({ playerBarLayout: 'compact' })
+        },
+        {
+          label: 'Beside side panel',
+          checked: settings.playerBarAsideIncludesSidePanel,
+          onSelect: () =>
+            update({ playerBarAsideIncludesSidePanel: !settings.playerBarAsideIncludesSidePanel })
         }
       ]
     },
