@@ -596,6 +596,21 @@ export function PlayerBar({
       ]
     },
     {
+      label: 'Sidebar placement',
+      submenu: [
+        {
+          label: 'Full-width',
+          checked: settings.playerBarSidebarPosition === 'below',
+          onSelect: () => update({ playerBarSidebarPosition: 'below' })
+        },
+        {
+          label: 'Beside sidebar',
+          checked: settings.playerBarSidebarPosition === 'aside',
+          onSelect: () => update({ playerBarSidebarPosition: 'aside' })
+        }
+      ]
+    },
+    {
       label: 'Scrubber position',
       submenu: [
         {

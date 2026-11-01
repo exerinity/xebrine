@@ -213,6 +213,8 @@ function Shell() {
   return (
     <div
       className={`xe_xebrine${settings.playerBarPosition === 'top' ? ' xe_xebrine--player-top' : ''}${
+        settings.playerBarSidebarPosition === 'aside' && !fullscreenOpen ? ' xe_xebrine--player-aside' : ''
+      }${
         settings.playerBarLayout === 'compact' ? ' xe_xebrine--player-compact' : ''
       }`}
       style={accentStyle}

@@ -80,6 +80,28 @@ export function AppearanceSettings({ show_heading }: { show_heading: boolean }) 
       </section>
 
       <section className="xe_settings__section">
+        <h2>Player bar and sidebar</h2>
+        <label className="xe_settings__radio">
+          <input
+            type="radio"
+            name="player-bar-sidebar-position"
+            checked={settings.playerBarSidebarPosition === 'below'}
+            onChange={() => update({ playerBarSidebarPosition: 'below' })}
+          />
+          <span>Player bar full-width</span>
+        </label>
+        <label className="xe_settings__radio">
+          <input
+            type="radio"
+            name="player-bar-sidebar-position"
+            checked={settings.playerBarSidebarPosition === 'aside'}
+            onChange={() => update({ playerBarSidebarPosition: 'aside' })}
+          />
+          <span>Player bar beside the sidebar</span>
+        </label>
+      </section>
+
+      <section className="xe_settings__section">
         <h2>The slider should go...</h2>
         <label className="xe_settings__radio">
           <input

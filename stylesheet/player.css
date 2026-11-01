@@ -24,6 +24,21 @@
     box-shadow 260ms ease;
 }
 
+html.xe_vt-player-bar .xe_player-bar {
+  view-transition-name: xe_player-bar;
+}
+
+::view-transition-group(xe_player-bar) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.22, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(xe_player-bar) {
+    animation-duration: 0ms;
+  }
+}
+
 .xe_player-bar::after {
   content: '';
   position: absolute;

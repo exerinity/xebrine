@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import type { LrclibMode } from '../api/lrclib';
 import { DEFAULT_IGNORE_RULES, normalizeIgnoreRules, type IgnoreRules } from '../utils/ignore_rules';
 import {
@@ -29,6 +30,7 @@ import {
 } from '../utils/home_sections';
 
 export type PlayerBarPosition = 'top' | 'bottom';
+export type PlayerBarSidebarPosition = 'below' | 'aside';
 export type PlayerBarSliderPosition = 'above' | 'below';
 export type PlayerBarLayout = 'compact' | 'comfortable';
 export type FullscreenPlayerStyle = 'maximal' | 'minimal';
@@ -47,6 +49,7 @@ export interface Settings {
   eqPreamp: number;
   eqIntensity: number;
   playerBarPosition: PlayerBarPosition;
+  playerBarSidebarPosition: PlayerBarSidebarPosition;
   playerBarSliderPosition: PlayerBarSliderPosition;
   playerBarLayout: PlayerBarLayout;
   showAutoMixPill: boolean;
@@ -103,6 +106,7 @@ export const DEFAULT_SETTINGS: Settings = {
   eqPreamp: EQ_PREAMP_DEFAULT,
   eqIntensity: EQ_INTENSITY_DEFAULT,
   playerBarPosition: 'bottom',
+  playerBarSidebarPosition: 'below',
   playerBarSliderPosition: 'below',
   playerBarLayout: 'comfortable',
   showAutoMixPill: true,
@@ -171,6 +175,7 @@ function loadSettings(): Settings {
       customSearchUrl: typeof merged.customSearchUrl === 'string' ? merged.customSearchUrl : '',
       pageKeyMode: isPageKeyMode(merged.pageKeyMode) ? merged.pageKeyMode : 'off',
       playerBarPosition: merged.playerBarPosition === 'top' ? 'top' : 'bottom',
+      playerBarSidebarPosition: merged.playerBarSidebarPosition === 'aside' ? 'aside' : 'below',
       playerBarSliderPosition: merged.playerBarSliderPosition === 'above' ? 'above' : 'below',
       playerBarLayout: merged.playerBarLayout === 'compact' ? 'compact' : 'comfortable',
       fsPlayerStyle: merged.fsPlayerStyle === 'minimal' ? 'minimal' : 'maximal',
@@ -227,7 +232,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }
   }, [settings]);
 
-  const update = (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch }));
+  const update = (patch: Partial<Settings>) => {
+    const apply = () => setSettings((s) => ({ ...s, ...patch }));
+    if ('playerBarSidebarPosition' in patch && document.startViewTransition && !settings.reducedMotion) {
+      document.documentElement.classList.add('xe_vt-player-bar');
+      const transition = document.startViewTransition(() => flushSync(apply));
+      void transition.finished.finally(() => {
+        document.documentElement.classList.remove('xe_vt-player-bar');
+      });
+    } else {
+      apply();
+    }
+  };
 
   return <SettingsContext.Provider value={{ settings, update }}>{children}</SettingsContext.Provider>;
 }

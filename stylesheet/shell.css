@@ -22,6 +22,18 @@
     'xe_nav xe_main';
 }
 
+.xe_xebrine--player-aside {
+  grid-template-areas:
+    'xe_nav xe_main'
+    'xe_nav player';
+}
+
+.xe_xebrine--player-aside.xe_xebrine--player-top {
+  grid-template-areas:
+    'xe_nav player'
+    'xe_nav xe_main';
+}
+
 .xe_xebrine--player-compact {
   --player-height: 64px;
 }
@@ -32,11 +44,30 @@
   grid-column: 1;
   position: relative;
   background: var(--panel);
-  border-right: 1px solid var(--border);
   padding: 16px 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.xe_nav::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--border);
+  pointer-events: none;
+}
+
+.xe_xebrine:not(.xe_xebrine--player-top):not(.xe_xebrine--player-aside) .xe_nav::before {
+  height: calc(100% - var(--player-height));
+}
+
+.xe_xebrine--player-top:not(.xe_xebrine--player-aside) .xe_nav::before {
+  top: var(--player-height);
+  height: calc(100% - var(--player-height));
 }
 
 .xe_nav--collapsed {
@@ -194,17 +225,48 @@
   overflow: hidden;
 }
 
-.xe_xebrine:not(.xe_xebrine--player-top) .xe_nav {
+.xe_xebrine:not(.xe_xebrine--player-top):not(.xe_xebrine--player-aside) .xe_nav {
   padding-bottom: calc(16px + var(--player-height));
 }
 
-.xe_xebrine--player-top .xe_nav {
+.xe_xebrine--player-top:not(.xe_xebrine--player-aside) .xe_nav {
   padding-top: calc(16px + var(--player-height));
 }
 
 .xe_player-hidden .xe_xebrine .xe_nav {
   padding-top: 16px;
   padding-bottom: 16px;
+}
+
+@media (max-width: 720px) {
+  .xe_xebrine--player-aside {
+    grid-template-areas:
+      'xe_nav xe_main'
+      'player player';
+  }
+
+  .xe_xebrine--player-aside.xe_xebrine--player-top {
+    grid-template-areas:
+      'player player'
+      'xe_nav xe_main';
+  }
+
+  .xe_xebrine--player-aside:not(.xe_xebrine--player-top) .xe_nav {
+    padding-bottom: calc(16px + var(--player-height));
+  }
+
+  .xe_xebrine--player-aside.xe_xebrine--player-top .xe_nav {
+    padding-top: calc(16px + var(--player-height));
+  }
+
+  .xe_xebrine--player-aside:not(.xe_xebrine--player-top) .xe_nav::before {
+    height: calc(100% - var(--player-height));
+  }
+
+  .xe_xebrine--player-aside.xe_xebrine--player-top .xe_nav::before {
+    top: var(--player-height);
+    height: calc(100% - var(--player-height));
+  }
 }
 
 .xe_page-backdrops {
