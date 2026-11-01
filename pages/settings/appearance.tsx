@@ -99,6 +99,14 @@ export function AppearanceSettings({ show_heading }: { show_heading: boolean }) 
           />
           <span>Player bar beside the sidebar</span>
         </label>
+        <label className="xe_settings__radio">
+          <input
+            type="checkbox"
+            checked={settings.playerBarAsideIncludesSidePanel}
+            onChange={(e) => update({ playerBarAsideIncludesSidePanel: e.target.checked })}
+          />
+          <span>Also beside the side panel</span>
+        </label>
       </section>
 
       <section className="xe_settings__section">

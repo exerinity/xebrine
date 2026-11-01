@@ -1,10 +1,10 @@
 .xe_xebrine {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-rows: 1fr auto;
   grid-template-areas:
-    'xe_nav xe_main'
-    'player player';
+    'xe_nav xe_main xe_side'
+    'player player player';
   height: 100vh;
   transition:
     --accent 600ms ease,
@@ -18,20 +18,28 @@
 .xe_xebrine--player-top {
   grid-template-rows: auto 1fr;
   grid-template-areas:
-    'player player'
-    'xe_nav xe_main';
+    'player player player'
+    'xe_nav xe_main xe_side';
 }
 
 .xe_xebrine--player-aside {
   grid-template-areas:
-    'xe_nav xe_main'
-    'xe_nav player';
+    'xe_nav xe_main xe_side'
+    'xe_nav player xe_side';
 }
 
 .xe_xebrine--player-aside.xe_xebrine--player-top {
   grid-template-areas:
-    'xe_nav player'
-    'xe_nav xe_main';
+    'xe_nav player xe_side'
+    'xe_nav xe_main xe_side';
+}
+
+.xe_xebrine--player-aside:not(.xe_xebrine--player-aside-side-panel) .xe_player-bar {
+  grid-column: 2 / 4;
+}
+
+.xe_xebrine--player-aside-side-panel .xe_player-bar {
+  grid-column: 2;
 }
 
 .xe_xebrine--player-compact {
@@ -208,12 +216,16 @@
 
 .xe_main {
   grid-area: xe_main;
-  grid-row: 1 / -1;
   grid-column: 2;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   display: flex;
+}
+
+.xe_side-panel {
+  grid-area: xe_side;
+  min-width: 0;
 }
 
 .xe_route-view {
@@ -241,14 +253,22 @@
 @media (max-width: 720px) {
   .xe_xebrine--player-aside {
     grid-template-areas:
-      'xe_nav xe_main'
-      'player player';
+      'xe_nav xe_main xe_side'
+      'player player player';
   }
 
   .xe_xebrine--player-aside.xe_xebrine--player-top {
     grid-template-areas:
-      'player player'
-      'xe_nav xe_main';
+      'player player player'
+      'xe_nav xe_main xe_side';
+  }
+
+  .xe_xebrine--player-aside .xe_player-bar {
+    grid-column: 1 / -1;
+  }
+
+  .xe_xebrine--player-aside .xe_side-panel {
+    grid-row: auto;
   }
 
   .xe_xebrine--player-aside:not(.xe_xebrine--player-top) .xe_nav {

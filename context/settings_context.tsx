@@ -50,6 +50,7 @@ export interface Settings {
   eqIntensity: number;
   playerBarPosition: PlayerBarPosition;
   playerBarSidebarPosition: PlayerBarSidebarPosition;
+  playerBarAsideIncludesSidePanel: boolean;
   playerBarSliderPosition: PlayerBarSliderPosition;
   playerBarLayout: PlayerBarLayout;
   showAutoMixPill: boolean;
@@ -107,6 +108,7 @@ export const DEFAULT_SETTINGS: Settings = {
   eqIntensity: EQ_INTENSITY_DEFAULT,
   playerBarPosition: 'bottom',
   playerBarSidebarPosition: 'below',
+  playerBarAsideIncludesSidePanel: false,
   playerBarSliderPosition: 'below',
   playerBarLayout: 'comfortable',
   showAutoMixPill: true,
@@ -176,6 +178,7 @@ function loadSettings(): Settings {
       pageKeyMode: isPageKeyMode(merged.pageKeyMode) ? merged.pageKeyMode : 'off',
       playerBarPosition: merged.playerBarPosition === 'top' ? 'top' : 'bottom',
       playerBarSidebarPosition: merged.playerBarSidebarPosition === 'aside' ? 'aside' : 'below',
+      playerBarAsideIncludesSidePanel: merged.playerBarAsideIncludesSidePanel === true,
       playerBarSliderPosition: merged.playerBarSliderPosition === 'above' ? 'above' : 'below',
       playerBarLayout: merged.playerBarLayout === 'compact' ? 'compact' : 'comfortable',
       fsPlayerStyle: merged.fsPlayerStyle === 'minimal' ? 'minimal' : 'maximal',

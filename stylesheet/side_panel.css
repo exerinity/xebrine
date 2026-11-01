@@ -22,6 +22,10 @@
   transition-delay: 0s;
 }
 
+.xe_xebrine--player-aside .xe_side-panel {
+  grid-row: 1 / -1;
+}
+
 .xe_side-panel__inner {
   position: relative;
   display: flex;
@@ -72,11 +76,11 @@
   background: var(--accent);
 }
 
-.xe_xebrine:not(.xe_xebrine--player-top) .xe_side-panel__inner {
+.xe_xebrine:not(.xe_xebrine--player-top):not(.xe_xebrine--player-aside-side-panel) .xe_side-panel__inner {
   padding-bottom: var(--player-height);
 }
 
-.xe_xebrine--player-top .xe_side-panel__inner {
+.xe_xebrine--player-top:not(.xe_xebrine--player-aside-side-panel) .xe_side-panel__inner {
   padding-top: var(--player-height);
 }
 

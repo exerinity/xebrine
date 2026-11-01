@@ -215,6 +215,12 @@ function Shell() {
       className={`xe_xebrine${settings.playerBarPosition === 'top' ? ' xe_xebrine--player-top' : ''}${
         settings.playerBarSidebarPosition === 'aside' && !fullscreenOpen ? ' xe_xebrine--player-aside' : ''
       }${
+        settings.playerBarSidebarPosition === 'aside' &&
+        settings.playerBarAsideIncludesSidePanel &&
+        !fullscreenOpen
+          ? ' xe_xebrine--player-aside-side-panel'
+          : ''
+      }${
         settings.playerBarLayout === 'compact' ? ' xe_xebrine--player-compact' : ''
       }`}
       style={accentStyle}
@@ -252,18 +258,18 @@ function Shell() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
-        {sidePanelMounted && (
-          <SidePanel
-            open={sidePanelVisible}
-            view={settings.sidePanelView}
-            onViewChange={(view) => update({ sidePanelView: view })}
-            onClose={() => update({ sidePanelOpen: false })}
-            onHidden={() => {
-              if (!sidePanelOpen) setSidePanelMounted(false);
-            }}
-          />
-        )}
       </main>
+      {sidePanelMounted && (
+        <SidePanel
+          open={sidePanelVisible}
+          view={settings.sidePanelView}
+          onViewChange={(view) => update({ sidePanelView: view })}
+          onClose={() => update({ sidePanelOpen: false })}
+          onHidden={() => {
+            if (!sidePanelOpen) setSidePanelMounted(false);
+          }}
+        />
+      )}
       <FullscreenPlayer
         open={fullscreenOpen}
         playerBarCollapsed={playerBarCollapsed}
