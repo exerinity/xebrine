@@ -407,7 +407,7 @@
   flex: 1;
   min-width: 0;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
@@ -461,7 +461,7 @@
 
 .xe_scan-drawer__title strong {
   color: var(--text);
-  font-weight: 500;
+  font-weight: 650;
 }
 
 .xe_scan-drawer__stop {
@@ -469,7 +469,7 @@
   padding: 2px 9px;
   border-radius: 6px;
   font-size: 10.5px;
-  font-weight: 500;
+  font-weight: 650;
   letter-spacing: 0.02em;
   color: var(--text-dim);
   background: var(--panel-2);
@@ -589,7 +589,7 @@
   top: 0;
   background: var(--panel);
   color: var(--text-dim);
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   font-size: 10px;
@@ -666,7 +666,7 @@
 
 .xe_player-bar__title {
   color: inherit;
-  font-weight: 500;
+  font-weight: 650;
 }
 
 .xe_player-bar__title-row {
@@ -775,8 +775,10 @@
 .xe_player-bar__percent {
   color: var(--text-dim);
   font-size: 13px;
+  font-family: 'Space Mono', monospace;
   min-width: 28px;
   text-align: center;
+  display: inline-block;
 }
 
 .xe_scrubber {
@@ -797,6 +799,7 @@
 .xe_scrubber__time {
   color: var(--text-dim);
   font-size: 12px;
+  font-family: 'Space Mono', monospace;
   
   min-width: 46px;
   text-align: right;
@@ -897,8 +900,12 @@ button.xe_scrubber__time:hover {
   bottom: calc(100% - 7px);
   pointer-events: none;
   color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
   font-size: 11px;
   line-height: 1;
+  transform: scaleX(1.2);
+  font-weight: 550;
+  transform-origin: left center;
   
   white-space: nowrap;
   transition: color 120ms ease;
@@ -1013,7 +1020,7 @@ button.xe_scrubber__time:hover {
   overflow: hidden;
   color: var(--text-dim);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1182,6 +1189,12 @@ button.xe_scrubber__time:hover {
   gap: 16px;
   min-height: 38px;
   margin-bottom: 16px;
+  transition: opacity 220ms ease;
+}
+
+.xe_fullscreen-player__top--hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .xe_fullscreen-player__top .xe_icon-btn {
@@ -1556,7 +1569,7 @@ button.xe_scrubber__time:hover {
 .xe_fullscreen-player__panel h2 {
   margin: 0 0 10px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   color: rgba(255, 255, 255, 0.6);
   text-transform: none;
 }
@@ -1731,7 +1744,7 @@ button.xe_scrubber__time:hover {
 
 .xe_fullscreen-player__track-title {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .xe_fullscreen-player__track-artist {

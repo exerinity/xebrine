@@ -54,7 +54,7 @@
 
 .xe_lyrics-header__title {
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .xe_lyrics-header__subtitle {
@@ -169,7 +169,7 @@
   background: var(--panel);
   color: var(--text-dim);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 650;
   text-align: center;
   transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
 }
@@ -319,7 +319,7 @@
 .xe_lrclib-search__result-heading h3 {
   margin: 0;
   font-size: 14px;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .xe_lrclib-search__result-heading p {
@@ -357,7 +357,7 @@
   width: max-content;
   cursor: pointer;
   color: var(--accent-text);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .xe_lrclib-search__preview > div {
@@ -484,7 +484,7 @@
   color: var(--text-dim);
   border-radius: 8px;
   transition: color 160ms ease, transform 160ms ease;
-  font-weight: 500;
+  font-weight: 650;
 }
 
 .xe_lyrics-panel--fullscreen .xe_lyrics-line {
@@ -590,12 +590,4 @@
   .xe_lyrics-panel--fullscreen .xe_lyrics-line {
     font-size: clamp(22px, 6cqi, 36px);
   }
-}
-
-.xe_lyrics-skeleton {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 28px 0;
 }

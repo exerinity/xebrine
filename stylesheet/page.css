@@ -16,7 +16,7 @@
 
 .xe_page__title {
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 600;
   margin: 0;
   margin-right: auto;
 }
@@ -136,7 +136,7 @@
 
 .xe_split__item--active {
   background: var(--panel-2);
-  font-weight: 600;
+  font-weight: 650;
   box-shadow: inset 2px 0 0 var(--accent-bright, var(--accent));
 }
 
@@ -166,7 +166,7 @@
 .xe_split__title {
   margin: 0;
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 @media (max-width: 720px) {
@@ -344,6 +344,7 @@
 .xe_about__heading {
   margin: 0 0 10px;
   font-size: 15px;
+  font-weight: 600;
 }
 
 .xe_about__list {
@@ -356,7 +357,7 @@
 .xe_about__subheading {
   margin: 0 0 6px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent-text);
@@ -402,7 +403,7 @@
 
 .xe_about__download-details strong {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .xe_about__download-details span {
@@ -431,7 +432,7 @@
   align-items: baseline;
   gap: 10px;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--accent-text);
 }
 

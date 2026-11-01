@@ -124,7 +124,7 @@
 .xe_share__style--on {
   color: var(--text);
   background: var(--accent);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .xe_share__style--on:hover {

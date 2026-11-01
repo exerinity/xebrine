@@ -99,7 +99,7 @@
   top: 10px;
   color: #b8b8b8;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: 0.04em;
   transform: none;
 }
@@ -206,7 +206,7 @@
   background: var(--accent);
   border-color: transparent;
   color: #fff;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .xe_btn--accent:hover:not(:disabled) {
@@ -454,6 +454,7 @@
 }
 
 .xe_sleep-panel {
+  --xe-context-surface: color-mix(in srgb, #000 90%, var(--xe-active-accent, var(--accent)) 10%);
   position: fixed;
   z-index: 1000;
   width: 300px;
@@ -461,7 +462,7 @@
   flex-direction: column;
   gap: 12px;
   padding: 14px;
-  background: var(--panel);
+  background: var(--xe-context-surface);
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);

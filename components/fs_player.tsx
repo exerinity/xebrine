@@ -156,12 +156,6 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
           aria-hidden="true"
         />
       )}
-      <div className="xe_fullscreen-player__top">
-        <button type="button" className="xe_icon-btn" onClick={onClose} title="Close the player">
-          <CloseIcon size={20} />
-        </button>
-      </div>
-
       {minimal ? (
         <FullscreenMinimalPlayer
           artworkUrl={displayArtworkUrl}
@@ -169,9 +163,16 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
           trackId={displayTrackId}
           coverRef={coverRef}
           coverHandlers={coverHandlers}
+          onClose={onClose}
         />
       ) : (
-        <div className="xe_fullscreen-player__layout">
+        <>
+          <div className="xe_fullscreen-player__top">
+            <button type="button" className="xe_icon-btn" onClick={onClose} title="Close the player">
+              <CloseIcon size={20} />
+            </button>
+          </div>
+          <div className="xe_fullscreen-player__layout">
           <section className="xe_fullscreen-player__hero" aria-label="Current track">
             <div className="xe_fullscreen-player__cover-wrap">
               <div className="xe_fullscreen-player__cover-glow" aria-hidden="true" />
@@ -240,7 +241,8 @@ export function FullscreenPlayer({ open, playerBarCollapsed, onClose }: Fullscre
             </div>
             </>}
           </section>
-        </div>
+          </div>
+        </>
       )}
     </section>
   );

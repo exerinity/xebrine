@@ -53,7 +53,6 @@ const chunk_rules: [RegExp, string][] = [
   [/components\/context_menu\.[^/?]+(?:\?|$)/, 'ctxm'],
   [/components\/track_list\.[^/?]+(?:\?|$)/, 'tls'],
   [/components\/sort_select\.[^/?]+(?:\?|$)/, 'srt'],
-  [/components\/skeletons\.[^/?]+(?:\?|$)/, 'skl'],
   [/components\/explicit_badge\.[^/?]+(?:\?|$)/, 'exb'],
   [/components\/playlist_cover\.[^/?]+(?:\?|$)/, 'plcv'],
   [/components\/lyrics\.[^/?]+(?:\?|$)/, 'lyr'],

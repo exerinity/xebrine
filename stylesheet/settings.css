@@ -6,7 +6,7 @@
 .xe_settings__section h2 {
   font-size: 15px;
   margin: 0 0 12px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .xe_settings__home-list {
@@ -71,7 +71,7 @@
 .xe_settings__home-label {
   flex: 1;
   min-width: 0;
-  font-weight: 600;
+  font-weight: 650;
   font-size: 13px;
 }
 
@@ -175,7 +175,7 @@
 
 .xe_settings__hint strong {
   color: var(--text);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .xe_settings__details {
@@ -194,7 +194,7 @@
   gap: 16px;
   padding: 12px 16px;
   color: var(--text);
-  font-weight: 600;
+  font-weight: 650;
   cursor: pointer;
   list-style: none;
   transition: background 120ms ease, color 120ms ease;
@@ -316,7 +316,7 @@
 
 .xe_settings__stop--active {
   color: var(--accent-text);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .xe_settings__quip {
@@ -491,7 +491,7 @@
 
 .xe_settings__import-key {
   flex-shrink: 0;
-  font-weight: 600;
+  font-weight: 650;
   font-family: monospace;
 }
 
@@ -533,7 +533,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .xe_settings__folder-count {
@@ -621,7 +621,7 @@
   background: var(--accent);
   border-color: transparent;
   color: #fff;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .xe_settings__chip--success.xe_settings__chip--active {
@@ -662,7 +662,7 @@
 .xe_theme-swatch--active {
   border-color: var(--accent);
   color: var(--text);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .xe_theme-swatch__dot {

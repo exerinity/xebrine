@@ -83,7 +83,7 @@ const EXTERNAL_ACKNOWLEDGEMENTS: Acknowledgement[] = [
   { name: 'LRCLIB', url: 'https://lrclib.net', role: 'lyrics' },
   { name: 'Last.fm', url: 'https://www.last.fm', role: <Link to="/lastfm">scrobbling</Link> },
   { name: 'Cloudflare Workers', url: 'https://workers.dev', role: 'basically where this thing lives' },
-  { name: 'Inter', url: 'https://rsms.me/inter/', role: 'font' },
+  { name: 'Mona Sans', url: 'https://fontsource.org/fonts/mona-sans', role: 'font' },
   { name: 'Voxity', url: 'https://voxity.dev', role: 'THE KING' }
 ];
 

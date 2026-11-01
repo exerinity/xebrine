@@ -7,7 +7,7 @@
 
 .xe_remote__question {
   font-size: 17px;
-  font-weight: 600;
+  font-weight: 650;
   margin: 0 0 14px;
 }
 
@@ -121,7 +121,7 @@
   gap: 8px;
   margin: 0;
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .xe_remote__count {
@@ -237,7 +237,7 @@
 .xe_remote__pin-entry .xe_remote__pin-label {
   margin: 0;
   font-size: 17px;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--text);
 }
 
@@ -264,7 +264,7 @@
 .xe_remote__now-title {
   margin: 0;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 650;
 }
 
 .xe_remote__now-artist {

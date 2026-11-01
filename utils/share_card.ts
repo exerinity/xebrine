@@ -22,7 +22,7 @@ const DIMENSIONS: Record<CardStyle, [number, number]> = {
   square: [1080, 1080]
 };
 
-const FONT = 'Inter, system-ui, sans-serif';
+const FONT = "'Mona Sans Variable', system-ui, sans-serif";
 const LOGO_VIEWBOX = { x: 70, y: 260, w: 563, h: 545 };
 const LOGO_PATH =
   'M86 413c26 -8 54 -12 84 -12s58 4 85 12v318h-169v-131h150v-56c-20 -4 -42 -6 -66 -6c-29 0 -57 4 -84 12v-137zM617 552c-27 -8 -56 -12 -85 -12c-30 0 -58 4 -84 12v-137c26 -8 54 -12 84 -12c29 0 58 4 85 12v137zM447 415c-27 -8 -55 -12 -84 -12c-23 0 -44 2 -66 6v384h-19v-515c27 -8 56 -12 85 -12c30 0 58 4 84 12v137z';
@@ -122,7 +122,7 @@ function drawArtwork(
     ctx.fillStyle = text;
     ctx.fillRect(x, y, size, size);
     ctx.globalAlpha = 0.6;
-    ctx.font = `600 ${size * 0.42}px ${FONT}`;
+    ctx.font = `650 ${size * 0.42}px ${FONT}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('♪', x + size / 2, y + size / 2);
@@ -218,7 +218,7 @@ export async function renderShareCard(options: ShareCardOptions): Promise<HTMLCa
   ctx.font = `700 44px ${FONT}`;
   ctx.fillText(ellipsize(ctx, options.title, headWidth), headX, cardY + pad + 50);
   ctx.globalAlpha = 0.72;
-  ctx.font = `500 34px ${FONT}`;
+  ctx.font = `650 34px ${FONT}`;
   ctx.fillText(ellipsize(ctx, options.artist, headWidth), headX, cardY + pad + 100);
   ctx.globalAlpha = 1;
 
@@ -233,7 +233,7 @@ export async function renderShareCard(options: ShareCardOptions): Promise<HTMLCa
     const footerY = cardY + cardHeight - pad - footerHeight;
     ctx.globalAlpha = 0.9;
     drawLogo(ctx, cardX + pad, footerY + 2, footerHeight - 4);
-    ctx.font = `600 33px ${FONT}`;
+    ctx.font = `650 33px ${FONT}`;
     ctx.textBaseline = 'middle';
     ctx.fillText('Xebrine', cardX + pad + footerHeight + 12, footerY + footerHeight / 2 + 2);
     ctx.globalAlpha = 1;

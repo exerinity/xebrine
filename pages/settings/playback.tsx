@@ -99,7 +99,7 @@ export function PlaybackSettings({ show_heading }: { show_heading: boolean }) {
             min={5}
             max={90}
             wheelStep={1}
-            resetTo={15}
+            resetTo={67} // jokes aside, 67s is a pretty good transition time for many extended/original house tracks...
             onChange={(v) => update({ autoMixDuration: Math.round(v) })}
             ariaLabel="Auto mix duration"
           />

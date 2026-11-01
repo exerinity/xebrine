@@ -17,7 +17,6 @@ import { isExplicitId, markExplicit } from '../utils/explicit_tracks';
 import { search_menu_item } from '../utils/search_menu';
 import { toast } from '../utils/toast';
 import type { Lyrics, StoredLyrics, TrackMeta } from '../types';
-import { LyricsSkeleton } from './skeletons';
 import { Spinner } from './spinner';
 import { Modal } from './modal';
 import { LrclibSearchModal } from './lrclib_search_modal';
@@ -27,8 +26,8 @@ import { is_online, use_online } from '../hooks/online_status';
 
 type Status = 'idle' | 'waiting' | 'loading' | 'notfound' | 'error' | 'offline' | 'ratelimited' | 'badfile';
 type RetryStatus = { seconds: number; attempt: number };
-const AUTO_SEARCH_DELAY_MS = 2000;
-const REQUEST_RETRY_DELAY_MS = 2000;
+const AUTO_SEARCH_DELAY_MS = 500;
+const REQUEST_RETRY_DELAY_MS = 3000;
 const MAX_REQUEST_RETRIES = 5;
 const NUDGE_SECONDS = 5;
 const HEADING_MAX = 25;
@@ -573,7 +572,6 @@ export function LyricsPanel({
             <Spinner />
             {retryStatus ? retryStatusText(retryStatus) : STATUS_TEXT[status]}
           </p>
-          {status === 'loading' && <LyricsSkeleton />}
         </>
       ) : (
         status !== 'idle' && <p className="xe_lyrics-panel__status">{STATUS_TEXT[status]}</p>
