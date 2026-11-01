@@ -1,0 +1,4 @@
+# Xebrine's backend worker
+This super compact worker (Cloudflare Worker) handles the remote mechanism, radio data and streaming, and Last.fm features. Since it's only ~1100 lines of code, I decided to just keep it in the same repo. Maybe if the worker explodes in size, it will be extracted into its own repo, who knows
+
+For efficiency and CORS-evasion, almost anything online-related (except lyrics) is, and will be in the future, handled by this worker. You can access its endpoint at https://xebrine.com/i/services/*. Try it: https://xebrine.com/i/services/radio/browse/popular?limit=5&offset=0&hide_unplayable=true

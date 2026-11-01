@@ -1,5 +1,5 @@
-# Xebrine
-Xebrine (pronounced *zeh-brine*) is a highly customizable, heavy-duty music player designed for people with massive local libraries, power users, and extremely long listening sessions. 
+# [Xebrine](https://xebrine.com)
+Xebrine (pronounced *zeh-brine* and named after zebrine, just with an X cuz im cool) is a highly customizable, heavy-duty music player designed for massive local libraries, power users, and extremely long listening sessions. Xebrine is also an [elementary radio app](https://xebrine.com/radio), wrapping around [radio-browser.info](https://www.radio-browser.info/). Xebrine also has an experimental [Electron wrapper](electron) for Linux and Windows and is backed by a [Cloudflare Worker](worker) for the online stuff. All under the one repo. What a mess!
 
 Made as a non-replacing spiritual successor to [Voxity](https://github.com/exerinity/voxity), Xebrine brings a noticably larger set of features, a more natural and friendly UI, and some absolutely bizarre things. 
 
@@ -24,6 +24,7 @@ For a full list, check https://exerinity.com/projects/xebrine
 - The player bar can be made compact or comfortable, top or bottom, and has drawers for scanning & auto mix
 - Context menus with right-click drag actions
 - Playlist scanning and aggregation via M3U/PLS files
+- Radio station searching, listening and voting courtesy of [radio-browser](https://www.radio-browser.info/)
 
 ## Screenshots
 For more, see https://exerinity.com/projects/xebrine/screenshots
