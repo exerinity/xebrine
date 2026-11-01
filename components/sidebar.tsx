@@ -4,9 +4,12 @@ import { usePlayer } from '../src/context/player';
 import { useLibrary } from '../context/library_context';
 import { useRemote } from '../context/remote_context';
 import { useSettings } from '../context/settings_context';
+import { use_force_offline } from '../hooks/online_status';
 import { AUTO_PLAY_LABELS, AUTO_PLAY_LEVELS } from '../queue/auto_play';
 import { clamp } from '../utils/format';
 import { THEMES } from '../utils/themes';
+import { ENGINE_GROUPS, engineKind, SEARCH_ENGINES } from '../utils/search_engine';
+import { set_force_offline } from '../utils/online_status';
 import {
   DiscIcon,
   FullscreenIcon,
@@ -54,6 +57,7 @@ const SETTINGS_SECTIONS = [
   { id: 'library', label: 'Library settings' },
   { id: 'playback', label: 'Playback settings' },
   { id: 'a11y', label: 'Accessibility' },
+  { id: 'kill', label: 'Kill switches' },
   { id: 'toys', label: 'Toys' },
   { id: 'share', label: 'Share settings' },
   { id: 'settings', label: 'All settings' }
@@ -75,6 +79,7 @@ export function Sidebar({ onOpenFullscreen, page_key_cursor_path }: SidebarProps
   const { queue, current, radio_station, autoMixEnabled, toggleAutoMix } = usePlayer();
   const { folders, scanning, rescanFolder, scanNewFiles } = useLibrary();
   const { settings, update } = useSettings();
+  const forceOffline = use_force_offline();
   const remote = useRemote();
   const remoteWaiting = remote.pending.length;
   const hasRemoteStatus = remoteWaiting > 0 || remote.phase === 'live' || remote.phase === 'connecting';
@@ -142,7 +147,27 @@ export function Sidebar({ onOpenFullscreen, page_key_cursor_path }: SidebarProps
 
   const main_preferences_menu: ContextMenuItem[] = [
     {
-      label: 'LRCLIB config',
+      label: 'Context menu search engine',
+      submenu: [
+        ...ENGINE_GROUPS.map((group) => ({
+          label: group.label,
+          submenu: SEARCH_ENGINES.filter((engine) => engineKind(engine.id) === group.kind).map(
+            (engine) => ({
+              label: engine.label,
+              checked: settings.searchEngine === engine.id,
+              onSelect: () => update({ searchEngine: engine.id })
+            })
+          )
+        })),
+        {
+          label: 'Custom',
+          checked: settings.searchEngine === 'custom',
+          onSelect: () => update({ searchEngine: 'custom' })
+        }
+      ]
+    },
+    {
+      label: 'LRCLIB search mode',
       submenu: [
         {
           label: 'Strict',
@@ -177,7 +202,7 @@ export function Sidebar({ onOpenFullscreen, page_key_cursor_path }: SidebarProps
       ]
     },
     {
-      label: 'Notifications',
+      label: 'Track notifications',
       checked: settings.notifications,
       onSelect: () => void set_notifications(!settings.notifications)
     },
@@ -439,6 +464,14 @@ export function Sidebar({ onOpenFullscreen, page_key_cursor_path }: SidebarProps
                 ? main_preferences_menu
                 : section.id === 'appearance'
                   ? appearance_menu
+                  : section.id === 'kill'
+                    ? [
+                        {
+                          label: 'Allow online',
+                          checked: !forceOffline,
+                          onSelect: () => set_force_offline(!forceOffline)
+                        }
+                      ]
                   : section.id === 'library'
                     ? library_menu
                   : section.id === 'playback'

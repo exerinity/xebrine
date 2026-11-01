@@ -67,6 +67,7 @@ export function PreferencesSettings({ show_heading }: { show_heading: boolean })
               )}
             </optgroup>
           ))}
+          <option value="custom">Custom</option>
         </select>
         {settings.searchEngine === 'custom' && (
           <>
@@ -86,6 +87,9 @@ export function PreferencesSettings({ show_heading }: { show_heading: boolean })
           This will open {' '}
           <u>{buildSearchUrl(SEARCH_PREVIEW, settings.searchEngine, settings.customSearchUrl)}</u> {' '}
           when selected
+        </p>
+        <p className="xe_settings__hint">
+          PS: Need the list of engines? Go here: <a href="https://github.com/exerinity/xebrine/blob/main/utils/search_engine.ts" target="_blank">github.com/exerinity/xebrine/blob/main/utils/search_engine.ts</a>
         </p>
       </section>
 
