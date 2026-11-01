@@ -168,6 +168,7 @@ export function PlayerBar({
   const [nowEntering, setNowEntering] = useState(false);
   const [scrobbleMenu, setScrobbleMenu] = useState<{ x: number; y: number } | null>(null);
   const [auto_play_menu, set_auto_play_menu] = useState<{ x: number; y: number } | null>(null);
+  const [player_bar_menu, set_player_bar_menu] = useState<{ x: number; y: number } | null>(null);
   const [field_context_menu, set_field_context_menu] = useState<{
     x: number;
     y: number;
@@ -563,6 +564,53 @@ export function PlayerBar({
     checked: settings.autoPlayLevel === level,
     onSelect: () => update({ autoPlayLevel: level })
   }));
+  const player_bar_menu_items: ContextMenuItem[] = [
+    {
+      label: 'Position',
+      submenu: [
+        {
+          label: 'Top',
+          checked: settings.playerBarPosition === 'top',
+          onSelect: () => update({ playerBarPosition: 'top' })
+        },
+        {
+          label: 'Bottom',
+          checked: settings.playerBarPosition === 'bottom',
+          onSelect: () => update({ playerBarPosition: 'bottom' })
+        }
+      ]
+    },
+    {
+      label: 'Layout',
+      submenu: [
+        {
+          label: 'Compact',
+          checked: settings.playerBarLayout === 'compact',
+          onSelect: () => update({ playerBarLayout: 'compact' })
+        },
+        {
+          label: 'Comfortable',
+          checked: settings.playerBarLayout === 'comfortable',
+          onSelect: () => update({ playerBarLayout: 'comfortable' })
+        }
+      ]
+    },
+    {
+      label: 'Scrubber position',
+      submenu: [
+        {
+          label: 'Above',
+          checked: settings.playerBarSliderPosition === 'above',
+          onSelect: () => update({ playerBarSliderPosition: 'above' })
+        },
+        {
+          label: 'Below',
+          checked: settings.playerBarSliderPosition === 'below',
+          onSelect: () => update({ playerBarSliderPosition: 'below' })
+        }
+      ]
+    }
+  ];
   const scrubber = (
     <div key="scrubber" ref={scrubberSlotRef} className="xe_player-bar__scrubber-slot">
       <Scrubber />
@@ -733,6 +781,11 @@ export function PlayerBar({
         }${compact ? ' xe_player-bar--compact' : ''}${
           fullscreenOpen ? ' xe_player-bar--fullscreen' : ''
         }`}
+        onContextMenu={(event) => {
+          if (event.defaultPrevented) return;
+          event.preventDefault();
+          set_player_bar_menu({ x: event.clientX, y: event.clientY });
+        }}
       >
         {visualizerOn && <Visualizer analyser={analyser} />}
         <ScanDrawer />
@@ -994,6 +1047,14 @@ export function PlayerBar({
           </div>
         </div>
       </footer>
+      {player_bar_menu && (
+        <ContextMenu
+          x={player_bar_menu.x}
+          y={player_bar_menu.y}
+          items={player_bar_menu_items}
+          onClose={() => set_player_bar_menu(null)}
+        />
+      )}
       {scrobbleMenu && lastfm && (
         <ContextMenu
           x={scrobbleMenu.x}
