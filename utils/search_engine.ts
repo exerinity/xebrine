@@ -66,7 +66,7 @@ export const SEARCH_ENGINES: {
   { id: 'grok', label: 'Grok', template: `https://grok.com/?q=${QUERY_TOKEN}` },
   { id: 'groktw', label: 'Grok on Twitter', template: `https://x.com/i/grok?text=${QUERY_TOKEN}` },
   { id: 'claude', label: 'Claude', template: `https://claude.ai/new?q=${QUERY_TOKEN}`},
-  
+  // gemini isn't present in this list because im not aware of any parameter google offers for it. not that gemini is good anyway (despite google ai mode has one ???? holy inconsistency)
   { id: 'twitter', label: 'Twitter', template: `https://x.com/search?q=${QUERY_TOKEN}`, noBy: true },
   { id: 'tunebat', label: 'Tunebat', template: `https://tunebat.com/Search?q=${QUERY_TOKEN}`, noBy: true },
   { id: 'facebook', label: 'Facebook', template: `https://www.facebook.com/search/top/?q=${QUERY_TOKEN}`, noBy: true },
