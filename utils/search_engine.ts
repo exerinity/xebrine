@@ -1,6 +1,8 @@
 export type SearchEngineId =
   | 'google'
   | 'google_ai'
+  | 'bing'
+  | 'copilot'
   | 'ddg'
   | 'yahoo'
   | 'kagi'
@@ -36,6 +38,8 @@ export const SEARCH_ENGINES: {
 }[] = [
   { id: 'google', label: 'Google', template: `https://www.google.com/search?q=${QUERY_TOKEN}`, noBy: true },
   { id: 'google_ai', label: 'Google AI Mode', template: `https://www.google.com/search?udm=50&q=${QUERY_TOKEN}` },
+  { id: 'bing', label: 'Bing', template: `https://www.bing.com/search?q=${QUERY_TOKEN}`, noBy: true },
+  { id: 'copilot', label: 'Bing Copilot', template: `https://www.bing.com/copilotsearch?q=${QUERY_TOKEN}` },
   { id: 'ddg', label: 'DuckDuckGo', template: `https://duckduckgo.com/?q=${QUERY_TOKEN}`, noBy: true },
   { id: 'yahoo', label: 'Yahoo', template: `https://search.yahoo.com/search?p=${QUERY_TOKEN}`, noBy: true }, // anyone actually still use yahoo?
   { id: 'kagi', label: 'Kagi', template: `https://kagi.com/search?q=${QUERY_TOKEN}`, noBy: true },
@@ -80,7 +84,7 @@ export const SEARCH_ENGINES: {
 
 export type SearchEngineKind = 'search' | 'music' | 'ai' | 'social' | 'custom';
 
-const AI_ENGINES = new Set<SearchEngineId>(['google_ai', 'chatgpt', 'grok', 'groktw', 'claude']);
+const AI_ENGINES = new Set<SearchEngineId>(['google_ai', 'copilot', 'chatgpt', 'grok', 'groktw', 'claude']);
 
 const MUSIC_ENGINES = new Set<SearchEngineId>([
   'youtube',
