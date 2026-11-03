@@ -26,7 +26,7 @@ import { is_online, use_online } from '../hooks/online_status';
 
 type Status = 'idle' | 'waiting' | 'loading' | 'notfound' | 'error' | 'offline' | 'ratelimited' | 'badfile';
 type RetryStatus = { seconds: number; attempt: number };
-const AUTO_SEARCH_DELAY_MS = 500;
+const AUTO_SEARCH_DELAY_MS = 2222;
 const REQUEST_RETRY_DELAY_MS = 3000;
 const MAX_REQUEST_RETRIES = 5;
 const NUDGE_SECONDS = 5;
