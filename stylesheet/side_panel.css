@@ -76,11 +76,11 @@
   background: var(--accent);
 }
 
-.xe_xebrine:not(.xe_xebrine--player-top):not(.xe_xebrine--player-aside-side-panel) .xe_side-panel__inner {
+.xe_xebrine--player-aside:not(.xe_xebrine--player-top):not(.xe_xebrine--player-aside-side-panel) .xe_side-panel__inner {
   padding-bottom: var(--player-height);
 }
 
-.xe_xebrine--player-top:not(.xe_xebrine--player-aside-side-panel) .xe_side-panel__inner {
+.xe_xebrine--player-aside.xe_xebrine--player-top:not(.xe_xebrine--player-aside-side-panel) .xe_side-panel__inner {
   padding-top: var(--player-height);
 }
 
