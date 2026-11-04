@@ -15,7 +15,7 @@ export function AboutDownload() {
       <p className="xe_about__text">
         The Electron wrapper gives Xebrine a dedicated multithreaded filesystem scanner and
         MPRIS support for Linux, ie, volume, shuffle, repeat controls that the browser normally
-        wouldn't
+        wouldn't. It is <strong>NOT REQUIRED</strong> to use Xebrine nor really even recommended unless you care enough about minuscule shit
       </p>
       <h4 className="xe_about__heading">Linux</h4>
       <div className="xe_about__download-item">
