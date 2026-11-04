@@ -27,7 +27,7 @@ export function AboutInfo() {
       </div>
 
       <p className="xe_about__lead">
-        <strong>Xebrine</strong> (pronounced <i>"zeh-brine"</i>) is a utillitarian heavy-duty,
+        <strong>Xebrine</strong> (pronounced <i>"zeh-brine"</i>) is a utilitarian heavy-duty,
         highly customizable, power-user desktop-focused PWA music player app designed for large
         music collections and very long listening sessions. Made in React with a minimal amount
         of dependencies by <a href="https://exerinity.com" target="_blank">exerinity</a>, it is
@@ -38,7 +38,7 @@ export function AboutInfo() {
 
       <p className="xe_about__lead">
         Xebrine was released a year after Voxity was created. The key difference between the two
-        is Voxity is the uglier, no-nonsense utillitarian player; Xebrine is the prettied-up,
+        is Voxity is the uglier, no-nonsense utilitarian player; Xebrine is the prettied-up,
         more feature-rich, and more friendly "experienceful" player. However, both are
         undoubtedly utilitarian and power-user focused...
       </p>
