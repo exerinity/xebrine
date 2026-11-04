@@ -9,6 +9,15 @@
   position: relative;
 }
 
+.xe_page--lyrics .xe_lyrics-panel__lines {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.xe_page--lyrics .xe_lyrics-panel__lines::-webkit-scrollbar {
+  display: none;
+}
+
 .xe_lyrics-drop-overlay {
   position: absolute;
   inset: 0;
