@@ -16,12 +16,12 @@
   font-weight: 550;
   position: sticky;
   top: 0;
-  background: var(--bg);
+  background: color-mix(in srgb, var(--accent-soft) 50%, transparent);
   z-index: 1;
 }
 
 .xe_track-table__row:not(.xe_track-table__row--head):hover {
-  background: var(--panel);
+  background: color-mix(in srgb, var(--accent-soft) 50%, transparent);
 }
 
 .xe_track-table__row--active {

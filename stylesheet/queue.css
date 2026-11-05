@@ -11,15 +11,14 @@
   height: 52px;
   padding: 0 10px;
   border-radius: 8px;
-  background: var(--bg);
 }
 
 .xe_queue-row:hover {
-  background: var(--panel);
+  background: color-mix(in srgb, var(--panel) 50%, transparent);
 }
 
 .xe_queue-row--current {
-  background: var(--accent-soft);
+  background: color-mix(in srgb, var(--accent-soft) 50%, transparent);
 }
 
 .xe_queue-row--dragging {
