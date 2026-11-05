@@ -16,7 +16,6 @@
   font-weight: 550;
   position: sticky;
   top: 0;
-  background: color-mix(in srgb, var(--accent-soft) 50%, transparent);
   z-index: 1;
 }
 
