@@ -5,16 +5,16 @@ import { AboutInfo } from './about/info';
 import { AboutStats } from './about/stats';
 import { AboutAcknowledgements } from './about/acknowledgements';
 import { AboutHotkeys } from './about/hotkeys';
-import { AboutDownload } from './about/download';
+import { AboutInstall } from './about/install';
 
-type SectionId = 'info' | 'stats' | 'acknowledgements' | 'hotkeys' | 'download';
+type SectionId = 'info' | 'stats' | 'acknowledgements' | 'hotkeys' | 'install';
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'info', label: 'About Xebrine' },
   { id: 'stats', label: 'Cool stats' },
   { id: 'acknowledgements', label: 'Acknowledgements' },
   { id: 'hotkeys', label: 'Hotkeys' },
-  { id: 'download', label: 'Downloads' }
+  { id: 'install', label: 'Install' }
 ];
 
 export function AboutPage() {
@@ -32,7 +32,7 @@ export function AboutPage() {
           Back
         </button>
         <h1 className="xe_page__title">About</h1>
-        <button type="button" className="xe_btn xe_btn--quiet" onClick={() => navigate('/i/release_notes')}>
+        <button type="button" className="xe_btn xe_btn--quiet" onClick={() => navigate('/about/release_notes')}>
           <NoteIcon size={16} />
           Release notes
         </button>
@@ -46,7 +46,7 @@ export function AboutPage() {
               type="button"
               className={`xe_split__item${item.id === active ? ' xe_split__item--active' : ''}`}
               aria-current={item.id === active}
-              onClick={() => navigate(`/i/${item.id}`)}
+              onClick={() => navigate(`/about/${item.id}`)}
             >
               <span>{item.label}</span>
               <ChevronRightIcon size={16} />
@@ -63,7 +63,7 @@ export function AboutPage() {
             {active === 'stats' && <AboutStats />}
             {active === 'acknowledgements' && <AboutAcknowledgements />}
             {active === 'hotkeys' && <AboutHotkeys />}
-            {active === 'download' && <AboutDownload />}
+            {active === 'install' && <AboutInstall />}
           </div>
         </div>
       </div>

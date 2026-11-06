@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './app';
 import { installButtonRipples } from './utils/button_ripple';
+import './utils/pwa_install';
 import './stylesheet/index.css';
 
 document.addEventListener('dragstart', (event) => {

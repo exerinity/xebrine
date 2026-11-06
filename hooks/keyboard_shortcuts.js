@@ -5,7 +5,7 @@ import { dismissToast, toast } from '../utils/toast';
 import { isTypingTarget } from '../utils/keyboard';
 
 const STATUS_DURATION = 1200;
-const HOTKEYS_PATH = '/i/hotkeys';
+const HOTKEYS_PATH = '/about/hotkeys';
 
 export function useKeyboardShortcuts({ toggleFullscreen } = {}) {
   const player = usePlayer();

@@ -250,10 +250,10 @@ function Shell() {
             <Route path="/settings" element={<Navigate to="/settings/preferences" replace />} />
             <Route path="/settings/scrobbling" element={<Navigate to="/lastfm" replace />} />
             <Route path="/settings/:section" element={<SettingsPage />} />
-            <Route path="/i" element={<Navigate to="/i/info" replace />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/about/release_notes" element={<ReleaseNotesPage />} />
+            <Route path="/about/:section" element={<AboutPage />} />
             <Route path="/i/flow/setup" element={<SetupFlowPage />} />
-            <Route path="/i/:section" element={<AboutPage />} />
-            <Route path="/i/release_notes" element={<ReleaseNotesPage />} />
             <Route path="/lastfm" element={<LastfmPage />} />
             <Route path="/remote" element={<RemotePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
