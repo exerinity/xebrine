@@ -16,7 +16,8 @@ const RELEASES: Release[] = [
     notes: [
       <>Completely reworked <Link to="/radio">the radio portal</Link> to look less like a dumb API wrapper and more like a proper radio station searcher and player</>,
       'Reworked the LRCLIB search modal to be more friendly and less confusing; with the ability to omit unsynced entries and sort by closest timestamps',
-      'Redone the styles for toasts to look more like the rest of the app (old design, finally caught up)'
+      'Redone the styles for toasts to look more like the rest of the app (old design, finally caught up)',
+      'Lyrics can now be colored by the accent color, and instrumental lines over 20 seconds now become three gradually filling dots'
     ]
   },
   {
