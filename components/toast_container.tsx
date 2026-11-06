@@ -46,24 +46,28 @@ function Toast({ item }: { item: ToastItem }) {
         if (leaving) dismissToast(item.id);
       }}
     >
-      <Icon size={18} />
-      <span className="xe_toast__message">{item.message}</span>
-      <button
-        type="button"
-        className="xe_toast__close"
-        onClick={() => setLeaving(true)}
-        title="Dismiss"
-        aria-label="Dismiss"
-      >
-        <CloseIcon size={14} />
-      </button>
+      <div className="xe_toast__body">
+        <span className="xe_toast__icon">
+          <Icon size={16} />
+        </span>
+        <span className="xe_toast__message">{item.message}</span>
+        <button
+          type="button"
+          className="xe_toast__close"
+          onClick={() => setLeaving(true)}
+          title="Dismiss"
+          aria-label="Dismiss"
+        >
+          <CloseIcon size={14} />
+        </button>
+      </div>
       {timed && !leaving && (
-        <span
-          key={countdownKey}
-          className="xe_toast__timeout"
-          style={{ '--toast-duration': `${item.duration}ms` } as CSSProperties}
-          aria-hidden="true"
-        />
+        <span key={countdownKey} className="xe_toast__timeout" aria-hidden="true">
+          <span
+            className="xe_toast__timeout-fill"
+            style={{ '--toast-duration': `${item.duration}ms` } as CSSProperties}
+          />
+        </span>
       )}
     </div>
   );
