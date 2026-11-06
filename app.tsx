@@ -233,6 +233,7 @@ function Shell() {
         <div className="xe_route-view">
           {settings.showBackgroundIcon && <PageIconBackdrop />}
           <Routes>
+            <Route path="/radio/:tab" element={<Radio_page />} />
             <Route path="/radio" element={<Radio_page />} />
             <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />

@@ -841,8 +841,17 @@ export function PlayerBar({
                   />
                 )}
                 <ScrollingText text={[radio_station.countrycode, radio_station.language, radio_station.bitrate > 0 ? `${radio_station.bitrate} kbps` : ''].filter(Boolean).join(', ')} className="xe_player-bar__subtitle" />
-                {(!compact || radio_connecting || !isPlaying) && (
-                  <span className="xe_player-bar__subtitle" role="status">{radio_connecting && <Spinner size={12} />}{' '}{radio_connecting ? 'Connecting, one moment...' : isPlaying ? 'Live radio' : 'Radio stopped'}</span>
+                {radio_connecting ? (
+                  <span className="xe_player-bar__subtitle" role="status"><Spinner size={12} /> Connecting, one moment...</span>
+                ) : isPlaying ? (
+                  <ScrollingText
+                    text="Live radio"
+                    className="xe_player-bar__subtitle"
+                    title="Go to radio"
+                    onClick={() => navigate('/radio')}
+                  />
+                ) : (
+                  <span className="xe_player-bar__subtitle" role="status">Radio stopped</span>
                 )}
                 {loadError && <span className="xe_player-bar__error" role="alert">{loadError}</span>}
               </>

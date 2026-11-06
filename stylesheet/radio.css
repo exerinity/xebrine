@@ -1,0 +1,269 @@
+.xe_radio-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.xe_radio-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 8px;
+}
+
+.xe_radio-hero .xe_search-field--big {
+  max-width: 560px;
+}
+
+.xe_radio-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.xe_radio-filters .xe_sort-select {
+  width: auto;
+  min-width: 140px;
+}
+
+.xe_radio-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.xe_radio-check input {
+  accent-color: var(--accent);
+}
+
+.xe_radio-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 0 12px;
+}
+
+.xe_radio-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text-dim);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.xe_radio-chip:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.xe_radio-chip--on {
+  border-color: var(--accent-bright);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.xe_radio-chip span {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.xe_radio-flag {
+  width: 18px;
+  height: 12px;
+  flex: none;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.xe_radio-shelf .xe_home-carousel {
+  gap: 10px;
+}
+
+.xe_radio-shelf .xe_home-carousel__item {
+  flex-basis: 148px;
+}
+
+.xe_radio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 10px;
+  padding: 4px 0 12px;
+}
+
+.xe_radio-dial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 8px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.xe_radio-dial:hover,
+.xe_radio-dial:focus-visible {
+  background: var(--panel);
+}
+
+.xe_radio-dial--live .xe_radio-dial__art {
+  box-shadow: 0 0 0 2px var(--accent-bright), 0 0 18px var(--accent-glow);
+}
+
+.xe_radio-dial__art {
+  position: relative;
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--panel);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.xe_radio-dial__art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.xe_radio-dial__play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(10, 8, 16, 0.7);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 140ms ease, transform 140ms ease, background 120ms ease;
+}
+
+.xe_radio-dial:hover .xe_radio-dial__play,
+.xe_radio-dial:focus-within .xe_radio-dial__play,
+.xe_radio-dial--live .xe_radio-dial__play {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.xe_radio-dial__play:hover:not(:disabled) {
+  background: var(--accent);
+}
+
+.xe_radio-dial__name,
+.xe_radio-dial__meta {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.xe_radio-dial__name {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.xe_radio-dial__meta {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.xe_radio-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.xe_radio-sheet__top {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.xe_radio-sheet__art {
+  width: 88px;
+  height: 88px;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--panel-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+}
+
+.xe_radio-sheet__art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.xe_radio-sheet__copy {
+  min-width: 0;
+}
+
+.xe_radio-sheet__copy h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.xe_radio-sheet__copy p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.xe_radio-sheet__copy .xe_radio-flag {
+  width: 22px;
+  height: 15px;
+}
+
+.xe_radio-sheet__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.xe_radio-sheet__tags span,
+.xe_radio-sheet__quality span {
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.xe_radio-sheet__quality {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+@media (max-width: 640px) {
+  .xe_radio-sheet__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
