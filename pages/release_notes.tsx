@@ -11,6 +11,15 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '20',
+    date: '2026-11-06',
+    notes: [
+      <>Completely reworked <Link to="/radio">the radio portal</Link> to look less like a dumb API wrapper and more like a proper radio station searcher and player</>,
+      'Reworked the LRCLIB search modal to be more friendly and less confusing; with the ability to omit unsynced entries and sort by closest timestamps',
+      'Redone the styles for toasts to look more like the rest of the app (old design, finally caught up)'
+    ]
+  },
+  {
     version: '19',
     date: '2026-10-19',
     notes: [
@@ -101,7 +110,7 @@ const RELEASES: Release[] = [
       </>,
       <>New settings category: <Link to="/settings/appearance">appearance</Link></>,
       <>The player bar can <Link to="/settings/appearance">now be customized</Link> by making it compact,
-      where the slider goes, and whether its hoisted to the top or bottom of your screen</>,
+        where the slider goes, and whether its hoisted to the top or bottom of your screen</>,
       'Lyric files can now be dropped into the lyrics page to apply them',
       'Artists, albums, and library now can be sorted by ascending/descending',
       'Toasts have been improved: they are now color-coded per type, and have a countdown bar to dismissal'
@@ -121,16 +130,16 @@ const RELEASES: Release[] = [
     date: '2026-08-03',
     notes: [
       <>Added <Link to="/lastfm">Last.fm scrobbling!!!!!!!!!11111111111</Link> You can connect your account,
-      manage how hard it should look for scrobble targets,
-      and it even has an offline queue to bulk-scrobble previous offline listens,
-      Still a lot to do, but give it a spin!</>,
+        manage how hard it should look for scrobble targets,
+        and it even has an offline queue to bulk-scrobble previous offline listens,
+        Still a lot to do, but give it a spin!</>,
       'The player bar can now be collapsed with an arrow on the top in the middle',
       'Made the fullscreen player more beautiful; especially in tandem with folding the player bar away',
       <>Added a <Link to="/settings">"Prevent exit"</Link> toggle</>,
       <><Link to="/settings/playback">The equalizer</Link> now has an intensity and preamp slider so it should now be listenable</>,
       <>Added a new <Link to="/search">Search</Link> page which, instead of a simple keyword filter,
-      has a user-friendly advanced algorithmical to feel almost as natural as Spotify
-      search (no idea how they do searching). No - it is not replacing every search bar; on the other pages, it is still a simple filter search, and it will remain that way.</>
+        has a user-friendly advanced algorithmical to feel almost as natural as Spotify
+        search (no idea how they do searching). No - it is not replacing every search bar; on the other pages, it is still a simple filter search, and it will remain that way.</>
     ]
   },
   {
