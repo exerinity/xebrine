@@ -174,6 +174,28 @@ export function AppearanceSettings({ show_heading }: { show_heading: boolean }) 
       </section>
 
       <section className="xe_settings__section">
+        <h2>Active lyrics</h2>
+        <label className="xe_settings__radio">
+          <input
+            type="radio"
+            name="lyrics-color"
+            checked={settings.lyricsColor === 'white'}
+            onChange={() => update({ lyricsColor: 'white' })}
+          />
+          <span>White lyrics</span>
+        </label>
+        <label className="xe_settings__radio">
+          <input
+            type="radio"
+            name="lyrics-color"
+            checked={settings.lyricsColor === 'accent'}
+            onChange={() => update({ lyricsColor: 'accent' })}
+          />
+          <span>Accent lyrics</span>
+        </label>
+      </section>
+
+      <section className="xe_settings__section">
         <h2>Fullscreen player style</h2>
         <label className="xe_settings__radio">
           <input

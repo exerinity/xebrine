@@ -34,6 +34,7 @@ export type PlayerBarSidebarPosition = 'below' | 'aside';
 export type PlayerBarSliderPosition = 'above' | 'below';
 export type PlayerBarLayout = 'compact' | 'comfortable';
 export type FullscreenPlayerStyle = 'maximal' | 'minimal';
+export type LyricsColor = 'white' | 'accent';
 export type SidePanelView = 'queue' | 'lyrics';
 
 export interface Settings {
@@ -56,6 +57,7 @@ export interface Settings {
   showAutoMixPill: boolean;
   showSleepTimerPill: boolean;
   fsPlayerStyle: FullscreenPlayerStyle;
+  lyricsColor: LyricsColor;
   sidePanelOpen: boolean;
   sidePanelView: SidePanelView;
   fsBlur: number;
@@ -114,6 +116,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showAutoMixPill: true,
   showSleepTimerPill: true,
   fsPlayerStyle: 'maximal',
+  lyricsColor: 'accent',
   sidePanelOpen: false,
   sidePanelView: 'queue',
   fsBlur: 0,
@@ -182,6 +185,7 @@ function loadSettings(): Settings {
       playerBarSliderPosition: merged.playerBarSliderPosition === 'above' ? 'above' : 'below',
       playerBarLayout: merged.playerBarLayout === 'compact' ? 'compact' : 'comfortable',
       fsPlayerStyle: merged.fsPlayerStyle === 'minimal' ? 'minimal' : 'maximal',
+      lyricsColor: merged.lyricsColor === 'white' ? 'white' : 'accent',
       fsMinimalBlur: Number.isFinite(merged.fsMinimalBlur)
         ? Math.min(120, Math.max(0, Math.round(merged.fsMinimalBlur)))
         : DEFAULT_SETTINGS.fsMinimalBlur,

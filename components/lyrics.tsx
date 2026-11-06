@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
@@ -30,6 +30,7 @@ const AUTO_SEARCH_DELAY_MS = 2222;
 const REQUEST_RETRY_DELAY_MS = 3000;
 const MAX_REQUEST_RETRIES = 5;
 const NUDGE_SECONDS = 5;
+const LONG_HOLD_SECONDS = 20;
 const HEADING_MAX = 25;
 const ACCEPTED_LYRICS_FILE = /\.(lrc|srt|vtt)$/i;
 
@@ -110,6 +111,30 @@ function lineHeading(text: string): string {
   return trimmed.length > HEADING_MAX ? `${trimmed.slice(0, HEADING_MAX)}...` : trimmed;
 }
 
+function lyric_line_span(lines: Lyrics['lines'], index: number, track_end: number): number {
+  const start = lines[index].time;
+  if (start === null) return 0;
+  for (let j = index + 1; j < lines.length; j++) {
+    const next = lines[j].time;
+    if (next !== null) return Math.max(0, next - start);
+  }
+  return Number.isFinite(track_end) && track_end > start ? track_end - start : 0;
+}
+
+function LyricsHoldDots({ fill }: { fill: number }) {
+  const clamped = Math.min(1, Math.max(0, fill));
+  return (
+    <span className="xe_lyrics-hold" aria-hidden="true">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          style={{ '--hold': Math.min(1, Math.max(0, clamped * 3 - i)) } as CSSProperties}
+        />
+      ))}
+    </span>
+  );
+}
+
 function editableLyricsText(lyrics: Lyrics | null): string {
   if (!lyrics) return '';
   return lyrics.synced ? toLrc(lyrics.lines) : lyrics.lines.map((line) => line.text).join('\n');
@@ -130,7 +155,7 @@ export function LyricsPanel({
   onDroppedFileHandled,
   onHideLyricsChange
 }: LyricsPanelProps) {
-  const { current, seek, audioRef } = usePlayer();
+  const { current, seek, audioRef, duration } = usePlayer();
   const { settings } = useSettings();
   const online = use_online();
   const navigate = useNavigate();
@@ -138,12 +163,17 @@ export function LyricsPanel({
 
   const [lyricsResult, setLyricsResult] = useState<StoredLyrics | null>(null);
   const lyrics = lyricsResult && lyricsResult.trackId === track?.id ? lyricsResult.lyrics : null;
+  const line_spans = useMemo(
+    () => (lyrics ? lyrics.lines.map((_, i) => lyric_line_span(lyrics.lines, i, duration)) : []),
+    [lyrics, duration]
+  );
   const instrumental = isInstrumentalLyrics(lyrics);
   const [status, setStatus] = useState<Status>('idle');
   const hide_lyrics =
     instrumental || status === 'notfound' || status === 'error' || status === 'offline' || status === 'ratelimited';
   const [retryStatus, setRetryStatus] = useState<RetryStatus | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [wait_fill, set_wait_fill] = useState<number | null>(null);
   const [following, setFollowing] = useState(true);
   const [lrclibSearchOpen, setLrclibSearchOpen] = useState(false);
   const [pasteOpen, setPasteOpen] = useState(false);
@@ -294,6 +324,7 @@ export function LyricsPanel({
   useEffect(() => {
     if (!lyrics?.synced) {
       setActiveIndex(-1);
+      set_wait_fill(null);
       return;
     }
     const lines = lyrics.lines;
@@ -306,11 +337,23 @@ export function LyricsPanel({
         else break;
       }
       setActiveIndex((prev) => (prev === idx ? prev : idx));
+      const line = idx >= 0 ? lines[idx] : null;
+      let fill: number | null = null;
+      if (line && !line.text.trim() && line.time !== null) {
+        const audio_end = audioRef.current?.duration;
+        const track_end = Number.isFinite(audio_end) && (audio_end as number) > 0 ? (audio_end as number) : duration;
+        const span = lyric_line_span(lines, idx, track_end);
+        if (span > LONG_HOLD_SECONDS) {
+          fill = Math.min(1, Math.max(0, (t - line.time) / span));
+        }
+      }
+      const rounded = fill === null ? null : Math.round(fill * 300) / 300;
+      set_wait_fill((prev) => (prev === rounded ? prev : rounded));
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [lyrics, audioRef]);
+  }, [lyrics, audioRef, duration]);
 
   useEffect(() => {
     if (activeIndex < 0 || menuOpenRef.current || Date.now() < userScrollUntil.current) return;
@@ -452,7 +495,11 @@ export function LyricsPanel({
   }
 
   return (
-    <div className={`xe_lyrics-panel xe_lyrics-panel--${variant}`} data-instrumental={variant === 'fullscreen' && instrumental ? '' : undefined}>
+    <div
+      className={`xe_lyrics-panel xe_lyrics-panel--${variant}`}
+      data-instrumental={variant === 'fullscreen' && instrumental ? '' : undefined}
+      data-lyrics-color={settings.lyricsColor}
+    >
       {showToolbar && (
         <div className="xe_lyrics-panel__toolbar">
           <button
@@ -589,6 +636,8 @@ export function LyricsPanel({
         >
           {lyrics.lines.map((line, i) => {
             const clickable = line.time !== null;
+            const long_hold = !line.text.trim() && line_spans[i] > LONG_HOLD_SECONDS;
+            const hold_fill = long_hold ? (i < activeIndex ? 1 : i > activeIndex ? 0 : (wait_fill ?? 0)) : 0;
             return (
               <button
                 key={i}
@@ -609,7 +658,7 @@ export function LyricsPanel({
                 }}
                 tabIndex={clickable ? 0 : -1}
               >
-                {line.text || '♪'}
+                {long_hold ? <LyricsHoldDots fill={hold_fill} /> : line.text || '♪'}
               </button>
             );
           })}
