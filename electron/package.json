@@ -45,7 +45,8 @@
     "linux": {
       "target": [
         "AppImage",
-        "deb"
+        "deb",
+        "rpm"
       ],
       "executableName": "xebrine",
       "category": "AudioVideo",
