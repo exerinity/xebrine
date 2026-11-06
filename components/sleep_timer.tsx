@@ -6,7 +6,8 @@ import type { SleepTimerMode } from '../src/context/player/sleep_timer';
 import { MoonIcon } from './icons';
 
 const MARGIN = 8;
-const MODES: Array<{ id: Exclude<SleepTimerMode, 'off'>; label: string }> = [
+type sleep_mode = Exclude<SleepTimerMode, 'off'>;
+const MODES: Array<{ id: sleep_mode; label: string }> = [
   { id: 'duration', label: 'Set a duration...' },
   { id: 'until', label: 'Until a time...' },
   { id: 'song', label: 'When this song finishes' },
@@ -27,9 +28,12 @@ export function SleepTimerControl() {
   const panelRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   const suppressClickRef = useRef(false);
+  const choose_ref = useRef<(mode: sleep_mode) => void>(() => {});
+  const submit_ref = useRef<() => void>(() => {});
+  const cancel_ref = useRef<() => void>(() => {});
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ x: 0, y: 0 });
-  const [editing, setEditing] = useState<Exclude<SleepTimerMode, 'off'> | null>(null);
+  const [editing, setEditing] = useState<sleep_mode | null>(null);
   const [minutes, setMinutes] = useState('50');
   const [time, setTime] = useState('03:40');
   const [songs, setSongs] = useState('2');
@@ -57,48 +61,7 @@ export function SleepTimerControl() {
     return () => observer.disconnect();
   }, [open, editing, sleepTimerMode]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onMove = (event: globalThis.MouseEvent) => {
-      const drag = dragRef.current;
-      if (drag && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) > 8) drag.moved = true;
-    };
-    const onUp = (event: globalThis.MouseEvent) => {
-      const drag = dragRef.current;
-      dragRef.current = null;
-      if (!drag?.moved) return;
-      const target = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-sleep-mode]') : null;
-      if (target && panelRef.current?.contains(target)) {
-        suppressClickRef.current = true;
-        choose(target.dataset.sleepMode as Exclude<SleepTimerMode, 'off'>);
-        window.setTimeout(() => { suppressClickRef.current = false; }, 0);
-      } else if (!target || !panelRef.current?.contains(target)) {
-        setOpen(false);
-      }
-    };
-    const onDown = (event: globalThis.MouseEvent) => {
-      if (buttonRef.current?.contains(event.target as Node)) return;
-      if (!panelRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setOpen(false); };
-    const close = () => setOpen(false);
-    document.addEventListener('mousemove', onMove, true);
-    document.addEventListener('mouseup', onUp, true);
-    document.addEventListener('mousedown', onDown);
-    document.addEventListener('keydown', onKey);
-    window.addEventListener('resize', close);
-    window.addEventListener('scroll', close, true);
-    return () => {
-      document.removeEventListener('mousemove', onMove, true);
-      document.removeEventListener('mouseup', onUp, true);
-      document.removeEventListener('mousedown', onDown);
-      document.removeEventListener('keydown', onKey);
-      window.removeEventListener('resize', close);
-      window.removeEventListener('scroll', close, true);
-    };
-  }, [open]);
-
-  const choose = (mode: Exclude<SleepTimerMode, 'off'>) => {
+  const choose = (mode: sleep_mode) => {
     if (mode === 'battery' && sleepTimerBatteryLevel === null) return;
     if (mode === 'song' || mode === 'queue') {
       setSleepTimer({ mode });
@@ -125,6 +88,77 @@ export function SleepTimerControl() {
     setOpen(false);
     setEditing(null);
   };
+
+  choose_ref.current = choose;
+  submit_ref.current = submit;
+  cancel_ref.current = cancelSleepTimer;
+
+  useEffect(() => {
+    if (!open) return;
+    const hit = (event: MouseEvent) => {
+      const node = document.elementFromPoint(event.clientX, event.clientY);
+      return node instanceof Element ? node : null;
+    };
+    const run_action = (action: string | undefined) => {
+      if (action === 'cancel') {
+        cancel_ref.current();
+        setOpen(false);
+        setEditing(null);
+      } else if (action === 'close') {
+        setOpen(false);
+        setEditing(null);
+      } else if (action === 'back') {
+        setEditing(null);
+      } else if (action === 'set') {
+        submit_ref.current();
+      }
+    };
+    const onMove = (event: MouseEvent) => {
+      const drag = dragRef.current;
+      if (drag && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) > 8) drag.moved = true;
+    };
+    const onUp = (event: MouseEvent) => {
+      const drag = dragRef.current;
+      dragRef.current = null;
+      if (!drag?.moved) return;
+      const node = hit(event);
+      const panel = panelRef.current;
+      const action_btn = node?.closest<HTMLElement>('[data-sleep-action]');
+      const mode_btn = node?.closest<HTMLButtonElement>('[data-sleep-mode]');
+      suppressClickRef.current = true;
+      window.setTimeout(() => { suppressClickRef.current = false; }, 0);
+      if (action_btn && panel?.contains(action_btn) && !action_btn.matches(':disabled')) {
+        run_action(action_btn.dataset.sleepAction);
+        return;
+      }
+      if (mode_btn && panel?.contains(mode_btn) && !mode_btn.disabled) {
+        const mode = mode_btn.dataset.sleepMode as sleep_mode | undefined;
+        if (mode) choose_ref.current(mode);
+        return;
+      }
+      if (!panel?.contains(node)) setOpen(false);
+    };
+    const onDown = (event: MouseEvent) => {
+      if (buttonRef.current?.contains(event.target as Node)) return;
+      if (!panelRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setOpen(false); };
+    const close = () => setOpen(false);
+    document.addEventListener('mousemove', onMove, true);
+    document.addEventListener('mouseup', onUp, true);
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', close);
+    window.addEventListener('scroll', close, true);
+    return () => {
+      document.removeEventListener('mousemove', onMove, true);
+      document.removeEventListener('mouseup', onUp, true);
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', close);
+      window.removeEventListener('scroll', close, true);
+    };
+  }, [open]);
 
   const currentLabel = sleepTimerMode === 'song'
     ? 'This song'
@@ -191,13 +225,13 @@ export function SleepTimerControl() {
             {editing === 'battery' && <>Battery level to reach before Xebrine stops<input required type="number" min="1" max="100" step="1" value={batteryPercent} onChange={(event) => setBatteryPercent(event.target.value)} /></>}
           </label>
           <div className="xe_sleep-panel__actions">
-            <button type="button" className="xe_btn xe_btn--small xe_btn--quiet" onClick={() => setEditing(null)}>Back</button>
-            <button type="submit" className="xe_btn xe_btn--small">Set</button>
+            <button type="button" className="xe_btn xe_btn--small xe_btn--quiet" data-sleep-action="back" onClick={() => setEditing(null)}>Back</button>
+            <button type="submit" className="xe_btn xe_btn--small" data-sleep-action="set">Set</button>
           </div>
         </form>}
         <div className="xe_sleep-panel__actions">
-          {active && <button type="button" className="xe_btn xe_btn--small xe_btn--quiet" onClick={() => { cancelSleepTimer(); setOpen(false); }}>Cancel timer</button>}
-          <button type="button" className="xe_btn xe_btn--small xe_btn--quiet" onClick={() => setOpen(false)}>Close</button>
+          {active && <button type="button" className="xe_btn xe_btn--small xe_btn--quiet" data-sleep-action="cancel" onClick={() => { cancelSleepTimer(); setOpen(false); }}>Cancel timer</button>}
+          <button type="button" className="xe_btn xe_btn--small xe_btn--quiet" data-sleep-action="close" onClick={() => setOpen(false)}>Close</button>
         </div>
       </div>, document.body
     )}
