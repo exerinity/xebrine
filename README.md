@@ -36,7 +36,7 @@ For more, see https://exerinity.com/projects/xebrine/screenshots
 [![](https://meow.exerinity.gay/xeb_ctx.png)](https://meow.exerinity.gay/xeb_ctx.png)
 
 ## Electron
-There is a rudimental Electron wrapper of Xebrine for Linux, which gives it MPRIS support and a more native file scanner available: see [the electron folder](electron) or [download it directly](https://espresso.exerinity.com/xebr/Xebrine-2.0.0.AppImage)
+There is a rudimental Electron wrapper of Xebrine for Linux, which gives it MPRIS support and a more native file scanner available: see https://github.com/xebrine/electron
 
 ## License
 Xebrine is available under the [MIT License](LICENSE)
