@@ -36,6 +36,7 @@ import { ReleaseNotesPage } from './pages/release_notes';
 import { LastfmPage } from './pages/lastfm';
 import { RemotePage } from './pages/remote';
 import { SetupFlowPage } from './pages/setup_flow';
+import { LogoIcon } from './components/icons';
 import { NAV_LINKS, Sidebar } from './components/sidebar';
 import { PlayerBar } from './components/player_bar';
 import { FullscreenPlayer } from './components/fs_player';
@@ -63,9 +64,13 @@ function KeyboardShortcuts({ toggleFullscreen }: { toggleFullscreen: () => void 
 }
 
 type NavItem = (typeof NAV_LINKS)[number];
+type BackdropItem = Pick<NavItem, 'path' | 'icon'>;
 type BackdropPhase = 'entering' | 'visible' | 'leaving';
 
-function pageNavItem(pathname: string): NavItem | null {
+function pageNavItem(pathname: string): BackdropItem | null {
+  if (pathname === '/about' || pathname.startsWith('/about/')) {
+    return { path: '/about', icon: LogoIcon };
+  }
   if (pathname === '/') return NAV_LINKS[0];
   return (
     NAV_LINKS.slice(1).find(
@@ -77,9 +82,9 @@ function pageNavItem(pathname: string): NavItem | null {
 function PageIconBackdrop() {
   const { pathname } = useLocation();
   const item = pageNavItem(pathname);
-  const requestedItemRef = useRef<NavItem | null>(item);
+  const requestedItemRef = useRef<BackdropItem | null>(item);
   requestedItemRef.current = item;
-  const [displayedItem, setDisplayedItem] = useState<NavItem | null>(item);
+  const [displayedItem, setDisplayedItem] = useState<BackdropItem | null>(item);
   const [phase, setPhase] = useState<BackdropPhase>('visible');
 
   useEffect(() => {
