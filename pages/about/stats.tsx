@@ -72,6 +72,7 @@ export function AboutStats() {
     return (
       <div className="xe_about__scanning">
         <Spinner size={30} />
+        <p>The stats will be calculated when the scan is finished, one moment...</p>
       </div>
     );
   }
@@ -182,6 +183,9 @@ export function AboutStats() {
             .join(', ')}
         </li>
       </ul>
+      <h3 className="xe_about__heading">
+        <Link to="/about/rich">Give me more stats</Link>
+      </h3>
     </>
   );
 }

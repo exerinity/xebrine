@@ -3,15 +3,17 @@ import { BackIcon, ChevronRightIcon, NoteIcon } from '../components/icons';
 import { usePageTitle } from '../hooks/page_title';
 import { AboutInfo } from './about/info';
 import { AboutStats } from './about/stats';
+import { AboutRichStats } from './about/rich';
 import { AboutAcknowledgements } from './about/acknowledgements';
 import { AboutHotkeys } from './about/hotkeys';
 import { AboutInstall } from './about/install';
 
-type SectionId = 'info' | 'stats' | 'acknowledgements' | 'hotkeys' | 'install';
+type SectionId = 'info' | 'stats' | 'rich' | 'acknowledgements' | 'hotkeys' | 'install';
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'info', label: 'About Xebrine' },
   { id: 'stats', label: 'Cool stats' },
+  { id: 'rich', label: 'Rich stats' },
   { id: 'acknowledgements', label: 'Acknowledgements' },
   { id: 'hotkeys', label: 'Hotkeys' },
   { id: 'install', label: 'Install' }
@@ -61,6 +63,7 @@ export function AboutPage() {
           <div className="xe_about">
             {active === 'info' && <AboutInfo />}
             {active === 'stats' && <AboutStats />}
+            {active === 'rich' && <AboutRichStats />}
             {active === 'acknowledgements' && <AboutAcknowledgements />}
             {active === 'hotkeys' && <AboutHotkeys />}
             {active === 'install' && <AboutInstall />}

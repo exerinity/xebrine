@@ -266,9 +266,19 @@
 
 .xe_about__scanning {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 16px;
   padding: 64px 0;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.xe_about__scanning p {
+  margin: 0;
+  max-width: 36ch;
+  line-height: 1.5;
 }
 
 .xe_about__duration {
@@ -344,6 +354,7 @@
   padding-left: 18px;
   color: var(--text-dim);
   line-height: 1.7;
+  overflow-wrap: anywhere;
 }
 
 .xe_about__subheading {
@@ -550,5 +561,226 @@
   font-family: 'Space Mono', monospace;
   font-size: 12px;
   line-height: 1.4;
+  text-align: center;
+}
+
+.xe_rich__codecs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 26px;
+}
+
+.xe_rich__donut {
+  position: relative;
+  width: 188px;
+  height: 188px;
+  flex-shrink: 0;
+}
+
+.xe_rich__donut-ring {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.xe_rich__donut-hole {
+  position: absolute;
+  inset: 26%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg);
+  text-align: center;
+}
+
+.xe_rich__donut-hole strong {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.xe_rich__donut-hole span {
+  margin-top: 4px;
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.xe_rich__legend {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.xe_rich__legend li {
+  display: grid;
+  grid-template-columns: 12px minmax(0, auto) minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+}
+
+.xe_rich__legend-name {
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.xe_rich__legend-meta {
+  color: var(--text-dim);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.xe_rich__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  align-self: center;
+}
+
+.xe_rich__lang {
+  display: flex;
+  height: 14px;
+  overflow: hidden;
+  gap: 2px;
+  border-radius: 7px;
+  background: var(--panel-2);
+}
+
+.xe_rich__lang > span {
+  display: block;
+  height: 100%;
+  min-width: 3px;
+}
+
+.xe_rich__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 12px 0 26px;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.xe_rich__chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.xe_rich__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.xe_rich__bar-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.xe_rich__bar-label span:last-child {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.xe_rich__bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: var(--panel-2);
+}
+
+.xe_rich__bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.xe_rich__ranks {
+  margin: 0 0 26px;
+  padding: 0;
+  list-style: none;
+}
+
+.xe_rich__rank {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  gap: 2px 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.xe_rich__rank-n {
+  grid-row: span 2;
+  align-self: center;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.xe_rich__rank-meta {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.xe_rich__alpha-scroll {
+  overflow-x: auto;
+  margin-bottom: 26px;
+}
+
+.xe_rich__alpha {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  height: 112px;
+  min-width: 540px;
+}
+
+.xe_rich__alpha-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-width: 0;
+  height: 100%;
+}
+
+.xe_rich__alpha-plot {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  width: 100%;
+  min-height: 0;
+}
+
+.xe_rich__alpha-bar {
+  display: block;
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: var(--accent);
+}
+
+.xe_rich__alpha-col > span:last-child {
+  margin-top: 6px;
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
   text-align: center;
 }
