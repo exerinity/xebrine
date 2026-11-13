@@ -91,6 +91,7 @@ function MenuPanel({
 }: MenuPanelProps) {
   const path_key = path.join('.');
   const ref = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const submenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const moveAnimation = useRef<Animation | null>(null);
   const positioned = useRef(false);
@@ -118,7 +119,7 @@ function MenuPanel({
   };
 
   const moveHighlight = (item: HTMLElement) => {
-    const panel = ref.current;
+    const panel = scrollRef.current;
     if (!panel) return;
     const panel_rect = panel.getBoundingClientRect();
     const item_rect = item.getBoundingClientRect();
@@ -137,7 +138,7 @@ function MenuPanel({
   };
 
   const focus_adjacent_item = (item_path: number[], direction: number) => {
-    const menu_items = Array.from(ref.current?.children ?? []).flatMap(item => {
+    const menu_items = Array.from(scrollRef.current?.children ?? []).flatMap(item => {
       const button = item.querySelector<HTMLElement>(':scope > [data-menu-path]');
       return button ? [button] : [];
     });
@@ -165,26 +166,53 @@ function MenuPanel({
 
   useLayoutEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    let nx = x;
-    let ny = y;
-    if (nx + rect.width > window.innerWidth - MARGIN && anchor) {
-      nx = anchor.left - rect.width - SUBMENU_GAP;
+    const scroller = scrollRef.current;
+    if (!el || !scroller) return;
+    const previous_rect = el.getBoundingClientRect();
+    const max_right = window.innerWidth - MARGIN;
+    const max_bottom = window.innerHeight - MARGIN;
+
+    el.style.maxWidth = '';
+    scroller.style.maxHeight = 'none';
+    let width = el.offsetWidth;
+    const available_width = max_right - MARGIN;
+    if (width > available_width) {
+      el.style.maxWidth = `${available_width}px`;
+      width = el.offsetWidth;
     }
-    if (nx + rect.width > window.innerWidth - MARGIN) nx = window.innerWidth - rect.width - MARGIN;
-    if (ny + rect.height > window.innerHeight - MARGIN) ny = window.innerHeight - rect.height - MARGIN;
-    const next = { x: Math.max(MARGIN, nx), y: Math.max(MARGIN, ny) };
+    const height = scroller.offsetHeight;
+
+    let nx = x;
+    if (anchor && nx + width > max_right) {
+      const flipped = anchor.left - width - SUBMENU_GAP;
+      if (flipped >= MARGIN) nx = flipped;
+    }
+    if (nx + width > max_right) nx = max_right - width;
+    nx = Math.max(MARGIN, nx);
+
+    const space_below = Math.max(0, max_bottom - y);
+    const space_above = Math.max(0, y - MARGIN);
+    let ny = y;
+    let max_height = Math.min(height, space_below);
+    if (height > space_below && space_above > space_below) {
+      max_height = Math.min(height, space_above);
+      ny = y - max_height;
+    }
+    ny = Math.max(MARGIN, Math.min(ny, max_bottom - max_height));
+    max_height = Math.min(max_height, Math.max(0, max_bottom - ny));
+
+    const next = { x: nx, y: ny };
     const path_changed = previousPath.current !== path_key;
     const reduced_motion =
       document.documentElement.classList.contains('xe_reduced-motion') ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const offset_x = rect.left - next.x;
-    const offset_y = rect.top - next.y;
+    const offset_x = previous_rect.left - next.x;
+    const offset_y = previous_rect.top - next.y;
 
     moveAnimation.current?.cancel();
     el.style.left = `${next.x}px`;
     el.style.top = `${next.y}px`;
+    scroller.style.maxHeight = `${max_height}px`;
     setPos((previous) =>
       previous.x === next.x && previous.y === next.y ? previous : next
     );
@@ -236,6 +264,7 @@ function MenuPanel({
       onMouseLeave={hideHighlight}
       onContextMenu={(event) => event.preventDefault()}
     >
+      <div ref={scrollRef} className="xe_context-menu__scroll">
       <div
         className={`xe_context-menu__highlight${
           highlight.visible ? ' xe_context-menu__highlight--visible' : ''
@@ -361,6 +390,7 @@ function MenuPanel({
           </div>
         );
       })}
+      </div>
       {open_submenu_item?.submenu && open_submenu_path && open_submenu_anchor && (
         <MenuPanel
           key="active-submenu"
