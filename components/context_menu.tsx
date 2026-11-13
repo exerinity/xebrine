@@ -167,12 +167,7 @@ function MenuPanel({
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (!anchor) {
-      const space_below = window.innerHeight - MARGIN - y;
-      el.style.maxHeight = 'none';
-      const natural_height = el.offsetHeight;
-      el.style.maxHeight = natural_height > space_below ? `${Math.max(0, space_below)}px` : '';
-    }
+    el.style.maxHeight = '';
     const rect = el.getBoundingClientRect();
     let nx = x;
     let ny = y;
