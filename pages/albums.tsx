@@ -2,18 +2,16 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
 import { usePlayer } from '../src/context/player';
-import { useSettings } from '../context/settings_context';
 import { groupAlbums, type AlbumGroup } from '../utils/groups';
-import { search_menu_item } from '../utils/search_menu';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { useAlbumArt } from '../hooks/album_art';
+import { useAlbumMenu } from '../hooks/album_menu';
 import { LogoIcon, PlayIcon, PlusIcon, SearchIcon, ShuffleIcon } from '../components/icons';
-import { ContextMenu, type ContextMenuItem } from '../components/context_menu';
+import { ContextMenu } from '../components/context_menu';
 import { ScanStatusBanner } from '../components/scan_status_banner';
 import { SortSelect, type SortDirection, type SortOption } from '../components/sort_select';
 import { toSlugParam } from '../utils/slug';
-import { toast } from '../utils/toast';
 import { useScrollRestoration } from '../hooks/scroll_restoration';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { usePageTitle } from '../hooks/page_title';
@@ -47,46 +45,11 @@ function loadSort(): { sort: AlbumSort; direction: SortDirection } {
 }
 
 export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void }) {
-  const { playNow, enqueueNext, enqueueEnd, remoteLocked } = usePlayer();
-  const { settings } = useSettings();
+  const { playNow, enqueueEnd, remoteLocked } = usePlayer();
   const art = useAlbumArt(album.key, album.tracks[0]);
   const navigate = useNavigate();
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
-
-  const menuItems: ContextMenuItem[] = [
-    {
-      label: 'Open album artist',
-      heading: 'Navigation...',
-      onSelect: () => navigate(`/artists/${toSlugParam(album.artist)}`)
-    },
-    search_menu_item(`${album.album} by ${album.artist}`, settings.searchEngine, settings.customSearchUrl),
-    {
-      label: 'Copy name',
-      onSelect: () => {
-        navigator.clipboard
-          .writeText(`${album.album} by ${album.artist}`)
-          .then(() => toast.success('Copied the album name'))
-          .catch(() => toast.error("Couldn't copy the album name"));
-      }
-    },
-    {
-      label: 'Enqueue this album',
-      heading: 'Queue...',
-      onSelect: () => enqueueEnd(album.tracks),
-      submenu: [
-        { label: 'Play this album next', onSelect: () => enqueueNext(album.tracks) },
-        { label: 'Play this album now', onSelect: () => playNow(album.tracks, 0) }
-      ]
-    },
-    {
-      label: 'Shuffle this album',
-      onSelect: () =>
-        playNow(
-          intelligentShuffle(album.tracks, (t) => ({ id: t.id, artist: t.artist }), getRecentIds()),
-          0
-        )
-    }
-  ];
+  const { buildMenu } = useAlbumMenu();
 
   return (
     <div
@@ -157,7 +120,7 @@ export function AlbumCard({ album, onOpen }: { album: AlbumGroup; onOpen(): void
         </button>
       </span>
       {menu && (
-        <ContextMenu x={menu.x} y={menu.y} items={menuItems} onClose={() => setMenu(null)} />
+        <ContextMenu x={menu.x} y={menu.y} items={buildMenu(album)} onClose={() => setMenu(null)} />
       )}
     </div>
   );

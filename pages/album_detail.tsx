@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type MouseEvent } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
 import { usePlayer } from '../src/context/player';
@@ -6,6 +6,8 @@ import { groupAlbums } from '../utils/groups';
 import { intelligentShuffle } from '../queue/shuffle';
 import { getRecentIds } from '../queue/history';
 import { useAlbumArt } from '../hooks/album_art';
+import { useAlbumMenu } from '../hooks/album_menu';
+import { ContextMenu } from '../components/context_menu';
 import { TrackList } from '../components/track_list';
 import { BackIcon, LogoIcon, PlayIcon, ShuffleIcon } from '../components/icons';
 import { formatTime } from '../utils/format';
@@ -21,6 +23,8 @@ export function AlbumDetailPage() {
   const { tracks } = useLibrary();
   const { playNow, remoteLocked } = usePlayer();
   const [coverOpen, setCoverOpen] = useState(false);
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+  const { buildMenu } = useAlbumMenu();
 
   const albums = useMemo(() => groupAlbums(tracks), [tracks]);
   const artistSlug = artistName.toLowerCase().replace(/^by:/, '');
@@ -67,6 +71,11 @@ export function AlbumDetailPage() {
       0
     );
 
+  const openAlbumMenu = (e: MouseEvent) => {
+    e.preventDefault();
+    setMenu({ x: e.clientX, y: e.clientY });
+  };
+
   return (
     <div className="xe_page">
       <div className="xe_page__toolbar">
@@ -80,14 +89,21 @@ export function AlbumDetailPage() {
           type="button"
           className="xe_album-hero__art"
           onClick={() => art && setCoverOpen(true)}
+          onContextMenu={openAlbumMenu}
           disabled={!art}
-          title={art ? 'Enlarge cover' : undefined}
+          title={art ? 'Enlarge cover (right-click for options)' : undefined}
         >
           {art ? <img src={art} alt="" /> : <LogoIcon size={48} />}
         </button>
         <div className="xe_album-hero__info">
           <h1 className="xe_album-hero__title">
-            <button type="button" className="xe_album-hero__title-btn" title="Copy album title" onClick={copyTitle}>
+            <button
+              type="button"
+              className="xe_album-hero__title-btn"
+              title="Copy album title (right-click for options)"
+              onClick={copyTitle}
+              onContextMenu={openAlbumMenu}
+            >
               {album.album}
             </button>
           </h1>
@@ -122,6 +138,9 @@ export function AlbumDetailPage() {
       </div>
       {coverOpen && art && (
         <CoverModal src={art} alt={`${album.album} cover`} onClose={() => setCoverOpen(false)} />
+      )}
+      {menu && (
+        <ContextMenu x={menu.x} y={menu.y} items={buildMenu(album)} onClose={() => setMenu(null)} />
       )}
     </div>
   );

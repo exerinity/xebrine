@@ -1,16 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLibrary } from '../context/library_context';
-import { usePlayer } from '../src/context/player';
-import { useSettings } from '../context/settings_context';
 import { groupArtists, type ArtistGroup } from '../utils/groups';
-import { search_menu_item } from '../utils/search_menu';
-import { intelligentShuffle } from '../queue/shuffle';
-import { getRecentIds } from '../queue/history';
+import { useArtistMenu } from '../hooks/artist_menu';
 import { toSlugParam } from '../utils/slug';
-import { toast } from '../utils/toast';
 import { SortSelect, type SortDirection, type SortOption } from '../components/sort_select';
-import { ContextMenu, type ContextMenuItem } from '../components/context_menu';
+import { ContextMenu } from '../components/context_menu';
 import { ScanStatusBanner } from '../components/scan_status_banner';
 import { useInfiniteScroll } from '../hooks/infinite_scroll';
 import { usePageTitle } from '../hooks/page_title';
@@ -46,47 +41,12 @@ function loadSort(): { sort: ArtistSort; direction: SortDirection } {
 
 export function ArtistsPage() {
   const { tracks } = useLibrary();
-  const { playNow, enqueueNext, enqueueEnd } = usePlayer();
-  const { settings } = useSettings();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [{ sort, direction }, setSortState] = useState(loadSort);
   const [menu, setMenu] = useState<{ x: number; y: number; artist: ArtistGroup } | null>(null);
+  const { buildMenu } = useArtistMenu();
   usePageTitle('Artists');
-
-  const copyName = (name: string) => {
-    navigator.clipboard
-      .writeText(name)
-      .then(() => toast.success('Copied the artist name'))
-      .catch(() => toast.error("Couldn't copy the artist name"));
-  };
-
-  const menuItems = (artist: ArtistGroup): ContextMenuItem[] => [
-    {
-      label: 'Open this artist',
-      heading: 'Navigation...',
-      onSelect: () => navigate(`/artists/${toSlugParam(artist.name)}`)
-    },
-    {
-      label: 'Shuffle all music',
-      heading: 'Queue...',
-      onSelect: () =>
-        playNow(
-          intelligentShuffle(artist.tracks, (t) => ({ id: t.id, artist: t.artist }), getRecentIds()),
-          0
-        )
-    },
-    {
-      label: 'Enqueue all music',
-      onSelect: () => enqueueEnd(artist.tracks),
-      submenu: [
-        { label: 'Play all music next', onSelect: () => enqueueNext(artist.tracks) },
-        { label: 'Play all music now', onSelect: () => playNow(artist.tracks, 0) }
-      ]
-    },
-    { ...search_menu_item(artist.name, settings.searchEngine, settings.customSearchUrl), separatorBefore: true },
-    { label: 'Copy name', onSelect: () => copyName(artist.name) }
-  ];
 
   const changeSort = (value: ArtistSort) => {
     setSortState((current) => ({ ...current, sort: value }));
@@ -184,7 +144,7 @@ export function ArtistsPage() {
         <ContextMenu
           x={menu.x}
           y={menu.y}
-          items={menuItems(menu.artist)}
+          items={buildMenu(menu.artist)}
           onClose={() => setMenu(null)}
         />
       )}
