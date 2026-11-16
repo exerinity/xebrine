@@ -9,6 +9,8 @@ The best way to summarise the difference between Xebrine and Voxity is: Xebrine 
 > Because Xebrine needs the File System Access API for the file scanning functionality (basically the heart), it will only work on Chromium browsers on desktop and Android; and hence will not work on iPhone, Mozilla Firefox, and basically anywhere not Chromium. However, radio should work fine outside Chromium.
 > Further, Voxity is *decently lightweight* for what it does; **Xebrine is not a lightweight player at all - it is heavy, by design.** If you're conscious about RAM usage, you probably shouldn't use this. (although, it uses about 200 to 350 MB, which is not bad compared to Spotify using 1 GB+...)
 
+> Also, on a side-tangent, in a world [where CEOs of $850B+ AI companies say its wasteful to own RAM](https://x.com/pubity/status/2116213541304746415), [why would you not want to use whats yours...?](https://www.reddit.com/r/memes/comments/mzgs0e/i_paid_for_the_whole_pc_im_gonna_use_the_whole_pc/) I know this sounds morbidly out of place, but what I'm trying to say is RAM optimization isn't really the main goal here.
+
 [![](https://meow.exerinity.gay/xeb2.png)](https://meow.exerinity.gay/xeb2.png)
 
 ## List of features
