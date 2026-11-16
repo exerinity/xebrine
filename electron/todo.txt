@@ -1,0 +1,12 @@
+Todo and goals (really just ideas that might never happen) for xebrine.electron
+
+1. Make a custom title bar to go with the themes
+2. Add Discord rich presence with cover art coming from Cover Art Archive (possibly unnecessary)
+3. Offshore basically all online activity done by the worker backend to
+the electron backend (ie, scrobbling, radio data fetching)
+- this will probably reduce any possible rate limits and make it more "native"
+(even though that term could never apply)
+4. A miniplayer. Not sure if this is more doable in Electron or just the web app itself, 
+without the ugly browser border, but a responsive miniplayer is a huge goal
+5. Instead of using IndexedDB, offshore some, if not all of its work,
+to a database done by the electron backend, this would hopefully make it both more peppy and more resilient
