@@ -30,7 +30,9 @@ export function AutoMixDrawer({ inline = false, hidden = false }: { inline?: boo
     autoMixBpm,
     autoMixProgress,
     currentTime,
-    duration
+    duration,
+    queue,
+    position
   } = usePlayer();
   const { settings } = useSettings();
   const [justDone, setJustDone] = useState(false);
@@ -77,6 +79,8 @@ export function AutoMixDrawer({ inline = false, hidden = false }: { inline?: boo
   const fadeProgress = autoMixProgress ?? trackFadeProgress;
   const hasMixPoint = duration > fade && duration > 0;
 
+  const hasNextTrack = queue[position + 1] != null;
+
   const status = getStatus({
     phase: autoMixPhase,
     justDone,
@@ -87,7 +91,8 @@ export function AutoMixDrawer({ inline = false, hidden = false }: { inline?: boo
     currentTime,
     bpm: autoMixBpm,
     memoryUsage,
-    transitionDuration: fade
+    transitionDuration: fade,
+    hasNextTrack
   });
 
   const accent = autoMixColor ? ` xe_automix-drawer--${autoMixColor}` : '';
@@ -139,6 +144,7 @@ function getStatus(input: {
   bpm: { current: number; next: number } | null;
   memoryUsage: number | null;
   transitionDuration: number;
+  hasNextTrack: boolean;
 }): MixStatus {
   const {
     phase,
@@ -150,7 +156,8 @@ function getStatus(input: {
     currentTime,
     bpm,
     memoryUsage,
-    transitionDuration
+    transitionDuration,
+    hasNextTrack
   } = input;
 
   if (phase === 'analyzing-current') {
@@ -197,7 +204,31 @@ function getStatus(input: {
       progress: mixPoint > 0 ? clamp01(currentTime / mixPoint) : 0
     };
   }
-  return { label: 'Enqueue more songs to auto mix', detail: 'There is no song up next', spinner: false, done: false, progress: null };
+  if (hasNextTrack) {
+    if (!hasMixPoint) {
+      return {
+        label: 'Auto mix on hold',
+        detail: 'This track is too short for a timed transition',
+        spinner: false,
+        done: false,
+        progress: null
+      };
+    }
+    return {
+      label: 'Transition imminent',
+      detail: 'Crossfade will start at the end of this track',
+      spinner: false,
+      done: false,
+      progress: 1
+    };
+  }
+  return {
+    label: 'Enqueue more songs to auto mix',
+    detail: 'Add another track after this one in the queue',
+    spinner: false,
+    done: false,
+    progress: null
+  };
 }
 
 function formatBpm(bpm: number): string {
