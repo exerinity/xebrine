@@ -44,6 +44,14 @@ export function useKeyboardShortcuts({ toggleFullscreen } = {}) {
       const tag = e.target?.tagName?.toLowerCase() ?? '';
       if (tag === 'button' && e.code === 'Space') return;
 
+      if (is_browser_history_arrow(e)) {
+        e.preventDefault();
+        const { navigate } = routeRef.current;
+        if (e.code === 'ArrowLeft') navigate(-1);
+        else navigate(1);
+        return;
+      }
+
       const { audioRef, seek, setVolume, togglePlay, next, prev, toggleShuffle, cycleRepeat } = ref.current;
       const audio = audioRef.current;
       if (!audio) return;
@@ -66,8 +74,6 @@ export function useKeyboardShortcuts({ toggleFullscreen } = {}) {
         const level = Math.max(0, Math.min(MAX_VOLUME, ref.current.volume + delta));
         setVolume(level);
       };
-
-      if (is_browser_history_arrow(e)) return;
 
       switch (e.code) {
         case 'Space':
