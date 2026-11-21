@@ -2,7 +2,12 @@ import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MAX_VOLUME, usePlayer } from '../src/context/player';
 import { dismissToast, toast } from '../utils/toast';
-import { isTypingTarget } from '../utils/keyboard';
+import {
+  is_browser_history_arrow,
+  is_browser_primary_chord,
+  isTypingTarget,
+  track_jump_digit
+} from '../utils/keyboard';
 
 const STATUS_DURATION = 1200;
 const HOTKEYS_PATH = '/about/hotkeys';
@@ -62,15 +67,18 @@ export function useKeyboardShortcuts({ toggleFullscreen } = {}) {
         setVolume(level);
       };
 
+      if (is_browser_history_arrow(e)) return;
+
       switch (e.code) {
         case 'Space':
         case 'KeyK':
+          if (e.code === 'KeyK' && is_browser_primary_chord(e)) return;
           e.preventDefault();
           togglePlay();
           break;
 
         case 'KeyR':
-          if (!e.ctrlKey) {
+          if (!is_browser_primary_chord(e)) {
             e.preventDefault();
             seek(0);
             status('Restarted the track');
@@ -78,16 +86,19 @@ export function useKeyboardShortcuts({ toggleFullscreen } = {}) {
           break;
 
         case 'KeyT':
+          if (is_browser_primary_chord(e)) return;
+          e.preventDefault();
           cycleRepeat();
           break;
 
         case 'KeyH':
+          if (is_browser_primary_chord(e)) return;
           e.preventDefault();
           toggleShuffle();
           break;
 
         case 'KeyF':
-          if (e.ctrlKey || e.metaKey) {
+          if (is_browser_primary_chord(e)) {
             const search = document.querySelector('.xe_search-input');
             if (search) {
               e.preventDefault();
@@ -101,63 +112,78 @@ export function useKeyboardShortcuts({ toggleFullscreen } = {}) {
           break;
 
         case 'ArrowLeft':
-        case 'KeyJ':
-        case 'KeyA':
           e.preventDefault();
-          if (e.altKey) scrub(-30);
-          else if (e.shiftKey) scrub(-1);
+          if (e.shiftKey) scrub(-1);
           else if (e.ctrlKey) scrub(-5);
           else scrub(-10);
           break;
 
         case 'ArrowRight':
+          e.preventDefault();
+          if (e.shiftKey) scrub(1);
+          else if (e.ctrlKey) scrub(5);
+          else scrub(10);
+          break;
+
+        case 'KeyJ':
+        case 'KeyA':
+          if (is_browser_primary_chord(e)) return;
+          e.preventDefault();
+          if (e.altKey) scrub(-30);
+          else if (e.shiftKey) scrub(-1);
+          else scrub(-10);
+          break;
+
         case 'KeyL':
         case 'KeyD':
+          if (is_browser_primary_chord(e)) return;
           e.preventDefault();
           if (e.altKey) scrub(30);
           else if (e.shiftKey) scrub(1);
-          else if (e.ctrlKey) scrub(5);
           else scrub(10);
           break;
 
         case 'KeyW':
         case 'ArrowUp':
+          if (is_browser_primary_chord(e)) return;
           e.preventDefault();
           changeVolume(0.02);
           break;
 
         case 'KeyS':
         case 'ArrowDown':
-          if (!e.ctrlKey) {
-            e.preventDefault();
-            changeVolume(-0.02);
-          }
+          if (is_browser_primary_chord(e)) return;
+          e.preventDefault();
+          changeVolume(-0.02);
           break;
 
         case 'KeyZ':
+          if (is_browser_primary_chord(e)) return;
+          e.preventDefault();
           prev();
           break;
 
         case 'KeyX':
+          if (is_browser_primary_chord(e)) return;
+          e.preventDefault();
           next();
           break;
 
-        default:
-          if (e.code.startsWith('Digit')) {
-            const num = parseInt(e.code.slice(5), 10);
-            if (!isNaN(num)) {
-              e.preventDefault();
-              let perc;
-              if (num === 0) {
-                perc = e.shiftKey ? 0.95 : 0;
-              } else {
-                perc = num * 0.1;
-                if (e.shiftKey) perc = Math.max(0, perc - 0.05);
-              }
-              jumpToPercent(perc);
+        default: {
+          const num = track_jump_digit(e);
+          if (num !== null) {
+            e.preventDefault();
+            let perc;
+            if (num === 0) {
+              perc = e.shiftKey ? 0.95 : 0;
+            } else {
+              perc = num * 0.1;
+              if (e.shiftKey) perc = Math.max(0, perc - 0.05);
             }
+            jumpToPercent(perc);
           }
           break;
+        }
       }
     };
 
