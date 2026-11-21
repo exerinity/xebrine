@@ -368,8 +368,10 @@ export function Sidebar({ onOpenFullscreen, page_key_cursor_path }: SidebarProps
   return (
     <nav className={`xe_nav${collapsed ? ' xe_nav--collapsed' : ''}`} style={{ width }}>
       <Link to="/about" className="xe_nav__logo" title="About Xebrine" draggable={false}>
-        <LogoIcon size={22} />
-        {!collapsed && <span>Xebrine</span>}
+        <span className="xe_nav__logo-mark" aria-hidden="true">
+          <LogoIcon size={22} />
+        </span>
+        {!collapsed && <span className="xe_nav__logo-wordmark">Xebrine</span>}
       </Link>
       {NAV_LINKS.map((link) => (
         <NavLink

@@ -86,3 +86,15 @@ export function parseSeekInput(raw: string, duration: number): number | null {
   if (!Number.isFinite(n)) return null;
   return clamp(n, 0, duration);
 }
+
+export type VolumeBoostTier = 0 | 1 | 2 | 3 | 4 | 5;
+
+export function volumeBoostTier(volume: number): VolumeBoostTier {
+  if (volume <= 1) return 0;
+  const percent = volume * 100;
+  if (percent <= 110) return 1;
+  if (percent <= 117) return 2;
+  if (percent <= 127) return 3;
+  if (percent <= 139) return 4;
+  return 5;
+}

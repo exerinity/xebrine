@@ -19,6 +19,7 @@ import { Slider } from './slider';
 import { Visualizer } from './visualizer';
 import { ContextMenu, type ContextMenuItem } from './context_menu';
 import { toast } from '../utils/toast';
+import { volumeBoostTier } from '../utils/format';
 import { toSlugParam } from '../utils/slug';
 import { displayArtist } from '../utils/groups';
 import { useTrackMenu } from '../hooks/track_menu';
@@ -214,7 +215,8 @@ export function PlayerBar({
   const compact = settings.playerBarLayout === 'compact';
   const hadTrackRef = useRef(Boolean(track));
   const volumeLevel = volume <= 0 ? 0 : volume < 0.34 ? 1 : volume < 0.67 ? 2 : 3;
-  const boosted = volume > 1;
+  const boostTier = volumeBoostTier(volume);
+  const boosted = boostTier > 0;
   const elapsedProgress = duration > 0 ? (currentTime / duration) * 100 : 0;
   const elapsedPercent = Math.round(elapsedProgress);
   const playlist_detail_should_show_album =
@@ -1051,7 +1053,7 @@ export function PlayerBar({
           </button>
           <div
             className={`xe_player-bar__volume-slider-wrap${
-              boosted ? ' xe_player-bar__volume-slider-wrap--boosted' : ''
+              boosted ? ` xe_player-bar__volume-slider-wrap--boost-${boostTier}` : ''
             }`}
             data-tooltip={`${Math.round(volume * 100)}%${boosted ? ' (BOOST)' : ''}`}
             onContextMenu={(e) => {
@@ -1066,7 +1068,7 @@ export function PlayerBar({
               onChange={setVolume}
               wheelStep={0.05}
               ariaLabel="Volume (drag past 100% to boost, up to 150%)"
-              className={`xe_player-bar__volume-slider${boosted ? ' xe_player-bar__volume-slider--boosted' : ''}`}
+              className={`xe_player-bar__volume-slider${boosted ? ` xe_player-bar__volume-slider--boost-${boostTier}` : ''}`}
             />
           </div>
         </div>

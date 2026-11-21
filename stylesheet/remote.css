@@ -296,12 +296,18 @@
 }
 
 .xe_remote__time {
-  color: var(--text-dim);
-  
-  font-size: 13px;
+  color: color-mix(in srgb, var(--text) 35%, transparent);
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
   flex-shrink: 0;
-  min-width: 42px;
+  min-width: 40px;
   text-align: center;
+  transition: color 150ms ease;
+}
+
+.xe_remote__scrubber:hover .xe_remote__time {
+  color: var(--text);
 }
 
 .xe_remote__buttons {
