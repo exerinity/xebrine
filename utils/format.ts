@@ -1,3 +1,9 @@
+export function playback_duration(audio_duration: number, track_duration: number): number {
+  const from_audio = Number.isFinite(audio_duration) && audio_duration > 0 ? audio_duration : 0;
+  const from_meta = Number.isFinite(track_duration) && track_duration > 0 ? track_duration : 0;
+  return Math.max(from_audio, from_meta);
+}
+
 export function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) seconds = 0;
   const s = Math.floor(seconds);

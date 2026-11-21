@@ -15,6 +15,7 @@ export interface AutoMixBpm {
 export interface PlayerContextValue {
   queue: QueueItem[];
   position: number;
+  playback_position: number;
   current: QueueItem | null;
   isPlaying: boolean;
   currentTime: number;

@@ -18,6 +18,7 @@ import { readCoverArt } from '../../../management/metadata';
 import type { QueueItem, TrackMeta } from '../../../types';
 import { toast } from '../../../utils/toast';
 import type { PlayerAudioGraph } from './audio_graph';
+import { playback_duration } from '../../../utils/format';
 import { loadAutoMix, saveAutoMix } from './storage';
 import type { AutoMixBpm, AutoMixColor, AutoMixPhase, RepeatMode } from './types';
 
@@ -126,7 +127,7 @@ export function useAutoMix({
       clearPreparedArtwork();
       if (resetTiming && hadPresentation) {
         setCurrentTime(audio.currentTime);
-        setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
+        setDuration(playback_duration(audio.duration, current?.track.duration ?? 0));
       }
     },
     [audio, clearPreparedArtwork, setCurrentTime, setDuration, setPresentedTrack]
@@ -462,7 +463,8 @@ export function useAutoMix({
       if (!enabledRef.current || crossfadeActiveRef.current || repeatModeRef.current === 'one') return;
       const queue = queueRef.current;
       const nextItem = queue.items[queue.position + 1];
-      const audioDuration = audio.duration;
+      const playing = queue.items[queue.position] ?? null;
+      const audioDuration = playback_duration(audio.duration, playing?.track.duration ?? 0);
       const fadeSeconds = transitionDurationRef.current;
       const mix = pendingMixRef.current;
       if (

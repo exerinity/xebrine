@@ -17,7 +17,7 @@ import { pickAutoPlayTrack } from '../../../queue/auto_play';
 import { readCoverArt } from '../../../management/metadata';
 import { useLibrary } from '../../../context/library_context';
 import { useSettings } from '../../../context/settings_context';
-import { clamp } from '../../../utils/format';
+import { clamp, playback_duration } from '../../../utils/format';
 import { toast } from '../../../utils/toast';
 import { usePlayerAudioGraph } from './audio_graph';
 import { useAutoMix } from './auto_mix';
@@ -193,6 +193,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [currentKey]);
 
   useEffect(() => {
+    if (radio_station || !current) return;
+    setDuration(playback_duration(audio.duration, current.track.duration));
+  }, [currentKey, radio_station, current, audio]);
+
+  useEffect(() => {
     const onTime = () => {
       if (radio_ref.current) return;
       const t = audio.currentTime;
@@ -201,7 +206,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const onDuration = () => {
       if (radio_ref.current) return;
       if (shouldAutoMixHoldDuration()) return;
-      setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
+      const playing = stateRef.current.items[stateRef.current.position] ?? null;
+      setDuration(playback_duration(audio.duration, playing?.track.duration ?? 0));
     };
     const onPlay = () => {
       setIsPlaying(true);
@@ -579,6 +585,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     () => ({
       queue: state.items,
       position: displayPosition,
+      playback_position: state.position,
       current: displayCurrent,
       isPlaying,
       currentTime,

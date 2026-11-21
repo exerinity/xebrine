@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePlayer } from '../src/context/player';
 import { useSettings } from '../context/settings_context';
 import { use_drawer_presence } from '../hooks/drawer_presence';
-import { formatTime } from '../utils/format';
+import { formatTime, playback_duration } from '../utils/format';
 import { AutoMixIcon, CheckIcon } from './icons';
 import { Spinner } from './spinner';
 
@@ -32,7 +32,8 @@ export function AutoMixDrawer({ inline = false, hidden = false }: { inline?: boo
     currentTime,
     duration,
     queue,
-    position
+    playback_position,
+    current
   } = usePlayer();
   const { settings } = useSettings();
   const [justDone, setJustDone] = useState(false);
@@ -73,13 +74,15 @@ export function AutoMixDrawer({ inline = false, hidden = false }: { inline?: boo
   }, [autoMixPhase]);
 
   const fade = settings.autoMixDuration;
-  const mixPoint = duration - fade;
+  const track_duration = playback_duration(duration, current?.track.duration ?? 0);
+  const mixPoint = track_duration - fade;
   const secondsUntilMix = mixPoint - currentTime;
   const trackFadeProgress = fade > 0 ? clamp01((currentTime - mixPoint) / fade) : 0;
   const fadeProgress = autoMixProgress ?? trackFadeProgress;
-  const hasMixPoint = duration > fade && duration > 0;
+  const hasMixPoint = track_duration > fade;
 
-  const hasNextTrack = queue[position + 1] != null;
+  const next_for_mix = queue[playback_position + 1] ?? null;
+  const hasNextTrack = next_for_mix != null;
 
   const status = getStatus({
     phase: autoMixPhase,
@@ -204,30 +207,30 @@ function getStatus(input: {
       progress: mixPoint > 0 ? clamp01(currentTime / mixPoint) : 0
     };
   }
-  if (hasNextTrack) {
-    if (!hasMixPoint) {
-      return {
-        label: 'Auto mix on hold',
-        detail: 'This track is too short for a timed transition',
-        spinner: false,
-        done: false,
-        progress: null
-      };
-    }
+  if (!hasNextTrack) {
     return {
-      label: 'Transition imminent',
-      detail: 'Crossfade will start at the end of this track',
+      label: 'Enqueue more songs to auto mix',
+      detail: 'Add another track after the one that is playing',
       spinner: false,
       done: false,
-      progress: 1
+      progress: null
+    };
+  }
+  if (!hasMixPoint) {
+    return {
+      label: 'Auto mix on hold',
+      detail: `This track is shorter than the ${formatSeconds(transitionDuration)}s transition`,
+      spinner: false,
+      done: false,
+      progress: null
     };
   }
   return {
-    label: 'Enqueue more songs to auto mix',
-    detail: 'Add another track after this one in the queue',
+    label: 'Transition imminent',
+    detail: 'Crossfade will start at the end of this track',
     spinner: false,
     done: false,
-    progress: null
+    progress: 1
   };
 }
 
